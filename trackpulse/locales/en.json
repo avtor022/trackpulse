@@ -1,0 +1,20 @@
+{
+  "app_title": "TrackPulse - RC Race Timing System",
+  "racers_tab": "Racers",
+  "models_tab": "RC Models",
+  "racer_models_tab": "Racer Models",
+  "races_tab": "Races",
+  "participants_tab": "Participants",
+  "tracking_tab": "Race Tracking",
+  "logs_tab": "Raw Scans",
+  "audit_tab": "Audit Log",
+  "settings_tab": "Settings",
+  "start_button": "Start",
+  "stop_button": "Stop",
+  "restart_button": "Restart",
+  "status_waiting": "Waiting",
+  "status_scheduled": "Scheduled",
+  "status_active": "Active",
+  "status_finished": "Finished",
+  "status_cancelled": "Cancelled"
+}

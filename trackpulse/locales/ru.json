@@ -1,0 +1,20 @@
+{
+  "app_title": "TrackPulse - RC Race Timing System",
+  "racers_tab": "Гонщики (Racers)",
+  "models_tab": "Модели (RC Models)",
+  "racer_models_tab": "Связки (Racer Models)",
+  "races_tab": "Заезды (Races)",
+  "participants_tab": "Участники (Participants)",
+  "tracking_tab": "Трекинг заезда (Race Tracking)",
+  "logs_tab": "Логи сканирований (Raw Scans)",
+  "audit_tab": "Аудит (Audit Log)",
+  "settings_tab": "Настройки (Settings)",
+  "start_button": "Старт (Start)",
+  "stop_button": "Стоп (Stop)",
+  "restart_button": "Перезапуск (Restart)",
+  "status_waiting": "Ожидание",
+  "status_scheduled": "Запланирован",
+  "status_active": "Активен",
+  "status_finished": "Завершён",
+  "status_cancelled": "Отменён"
+}
