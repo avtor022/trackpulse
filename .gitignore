@@ -1,0 +1,53 @@
+```
+# Build artifacts
+*.o
+*.obj
+*.a
+*.so
+*.dll
+*.exe
+*.out
+
+# Go-specific ignores
+*.mod
+*.sum
+vendor/
+bin/
+
+# Dependencies
+node_modules/
+__pycache__/
+*.egg-info/
+.Python
+env/
+venv/
+.venv/
+.env
+.env.local
+*.env.*
+
+# Logs and temporary files
+*.log
+*.tmp
+*.swp
+*.swo
+coverage/
+htmlcov/
+.coverage
+
+# Editors and IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Distribution / packaging
+.dist/
+build/
+*.tar.gz
+*.whl
+```
