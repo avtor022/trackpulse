@@ -1,73 +1,39 @@
 ```
 # Go-specific ignores
-go.sum
-*.mod
-*.sum
-vendor/
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+*.exe
+*.out
 
 # Dependencies
-node_modules/
-venv/
-.venv/
-__pycache__/
-.mypy_cache/
-.pytest_cache/
-target/
-.gradle/
+vendor/
 
-# Compiled/Build artifacts
-*.pyc
-*.class
-*.o
-*.exe
-*.dll
-*.so
-*.a
-*.obj
-*.out
-dist/
-build/
-coverage/
-htmlcov/
+# Build artifacts
+bin/
+pkg/
+
+# Logs
 *.log
-*.tmp
 
 # Environment
 .env
 .env.local
-*.env.*
+.env.*
 
-# Editors/IDE
+# Editors
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# System
-.DS_Store
-Thumbs.db
+# Coverage
+coverage/
+htmlcov/
+.coverage
 
-# Compressed files
-*.zip
-*.gz
-*.tar
-*.tgz
-*.bz2
-*.xz
-*.7z
-*.rar
-*.zst
-*.lz4
-*.lzh
-*.cab
-*.arj
-*.rpm
-*.deb
-*.Z
-*.lz
-*.lzo
-*.tar.gz
-*.tar.bz2
-*.tar.xz
-*.tar.zst
+# Temporary files
+*.tmp
 ```

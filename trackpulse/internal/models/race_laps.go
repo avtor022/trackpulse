@@ -30,4 +30,4 @@ func (rl *RaceLap) Validate() error {
 	return nil
 }
 
-var ErrRaceLapRequiredFields = "race_participant_id is required"
+var ErrRaceLapRequiredFields = errors.New("race_participant_id is required")

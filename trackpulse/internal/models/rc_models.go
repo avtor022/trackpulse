@@ -27,4 +27,4 @@ func (m *RCModel) Validate() error {
 	return nil
 }
 
-var ErrModelRequiredFields = "brand and model name are required"
+var ErrModelRequiredFields = errors.New("brand and model name are required")

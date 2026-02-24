@@ -27,4 +27,4 @@ func (lh *LapHistory) Validate() error {
 	return nil
 }
 
-var ErrLapHistoryRequiredFields = "race_participant_id, lap_number and lap_time_ms are required"
+var ErrLapHistoryRequiredFields = errors.New("race_participant_id, lap_number and lap_time_ms are required")

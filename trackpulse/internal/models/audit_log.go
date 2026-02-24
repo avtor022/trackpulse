@@ -27,4 +27,4 @@ func (al *AuditLog) Validate() error {
 	return nil
 }
 
-var ErrAuditLogRequiredFields = "action_type and entity_type are required"
+var ErrAuditLogRequiredFields = errors.New("action_type and entity_type are required")

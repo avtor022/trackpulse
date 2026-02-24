@@ -27,4 +27,4 @@ func (rp *RaceParticipant) Validate() error {
 	return nil
 }
 
-var ErrRaceParticipantRequiredFields = "race_id and racer_model_id are required"
+var ErrRaceParticipantRequiredFields = errors.New("race_id and racer_model_id are required")

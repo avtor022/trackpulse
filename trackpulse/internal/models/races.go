@@ -31,4 +31,4 @@ func (r *Race) Validate() error {
 	return nil
 }
 
-var ErrRaceTitleRequired = "race title is required"
+var ErrRaceTitleRequired = errors.New("race title is required")

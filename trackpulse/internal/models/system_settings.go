@@ -35,4 +35,4 @@ func (ss *SystemSetting) Validate() error {
 	return nil
 }
 
-var ErrSystemSettingKeyRequired = "key is required"
+var var var ErrSystemSettingKeyRequired = "key is required" = errors.New("var ErrSystemSettingKeyRequired = "key is required"") = errors.New("var var ErrSystemSettingKeyRequired = "key is required" = errors.New("var ErrSystemSettingKeyRequired = "key is required"")")

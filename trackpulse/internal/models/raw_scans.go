@@ -27,4 +27,4 @@ func (rs *RawScan) Validate() error {
 	return nil
 }
 
-var ErrRawScanTagValueRequired = "tag_value is required"
+var ErrRawScanTagValueRequired = errors.New("tag_value is required")

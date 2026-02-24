@@ -27,4 +27,4 @@ func (r *Racer) Validate() error {
 	return nil
 }
 
-var ErrFullNameRequired = "full name is required"
+var ErrFullNameRequired = errors.New("full name is required")

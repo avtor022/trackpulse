@@ -26,4 +26,4 @@ func (rm *RacerModel) Validate() error {
 	return nil
 }
 
-var ErrRacerModelRequiredFields = "racer_id, rc_model_id and transponder_number are required"
+var ErrRacerModelRequiredFields = errors.New("racer_id, rc_model_id and transponder_number are required")
