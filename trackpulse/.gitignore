@@ -1,0 +1,27 @@
+# Бинарные файлы
+*.exe
+*.app
+*.dll
+*.so
+
+# База данных
+*.db
+*.db-wal
+*.db-shm
+
+# Логи
+*.log
+logs/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Сборка
+dist/
+build/
+
+# Конфигурация пользователя
+config.json

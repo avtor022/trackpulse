@@ -1,0 +1,252 @@
+package repository
+
+import (
+	"database/sql"
+	"fmt"
+	"log"
+
+	_ "github.com/mattn/go-sqlite3"
+)
+
+func InitDatabase(dbPath string) (*sql.DB, error) {
+	db, err := sql.Open("sqlite3", dbPath+"?_busy_timeout=5000")
+	if err != nil {
+		return nil, err
+	}
+
+	// Настройка режима WAL
+	pragmas := []string{
+		"PRAGMA journal_mode=WAL",
+		"PRAGMA foreign_keys=ON",
+		"PRAGMA busy_timeout=5000",
+		"PRAGMA synchronous=NORMAL",
+		"PRAGMA cache_size=-64000",
+		"PRAGMA temp_store=MEMORY",
+	}
+
+	for _, pragma := range pragmas {
+		if _, err := db.Exec(pragma); err != nil {
+			return nil, fmt.Errorf("failed to execute pragma %s: %w", pragma, err)
+		}
+	}
+
+	// Выполнение миграций
+	if err := runMigrations(db); err != nil {
+		return nil, fmt.Errorf("failed to run migrations: %w", err)
+	}
+
+	// Инициализация настроек по умолчанию
+	if err := initDefaultSettings(db); err != nil {
+		return nil, fmt.Errorf("failed to initialize default settings: %w", err)
+	}
+
+	return db, nil
+}
+
+// runMigrations выполняет миграции базы данных
+func runMigrations(db *sql.DB) error {
+	// Пока что просто создаем таблицы, если они не существуют
+	queries := []string{
+		`CREATE TABLE IF NOT EXISTS racers (
+			id TEXT PRIMARY KEY NOT NULL,
+			racer_number INTEGER UNIQUE NOT NULL,
+			full_name TEXT NOT NULL,
+			birthday TEXT,
+			country TEXT,
+			city TEXT,
+			rating INTEGER DEFAULT 0,
+			created_at TEXT NOT NULL,
+			updated_at TEXT NOT NULL
+		)`,
+
+		`CREATE TABLE IF NOT EXISTS rc_models (
+			id TEXT PRIMARY KEY NOT NULL,
+			brand TEXT NOT NULL,
+			model_name TEXT NOT NULL,
+			scale TEXT NOT NULL,
+			model_type TEXT NOT NULL,
+			motor_type TEXT,
+			drive_type TEXT,
+			created_at TEXT NOT NULL,
+			updated_at TEXT NOT NULL
+		)`,
+
+		`CREATE TABLE IF NOT EXISTS racer_models (
+			id TEXT PRIMARY KEY NOT NULL,
+			racer_id TEXT NOT NULL,
+			rc_model_id TEXT NOT NULL,
+			transponder_number TEXT UNIQUE NOT NULL,
+			transponder_type TEXT DEFAULT 'RFID',
+			is_active BOOLEAN DEFAULT 1,
+			created_at TEXT NOT NULL,
+			updated_at TEXT NOT NULL,
+			FOREIGN KEY(racer_id) REFERENCES racers(id) ON DELETE CASCADE,
+			FOREIGN KEY(rc_model_id) REFERENCES rc_models(id) ON DELETE CASCADE
+		)`,
+
+		`CREATE TABLE IF NOT EXISTS races (
+			id TEXT PRIMARY KEY NOT NULL,
+			race_title TEXT NOT NULL,
+			race_type TEXT DEFAULT 'qualifying',
+			model_type TEXT,
+			model_scale TEXT,
+			track_name TEXT,
+			lap_count_target INTEGER,
+			time_limit_minutes INTEGER,
+			time_start TEXT,
+			time_finish TEXT,
+			status TEXT DEFAULT 'scheduled',
+			created_at TEXT NOT NULL,
+			updated_at TEXT NOT NULL
+		)`,
+
+		`CREATE TABLE IF NOT EXISTS race_participants (
+			id TEXT PRIMARY KEY NOT NULL,
+			race_id TEXT NOT NULL,
+			racer_model_id TEXT NOT NULL,
+			grid_position INTEGER,
+			is_finished BOOLEAN DEFAULT 0,
+			disqualified BOOLEAN DEFAULT 0,
+			dnf_reason TEXT,
+			created_at TEXT NOT NULL,
+			updated_at TEXT NOT NULL,
+			FOREIGN KEY(race_id) REFERENCES races(id) ON DELETE CASCADE,
+			FOREIGN KEY(racer_model_id) REFERENCES racer_models(id) ON DELETE CASCADE,
+			UNIQUE(race_id, racer_model_id)
+		)`,
+
+		`CREATE TABLE IF NOT EXISTS race_laps (
+			id TEXT PRIMARY KEY NOT NULL,
+			race_participant_id TEXT UNIQUE NOT NULL,
+			time_start TEXT NOT NULL,
+			time_finish TEXT,
+			number_of_laps INTEGER DEFAULT 0,
+			best_lap_time_ms INTEGER DEFAULT 0,
+			best_lap_number INTEGER DEFAULT 0,
+			last_lap_time_ms INTEGER DEFAULT 0,
+			last_pass_time TEXT,
+			total_race_time_ms INTEGER DEFAULT 0,
+			created_at TEXT NOT NULL,
+			updated_at TEXT NOT NULL,
+			FOREIGN KEY(race_participant_id) REFERENCES race_participants(id) ON DELETE CASCADE
+		)`,
+
+		`CREATE TABLE IF NOT EXISTS lap_history (
+			id TEXT PRIMARY KEY NOT NULL,
+			race_participant_id TEXT NOT NULL,
+			lap_number INTEGER NOT NULL,
+			lap_time_ms INTEGER NOT NULL,
+			start_time TEXT NOT NULL,
+			end_time TEXT NOT NULL,
+			is_valid BOOLEAN DEFAULT 1,
+			invalidation_reason TEXT,
+			created_at TEXT NOT NULL,
+			FOREIGN KEY(race_participant_id) REFERENCES race_participants(id) ON DELETE CASCADE
+		)`,
+
+		`CREATE TABLE IF NOT EXISTS raw_scans (
+			id TEXT PRIMARY KEY NOT NULL,
+			timestamp TEXT NOT NULL,
+			tag_value TEXT NOT NULL,
+			reader_type TEXT NOT NULL,
+			com_port TEXT,
+			signal_strength INTEGER,
+			is_processed BOOLEAN DEFAULT 0,
+			linked_racer_model_id TEXT,
+			created_at TEXT NOT NULL,
+			FOREIGN KEY(linked_racer_model_id) REFERENCES racer_models(id) ON DELETE SET NULL
+		)`,
+
+		`CREATE TABLE IF NOT EXISTS system_settings (
+			key TEXT PRIMARY KEY NOT NULL,
+			value TEXT NOT NULL,
+			value_type TEXT DEFAULT 'string',
+			description TEXT,
+			updated_at TEXT NOT NULL
+		)`,
+
+		`CREATE TABLE IF NOT EXISTS audit_log (
+			id TEXT PRIMARY KEY NOT NULL,
+			timestamp TEXT NOT NULL,
+			action_type TEXT NOT NULL,
+			entity_type TEXT NOT NULL,
+			entity_id TEXT,
+			user_name TEXT,
+			ip_address TEXT,
+			details TEXT,
+			created_at TEXT NOT NULL
+		)`,
+
+		// Индексы
+		`CREATE INDEX IF NOT EXISTS idx_racers_number ON racers(racer_number)`,
+		`CREATE INDEX IF NOT EXISTS idx_racers_name ON racers(full_name)`,
+		`CREATE INDEX IF NOT EXISTS idx_models_brand ON rc_models(brand)`,
+		`CREATE INDEX IF NOT EXISTS idx_models_type ON rc_models(model_type)`,
+		`CREATE INDEX IF NOT EXISTS idx_models_scale ON rc_models(scale)`,
+		`CREATE INDEX IF NOT EXISTS idx_racer_models_transponder ON racer_models(transponder_number)`,
+		`CREATE INDEX IF NOT EXISTS idx_racer_models_racer ON racer_models(racer_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_racer_models_model ON racer_models(rc_model_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_races_status ON races(status)`,
+		`CREATE INDEX IF NOT EXISTS idx_races_time_start ON races(time_start)`,
+		`CREATE INDEX IF NOT EXISTS idx_participants_race ON race_participants(race_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_participants_racer_model ON race_participants(racer_model_id)`,
+		`CREATE UNIQUE INDEX IF NOT EXISTS idx_participants_unique ON race_participants(race_id, racer_model_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_race_laps_participant ON race_laps(race_participant_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_race_laps_laps ON race_laps(number_of_laps DESC)`,
+		`CREATE INDEX IF NOT EXISTS idx_lap_history_participant ON lap_history(race_participant_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_lap_history_race_lap ON lap_history(race_participant_id, lap_number)`,
+		`CREATE INDEX IF NOT EXISTS idx_lap_history_time ON lap_history(end_time)`,
+		`CREATE INDEX IF NOT EXISTS idx_raw_scans_timestamp ON raw_scans(timestamp)`,
+		`CREATE INDEX IF NOT EXISTS idx_raw_scans_tag ON raw_scans(tag_value)`,
+		`CREATE INDEX IF NOT EXISTS idx_raw_scans_processed ON raw_scans(is_processed)`,
+		`CREATE INDEX IF NOT EXISTS idx_raw_scans_tag_timestamp ON raw_scans(tag_value, timestamp)`,
+		`CREATE INDEX IF NOT EXISTS idx_settings_key ON system_settings(key)`,
+		`CREATE INDEX IF NOT EXISTS idx_audit_timestamp ON audit_log(timestamp)`,
+		`CREATE INDEX IF NOT EXISTS idx_audit_action ON audit_log(action_type)`,
+		`CREATE INDEX IF NOT EXISTS idx_audit_entity ON audit_log(entity_type, entity_id)`,
+	}
+
+	for _, query := range queries {
+		if _, err := db.Exec(query); err != nil {
+			log.Printf("Error executing query: %v", err)
+			log.Printf("Query: %s", query)
+			return err
+		}
+	}
+
+	return nil
+}
+
+// initDefaultSettings инициализирует настройки по умолчанию
+func initDefaultSettings(db *sql.DB) error {
+	// Проверяем, есть ли уже какие-то настройки
+	var count int
+	err := db.QueryRow("SELECT COUNT(*) FROM system_settings").Scan(&count)
+	if err != nil {
+		return err
+	}
+
+	// Если настроек нет, добавляем настройки по умолчанию
+	if count == 0 {
+		// Хеш пароля "admin" (сгенерирован заранее: bcrypt.GenerateFromPassword([]byte("admin"), 10))
+		defaultPasswordHash := "$2a$10$NQ4q9oaCB6/Q1jYbgzJBeuKfkUy7XkVaEG4SrhTJdZ4a7K5HnO3z."
+
+		query := `
+			INSERT INTO system_settings (key, value, value_type, description, updated_at)
+			VALUES 
+				('ui_language', 'ru', 'string', 'Язык интерфейса', datetime('now')),
+				('db_path', './track_pulse.db', 'string', 'Путь к файлу БД', datetime('now')),
+				('hardware_com_port', '', 'string', 'COM-порт Arduino', datetime('now')),
+				('hardware_reader_type', 'EM4095', 'string', 'Тип считывателя', datetime('now')),
+				('hardware_debounce_ms', '2000', 'int', 'Задержка дебаунса', datetime('now')),
+				('auth_user', 'admin', 'string', 'Логин для доступа', datetime('now')),
+				('auth_password_hash', ?, 'string', 'Хеш пароля (admin)', datetime('now')),
+				('log_retention_years', '1', 'int', 'Срок хранения логов', datetime('now'))
+		`
+
+		_, err := db.Exec(query, defaultPasswordHash)
+		return err
+	}
+
+	return nil
+}
