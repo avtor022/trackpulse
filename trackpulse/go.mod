@@ -1,11 +1,10 @@
 module trackpulse
 
-go 1.20
+go 1.19
 
 require (
 	github.com/mattn/go-sqlite3 v1.14.22
-	golang.org/x/crypto v0.17.0
-	go.bug.st/serial v1.6.0
-	github.com/google/uuid v1.5.0
-	github.com/fyne-io/fyne/v2 v2.4.0
+	github.com/tarm/serial v0.0.0-20180830185346-98f6abe2eb07
 )
+
+require golang.org/x/sys v0.15.0 // indirect
