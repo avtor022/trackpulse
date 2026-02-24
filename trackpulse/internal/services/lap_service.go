@@ -44,7 +44,7 @@ type lapService struct {
 	activeRace  *string
 }
 
-func NewLapService(repos *repository.Repositories, cfg *Config) LapService {
+func NewLapService(repos *repository.Repositories, cfg *config.Config) LapService {
 	// Get debounce setting from system settings
 	settingsRepo := repos.SystemSettings
 	hardwareSettings, err := settingsRepo.GetHardwareSettings()
@@ -191,7 +191,7 @@ func (s *lapService) StopRace(raceID string) error {
 
 func (s *lapService) GetLiveStandings(raceID string) ([]StandingsRow, error) {
 	// This would be implemented similarly to in race_service but could include real-time updates
-	service := NewRaceService(s.repos, &Config{})
+	service := NewRaceService(s.repos, service := NewRaceService(s.repos, &Config{})config.Config{})
 	return service.GetLiveStandings(raceID)
 }
 

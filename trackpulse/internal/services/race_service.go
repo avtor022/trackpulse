@@ -53,7 +53,7 @@ type raceService struct {
 	repos *repository.Repositories
 }
 
-func NewRaceService(repos *repository.Repositories, cfg *Config) RaceService {
+func NewRaceService(repos *repository.Repositories, cfg *config.Config) RaceService {
 	return &raceService{
 		repos: repos,
 	}

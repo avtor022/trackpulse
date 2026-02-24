@@ -74,11 +74,6 @@ func (s *authService) ChangePassword(oldPass, newPass string) error {
 		return err
 	}
 
-	currentUser, err := s.settingsRepo.Get(models.SettingKeyAuthUser)
-	if err != nil {
-		return err
-	}
-
 	// Проверяем текущий логин и пароль
 	if err := security.ComparePassword(oldPass, currentHash.Value); err != nil {
 		return err
@@ -114,4 +109,6 @@ func (s *authService) ChangeUsername(newUsername string) error {
 	return s.settingsRepo.Update(setting)
 }
 
-var ErrNotAuthorized = "not authorized"
+import "errors"
+
+var ErrNotAuthorized = errors.New("not authorized")
