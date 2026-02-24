@@ -1,5 +1,6 @@
 package models
 
+import "errors"
 import "time"
 
 type RCModel struct {

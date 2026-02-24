@@ -1,5 +1,6 @@
 package models
 
+import "errors"
 import "time"
 
 type SystemSetting struct {
@@ -35,4 +36,4 @@ func (ss *SystemSetting) Validate() error {
 	return nil
 }
 
-var var var ErrSystemSettingKeyRequired = "key is required" = errors.New("var ErrSystemSettingKeyRequired = "key is required"") = errors.New("var var ErrSystemSettingKeyRequired = "key is required" = errors.New("var ErrSystemSettingKeyRequired = "key is required"")")
+var ErrSystemSettingKeyRequired = errors.New("key is required")

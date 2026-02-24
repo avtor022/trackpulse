@@ -1,6 +1,9 @@
 package models
 
-import "time"
+import (
+	"errors"
+	"time"
+)
 
 type LapHistory struct {
 	ID                  string    `db:"id" json:"id"`

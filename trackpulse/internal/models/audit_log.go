@@ -1,6 +1,9 @@
 package models
 
-import "time"
+import (
+	"errors"
+	"time"
+)
 
 type AuditLog struct {
 	ID          string    `db:"id" json:"id"`
