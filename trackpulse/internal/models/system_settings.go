@@ -28,6 +28,8 @@ const (
 	SettingKeyLogRetention    = "log_retention_years"
 )
 
+var ErrSystemSettingKeyRequired = errors.New("key is required")
+
 // Validate валидация данных
 func (ss *SystemSetting) Validate() error {
 	if ss.Key == "" {
@@ -35,5 +37,3 @@ func (ss *SystemSetting) Validate() error {
 	}
 	return nil
 }
-
-var ErrSystemSettingKeyRequired = errors.New("key is required")
