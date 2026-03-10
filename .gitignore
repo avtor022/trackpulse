@@ -1,0 +1,37 @@
+```
+# Go build artifacts
+*.o
+*.a
+*.so
+*.exe
+*.dll
+*.dylib
+*.test
+*.prof
+
+# Go cache and build directories
+cache/
+build/
+dist/
+
+# Dependencies
+vendor/
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
+```
