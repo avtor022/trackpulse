@@ -7,9 +7,9 @@ import (
 
 	"trackpulse/internal/config"
 	"trackpulse/internal/database"
-	"trackpulse/internal/models"
 	"trackpulse/internal/repository"
 	"trackpulse/internal/service"
+	"trackpulse/internal/ui"
 	"trackpulse/pkg/logger"
 )
 
@@ -62,38 +62,13 @@ func main() {
 	// Initialize services
 	racerService := service.NewRacerService(racerRepo)
 
-	// Test racer CRUD operations
-	log.Info("Testing Racer CRUD operations...")
-
-	// Create a test racer
-	testRacer := &models.Racer{
-		FullName:    "Test Driver",
-		RacerNumber: 1,
-		Country:     "USA",
-		City:        "New York",
-		Rating:      100,
-	}
-
-	if err := racerService.CreateRacer(testRacer); err != nil {
-		log.Error("Failed to create test racer: %v", err)
-	} else {
-		log.Info("Test racer created successfully: %s", testRacer.FullName)
-	}
-
-	// Get all racers
-	racers, err := racerService.GetAllRacers()
-	if err != nil {
-		log.Error("Failed to get racers: %v", err)
-	} else {
-		log.Info("Total racers in database: %d", len(racers))
-		for _, r := range racers {
-			log.Info("  - #%d: %s (%s, %s)", r.RacerNumber, r.FullName, r.City, r.Country)
-		}
-	}
-
 	log.Info("TrackPulse initialization complete!")
-	fmt.Println("TrackPulse initialized successfully!")
+	
+	// Start UI
+	fmt.Println("Starting TrackPulse UI...")
 	fmt.Printf("Database: %s\n", cfg.DBPath)
 	fmt.Printf("Language: %s\n", cfg.UILanguage)
-	fmt.Printf("Total racers: %d\n", len(racers))
+	
+	uiApp := ui.NewApp(racerService, cfg.UILanguage)
+	uiApp.Run()
 }

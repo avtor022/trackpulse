@@ -1,0 +1,109 @@
+package ui
+
+import (
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/widget"
+	"trackpulse/internal/service"
+)
+
+// App represents the main application UI
+type App struct {
+	fyneApp      fyne.App
+	mainWindow   fyne.Window
+	racerService *service.RacerService
+	config       *Config
+}
+
+// Config holds UI configuration
+type Config struct {
+	Language string
+	Title    string
+}
+
+// NewApp creates a new TrackPulse application
+func NewApp(racerService *service.RacerService, language string) *App {
+	fyneApp := app.New()
+	mainWindow := fyneApp.NewWindow("TrackPulse")
+
+	return &App{
+		fyneApp:      fyneApp,
+		mainWindow:   mainWindow,
+		racerService: racerService,
+		config: &Config{
+			Language: language,
+			Title:    "TrackPulse",
+		},
+	}
+}
+
+// Run starts the application UI
+func (a *App) Run() {
+	a.mainWindow.SetContent(a.createMainContent())
+	a.mainWindow.Resize(fyne.NewSize(1200, 800))
+	a.mainWindow.ShowAndRun()
+}
+
+// createMainContent builds the main tabbed interface
+func (a *App) createMainContent() *container.Tabs {
+	tabs := container.NewAppTabs(
+		container.NewTabItem("Monitoring", a.createMonitoringTab()),
+		container.NewTabItem("Racers", a.createRacersTab()),
+		container.NewTabItem("Models", a.createModelsTab()),
+		container.NewTabItem("Transponders", a.createTranspondersTab()),
+		container.NewTabItem("Races", a.createRacesTab()),
+		container.NewTabItem("Logs", a.createLogsTab()),
+		container.NewTabItem("Settings", a.createSettingsTab()),
+	)
+
+	tabs.SetTabLocation(container.TabLocationTop)
+	return tabs
+}
+
+// createMonitoringTab creates the Live Monitoring tab
+func (a *App) createMonitoringTab() fyne.CanvasObject {
+	content := widget.NewLabel("Live Race Monitoring - Coming Soon")
+	content.Alignment = fyne.TextAlignCenter
+	return container.NewCenter(content)
+}
+
+// createRacersTab creates the Racers management tab
+func (a *App) createRacersTab() fyne.CanvasObject {
+	return NewRacerPanel(a.racerService)
+}
+
+// createModelsTab creates the Models management tab
+func (a *App) createModelsTab() fyne.CanvasObject {
+	content := widget.NewLabel("RC Models Management - Coming Soon")
+	content.Alignment = fyne.TextAlignCenter
+	return container.NewCenter(content)
+}
+
+// createTranspondersTab creates the Transponders management tab
+func (a *App) createTranspondersTab() fyne.CanvasObject {
+	content := widget.NewLabel("Transponder Assignment - Coming Soon")
+	content.Alignment = fyne.TextAlignCenter
+	return container.NewCenter(content)
+}
+
+// createRacesTab creates the Races management tab
+func (a *App) createRacesTab() fyne.CanvasObject {
+	content := widget.NewLabel("Race Management - Coming Soon")
+	content.Alignment = fyne.TextAlignCenter
+	return container.NewCenter(content)
+}
+
+// createLogsTab creates the Logs viewing tab
+func (a *App) createLogsTab() fyne.CanvasObject {
+	content := widget.NewLabel("System Logs - Coming Soon")
+	content.Alignment = fyne.TextAlignCenter
+	return container.NewCenter(content)
+}
+
+// createSettingsTab creates the Settings tab
+func (a *App) createSettingsTab() fyne.CanvasObject {
+	content := widget.NewLabel("System Settings - Coming Soon")
+	content.Alignment = fyne.TextAlignCenter
+	return container.NewCenter(content)
+}
