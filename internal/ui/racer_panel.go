@@ -251,10 +251,14 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 		widget.NewFormItem("Rating", ratingEntry),
 	)
 
-	d := dialog.NewCustom(title, "Save", form, p.window)
-	
-	// Set submit action
-	form.OnSubmit = func() {
+	// Создаем диалог с двумя кнопками: Save и Cancel
+	d := dialog.NewCustomConfirm(title, "Save", "Cancel", form, func(confirmed bool) {
+		if !confirmed {
+			// User clicked Cancel
+			p.statusLabel.SetText("Operation cancelled")
+			return
+		}
+
 		// Parse values
 		number, err := strconv.Atoi(numberEntry.Text)
 		if err != nil {
@@ -311,9 +315,8 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 			p.statusLabel.SetText("Racer created successfully")
 		}
 
-		d.Hide()
 		p.refreshData()
-	}
+	}, p.window)
 
 	d.Show()
 }
