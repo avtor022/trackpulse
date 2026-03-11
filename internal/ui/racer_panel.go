@@ -253,8 +253,8 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 		ratingEntry.SetText(strconv.Itoa(racer.Rating))
 	}
 	
-	// Увеличиваем ширину полей ввода
-	minWidth := float32(300)
+	// Увеличиваем ширину полей ввода для лучшей видимости
+	minWidth := float32(400)
 	numberEntry.Resize(fyne.NewSize(minWidth, numberEntry.MinSize().Height))
 	nameEntry.Resize(fyne.NewSize(minWidth, nameEntry.MinSize().Height))
 	countryEntry.Resize(fyne.NewSize(minWidth, countryEntry.MinSize().Height))
@@ -262,7 +262,7 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 	birthdayEntry.Resize(fyne.NewSize(minWidth, birthdayEntry.MinSize().Height))
 	ratingEntry.Resize(fyne.NewSize(minWidth, ratingEntry.MinSize().Height))
 
-	// Create form
+	// Создаем форму
 	form := widget.NewForm(
 		widget.NewFormItem("Racer Number", numberEntry),
 		widget.NewFormItem("Full Name", nameEntry),
