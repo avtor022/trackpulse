@@ -16,16 +16,20 @@ import (
 
 // RacerPanel represents the Racers management panel
 type RacerPanel struct {
-	racerService *service.RacerService
-	content      *fyne.Container
-	table        *widget.Table
-	statusLabel  *widget.Label
+	racerService    *service.RacerService
+	content         *fyne.Container
+	table           *widget.Table
+	statusLabel     *widget.Label
+	window          fyne.Window // Ссылка на окно для диалогов
+	selectedRacerID string      // ID выбранного гонщика
+	allRacers       []models.Racer // Кэш всех гонщиков
 }
 
 // NewRacerPanel creates a new racer management panel
-func NewRacerPanel(racerService *service.RacerService) fyne.CanvasObject {
+func NewRacerPanel(racerService *service.RacerService, window fyne.Window) fyne.CanvasObject {
 	panel := &RacerPanel{
 		racerService: racerService,
+		window:       window,
 	}
 	return panel.buildUI()
 }
@@ -77,24 +81,25 @@ func (p *RacerPanel) createToolbar() *widget.Toolbar {
 
 // createRacerTable creates the data table for racers
 func (p *RacerPanel) createRacerTable() *widget.Table {
-	table := widget.NewTable(
+	// Сначала загружаем данные
+	p.allRacers, _ = p.racerService.GetAllRacers()
+
+	table := widget.NewTableWithHeaders(
 		func() (int, int) {
-			racers, _ := p.racerService.GetAllRacers()
-			if len(racers) == 0 {
+			if len(p.allRacers) == 0 {
 				return 0, 0
 			}
-			return len(racers), 7 // rows, columns
+			return len(p.allRacers), 7 // rows, columns
 		},
 		func() fyne.CanvasObject {
 			return widget.NewLabel("Template")
 		},
 		func(i widget.TableCellID, o fyne.CanvasObject) {
-			racers, err := p.racerService.GetAllRacers()
-			if err != nil || i.Row >= len(racers) {
+			if i.Row >= len(p.allRacers) {
 				o.(*widget.Label).SetText("")
 				return
 			}
-			racer := racers[i.Row]
+			racer := p.allRacers[i.Row]
 			switch i.Col {
 			case 0:
 				o.(*widget.Label).SetText(strconv.Itoa(racer.RacerNumber))
@@ -113,19 +118,35 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 			case 5:
 				o.(*widget.Label).SetText(strconv.Itoa(racer.Rating))
 			case 6:
-				o.(*widget.Label).SetText(racer.UpdatedAt)
+				if !racer.UpdatedAt.IsZero() {
+					o.(*widget.Label).SetText(racer.UpdatedAt.Format("2006-01-02 15:04:05"))
+				} else {
+					o.(*widget.Label).SetText("-")
+				}
 			}
 		},
 	)
 
 	// Set column headers
-	table.CreateHeader = func() fyne.CanvasObject {
-		return widget.NewLabel("Header")
+	headers := []string{"#", "Full Name", "Country", "City", "Birthday", "Rating", "Updated"}
+	for col, header := range headers {
+		table.SetColumnWidth(col, 120)
+		_ = header // используется в UpdateHeader
 	}
-	table.UpdateHeader = func(i widget.TableCellID, o fyne.CanvasObject) {
-		headers := []string{"#", "Full Name", "Country", "City", "Birthday", "Rating", "Updated"}
-		o.(*widget.Label).SetText(headers[i.Col])
-		o.(*widget.Label).TextStyle = fyne.TextStyle{Bold: true}
+
+	// Обработка выбора строки
+	table.OnSelected = func(id widget.TableCellID) {
+		if id.Row >= 0 && id.Row < len(p.allRacers) {
+			p.selectedRacerID = p.allRacers[id.Row].ID
+			p.statusLabel.SetText(fmt.Sprintf("Selected: %s", p.allRacers[id.Row].FullName))
+		}
+	}
+
+	// Обработка двойного клика для редактирования
+	table.OnDoubleTapped = func(id widget.TableCellID) {
+		if id.Row >= 0 && id.Row < len(p.allRacers) {
+			p.showRacerDialog("Edit Racer", &p.allRacers[id.Row])
+		}
 	}
 
 	return table
@@ -134,6 +155,8 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 // refreshData reloads the racer data
 func (p *RacerPanel) refreshData() {
 	if p.table != nil {
+		// Обновляем кэш данных
+		p.allRacers, _ = p.racerService.GetAllRacers()
 		p.table.Refresh()
 		p.statusLabel.SetText("Data refreshed")
 	}
@@ -146,53 +169,61 @@ func (p *RacerPanel) showCreateDialog() {
 
 // showEditDialog shows the dialog for editing an existing racer
 func (p *RacerPanel) showEditDialog() {
-	selectedRow := p.table.SelectedRow
-	if selectedRow < 0 {
-		dialog.ShowInformation("Info", "Please select a racer to edit", p.content)
+	if p.selectedRacerID == "" {
+		dialog.ShowInformation("Info", "Please select a racer in the table first", p.window)
 		return
 	}
 
-	racers, err := p.racerService.GetAllRacers()
-	if err != nil || selectedRow >= len(racers) {
-		dialog.ShowError(err, p.content)
-		return
+	// Ищем выбранного гонщика в кэше
+	for _, racer := range p.allRacers {
+		if racer.ID == p.selectedRacerID {
+			p.showRacerDialog("Edit Racer", &racer)
+			return
+		}
 	}
 
-	p.showRacerDialog("Edit Racer", racers[selectedRow])
+	dialog.ShowInformation("Info", "Selected racer not found", p.window)
 }
 
 // deleteSelected deletes the selected racer
 func (p *RacerPanel) deleteSelected() {
-	selectedRow := p.table.SelectedRow
-	if selectedRow < 0 {
-		dialog.ShowInformation("Info", "Please select a racer to delete", p.content)
+	if p.selectedRacerID == "" {
+		dialog.ShowInformation("Info", "Please select a racer in the table first", p.window)
 		return
 	}
 
-	racers, err := p.racerService.GetAllRacers()
-	if err != nil || selectedRow >= len(racers) {
-		dialog.ShowError(err, p.content)
+	// Ищем выбранного гонщика в кэше
+	var racerToDelete *models.Racer
+	for i, racer := range p.allRacers {
+		if racer.ID == p.selectedRacerID {
+			racerToDelete = &p.allRacers[i]
+			break
+		}
+	}
+
+	if racerToDelete == nil {
+		dialog.ShowInformation("Info", "Selected racer not found", p.window)
 		return
 	}
 
-	racer := racers[selectedRow]
-	confirmDialog := dialog.ShowConfirm(
+	// Показываем диалог подтверждения
+	dialog.ShowConfirm(
 		"Confirm Delete",
-		"Are you sure you want to delete racer "+racer.FullName+"?",
+		"Are you sure you want to delete racer "+racerToDelete.FullName+"?",
 		func(confirmed bool) {
 			if confirmed {
-				if err := p.racerService.DeleteRacer(racer.ID); err != nil {
-					dialog.ShowError(err, p.content)
+				if err := p.racerService.DeleteRacer(racerToDelete.ID); err != nil {
+					dialog.ShowError(err, p.window)
 					p.statusLabel.SetText("Delete failed: " + err.Error())
 				} else {
 					p.refreshData()
+					p.selectedRacerID = ""
 					p.statusLabel.SetText("Racer deleted successfully")
 				}
 			}
 		},
-		p.content,
+		p.window,
 	)
-	confirmDialog.Resize(fyne.NewSize(300, 150))
 }
 
 // showRacerDialog shows a dialog for creating or editing a racer
@@ -227,14 +258,14 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 		widget.NewFormItem("Rating", ratingEntry),
 	)
 
-	d := dialog.NewCustom(title, "Save", form, p.content)
+	d := dialog.NewCustom(title, "Save", form, p.window)
 	
 	// Set submit action
 	form.OnSubmit = func() {
 		// Parse values
 		number, err := strconv.Atoi(numberEntry.Text)
 		if err != nil {
-			dialog.ShowError(fmt.Errorf("invalid racer number"), p.content)
+			dialog.ShowError(fmt.Errorf("invalid racer number"), p.window)
 			return
 		}
 
@@ -261,7 +292,7 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 			}
 			r.Rating = rating
 			if err := p.racerService.UpdateRacer(r); err != nil {
-				dialog.ShowError(err, p.content)
+				dialog.ShowError(err, p.window)
 				return
 			}
 			p.statusLabel.SetText("Racer updated successfully")
@@ -281,7 +312,7 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 				}
 			}
 			if err := p.racerService.CreateRacer(r); err != nil {
-				dialog.ShowError(err, p.content)
+				dialog.ShowError(err, p.window)
 				return
 			}
 			p.statusLabel.SetText("Racer created successfully")

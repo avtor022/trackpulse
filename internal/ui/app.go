@@ -70,7 +70,7 @@ func (a *App) createMonitoringTab() fyne.CanvasObject {
 
 // createRacersTab creates the Racers management tab
 func (a *App) createRacersTab() fyne.CanvasObject {
-	return NewRacerPanel(a.racerService)
+	return NewRacerPanel(a.racerService, a.mainWindow)
 }
 
 // createModelsTab creates the Models management tab
