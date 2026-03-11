@@ -111,7 +111,7 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 				o.(*widget.Label).SetText(racer.City)
 			case 4:
 				if racer.Birthday != nil {
-					o.(*widget.Label).SetText(racer.Birthday.Format("2006-01-02"))
+					o.(*widget.Label).SetText(racer.Birthday.Format("02.01.2006"))
 				} else {
 					o.(*widget.Label).SetText("-")
 				}
@@ -128,7 +128,7 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 	)
 
 	// Set column headers
-	headers := []string{"#", "Full Name", "Country", "City", "Birthday", "Rating", "Updated"}
+	headers := []string{"#", "Full Name", "Country", "City", "Birthday (DD.MM.YYYY)", "Rating", "Updated"}
 	for col, header := range headers {
 		table.SetColumnWidth(col, 120)
 		_ = header // используется в UpdateHeader
@@ -236,7 +236,7 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 		countryEntry.SetText(racer.Country)
 		cityEntry.SetText(racer.City)
 		if racer.Birthday != nil {
-			birthdayEntry.SetText(racer.Birthday.Format("2006-01-02"))
+			birthdayEntry.SetText(racer.Birthday.Format("02.01.2006"))
 		}
 		ratingEntry.SetText(strconv.Itoa(racer.Rating))
 	}
@@ -280,7 +280,7 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 			r.Country = countryEntry.Text
 			r.City = cityEntry.Text
 			if birthdayEntry.Text != "" {
-				birthday, err := time.Parse("2006-01-02", birthdayEntry.Text)
+				birthday, err := time.Parse("02.01.2006", birthdayEntry.Text)
 				if err == nil {
 					r.Birthday = &birthday
 				}
@@ -303,7 +303,7 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 				Rating:      rating,
 			}
 			if birthdayEntry.Text != "" {
-				birthday, err := time.Parse("2006-01-02", birthdayEntry.Text)
+				birthday, err := time.Parse("02.01.2006", birthdayEntry.Text)
 				if err == nil {
 					r.Birthday = &birthday
 				}
