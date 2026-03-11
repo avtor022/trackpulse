@@ -2,11 +2,13 @@ package ui
 
 import (
 	"fmt"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
+	"fyne.io/fyne/v2/theme"
 	"strconv"
 	"trackpulse/internal/models"
 	"trackpulse/internal/service"
@@ -56,17 +58,20 @@ func (p *RacerPanel) buildUI() *fyne.Container {
 
 // createToolbar creates the action toolbar
 func (p *RacerPanel) createToolbar() *widget.Toolbar {
-	newButton := widget.NewButtonWithIcon("New", widget.IconNameContentAdd, p.showCreateDialog)
-	editButton := widget.NewButtonWithIcon("Edit", widget.IconNameContentRedo, p.showEditDialog)
-	deleteButton := widget.NewButtonWithIcon("Delete", widget.IconNameContentRemove, p.deleteSelected)
-	refreshButton := widget.NewButtonWithIcon("Refresh", widget.IconNameContentRefresh, p.refreshData)
-
 	return widget.NewToolbar(
-		widget.NewToolbarAction(newButton),
-		widget.NewToolbarAction(editButton),
-		widget.NewToolbarAction(deleteButton),
+		widget.NewToolbarAction(theme.ContentAddIcon(), func() {
+			p.showCreateDialog()
+		}),
+		widget.NewToolbarAction(theme.ContentRedoIcon(), func() {
+			p.showEditDialog()
+		}),
+		widget.NewToolbarAction(theme.ContentRemoveIcon(), func() {
+			p.deleteSelected()
+		}),
 		widget.NewToolbarSeparator(),
-		widget.NewToolbarAction(refreshButton),
+		widget.NewToolbarAction(theme.ViewRefreshIcon(), func() {
+			p.refreshData()
+		}),
 	)
 }
 
@@ -100,8 +105,8 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 			case 3:
 				o.(*widget.Label).SetText(racer.City)
 			case 4:
-				if racer.Birthday != "" {
-					o.(*widget.Label).SetText(racer.Birthday)
+				if racer.Birthday != nil {
+					o.(*widget.Label).SetText(racer.Birthday.Format("2006-01-02"))
 				} else {
 					o.(*widget.Label).SetText("-")
 				}
@@ -206,8 +211,8 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 		nameEntry.SetText(racer.FullName)
 		countryEntry.SetText(racer.Country)
 		cityEntry.SetText(racer.City)
-		if racer.Birthday != "" {
-			birthdayEntry.SetText(racer.Birthday)
+		if racer.Birthday != nil {
+			birthdayEntry.SetText(racer.Birthday.Format("2006-01-02"))
 		}
 		ratingEntry.SetText(strconv.Itoa(racer.Rating))
 	}
@@ -246,7 +251,14 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 			r.FullName = nameEntry.Text
 			r.Country = countryEntry.Text
 			r.City = cityEntry.Text
-			r.Birthday = birthdayEntry.Text
+			if birthdayEntry.Text != "" {
+				birthday, err := time.Parse("2006-01-02", birthdayEntry.Text)
+				if err == nil {
+					r.Birthday = &birthday
+				}
+			} else {
+				r.Birthday = nil
+			}
 			r.Rating = rating
 			if err := p.racerService.UpdateRacer(r); err != nil {
 				dialog.ShowError(err, p.content)
@@ -260,8 +272,13 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 				FullName:    nameEntry.Text,
 				Country:     countryEntry.Text,
 				City:        cityEntry.Text,
-				Birthday:    birthdayEntry.Text,
 				Rating:      rating,
+			}
+			if birthdayEntry.Text != "" {
+				birthday, err := time.Parse("2006-01-02", birthdayEntry.Text)
+				if err == nil {
+					r.Birthday = &birthday
+				}
 			}
 			if err := p.racerService.CreateRacer(r); err != nil {
 				dialog.ShowError(err, p.content)
