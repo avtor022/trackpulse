@@ -142,13 +142,6 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 		}
 	}
 
-	// Обработка двойного клика для редактирования
-	table.OnDoubleTapped = func(id widget.TableCellID) {
-		if id.Row >= 0 && id.Row < len(p.allRacers) {
-			p.showRacerDialog("Edit Racer", &p.allRacers[id.Row])
-		}
-	}
-
 	return table
 }
 
