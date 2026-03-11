@@ -1,1 +1,4 @@
-Nothing should be ignored since the changes only include source code files (.go files) without any build artifacts, dependencies, or temporary files.
+```
+# Executables
+*.exe
+```
