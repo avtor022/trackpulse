@@ -221,13 +221,24 @@ func (p *RacerPanel) deleteSelected() {
 
 // showRacerDialog shows a dialog for creating or editing a racer
 func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
-	// Create form fields
+	// Create form fields with placeholders and increased width
 	numberEntry := widget.NewEntry()
+	numberEntry.SetPlaceHolder("Например: 7")
+	
 	nameEntry := widget.NewEntry()
+	nameEntry.SetPlaceHolder("Иванов Иван Иванович")
+	
 	countryEntry := widget.NewEntry()
+	countryEntry.SetPlaceHolder("Россия")
+	
 	cityEntry := widget.NewEntry()
+	cityEntry.SetPlaceHolder("Москва")
+	
 	birthdayEntry := widget.NewEntry()
+	birthdayEntry.SetPlaceHolder("ДД.ММ.ГГГГ")
+	
 	ratingEntry := widget.NewEntry()
+	ratingEntry.SetPlaceHolder("0")
 
 	if racer != nil {
 		// Edit mode - populate fields
@@ -240,6 +251,15 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 		}
 		ratingEntry.SetText(strconv.Itoa(racer.Rating))
 	}
+	
+	// Увеличиваем ширину полей ввода
+	minWidth := float32(300)
+	numberEntry.Resize(fyne.NewSize(minWidth, numberEntry.MinSize().Height))
+	nameEntry.Resize(fyne.NewSize(minWidth, nameEntry.MinSize().Height))
+	countryEntry.Resize(fyne.NewSize(minWidth, countryEntry.MinSize().Height))
+	cityEntry.Resize(fyne.NewSize(minWidth, cityEntry.MinSize().Height))
+	birthdayEntry.Resize(fyne.NewSize(minWidth, birthdayEntry.MinSize().Height))
+	ratingEntry.Resize(fyne.NewSize(minWidth, ratingEntry.MinSize().Height))
 
 	// Create form
 	form := widget.NewForm(
@@ -247,7 +267,7 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 		widget.NewFormItem("Full Name", nameEntry),
 		widget.NewFormItem("Country", countryEntry),
 		widget.NewFormItem("City", cityEntry),
-		widget.NewFormItem("Birthday (YYYY-MM-DD)", birthdayEntry),
+		widget.NewFormItem("Birthday (DD.MM.YYYY)", birthdayEntry),
 		widget.NewFormItem("Rating", ratingEntry),
 	)
 
@@ -283,6 +303,9 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 				birthday, err := time.Parse("02.01.2006", birthdayEntry.Text)
 				if err == nil {
 					r.Birthday = &birthday
+				} else {
+					dialog.ShowError(fmt.Errorf("invalid date format (use DD.MM.YYYY)"), p.window)
+					return
 				}
 			} else {
 				r.Birthday = nil
@@ -306,6 +329,9 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 				birthday, err := time.Parse("02.01.2006", birthdayEntry.Text)
 				if err == nil {
 					r.Birthday = &birthday
+				} else {
+					dialog.ShowError(fmt.Errorf("invalid date format (use DD.MM.YYYY)"), p.window)
+					return
 				}
 			}
 			if err := p.racerService.CreateRacer(r); err != nil {
