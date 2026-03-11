@@ -56,17 +56,17 @@ func (p *RacerPanel) buildUI() *fyne.Container {
 
 // createToolbar creates the action toolbar
 func (p *RacerPanel) createToolbar() *widget.Toolbar {
-	newButton := widget.NewButtonWithIcon("New", widget.ContentAdd, p.showCreateDialog)
-	editButton := widget.NewButtonWithIcon("Edit", widget.ContentRedo, p.showEditDialog)
-	deleteButton := widget.NewButtonWithIcon("Delete", widget.ContentRemove, p.deleteSelected)
-	refreshButton := widget.NewButtonWithIcon("Refresh", widget.ContentRefresh, p.refreshData)
+	newButton := widget.NewButtonWithIcon("New", widget.IconNameContentAdd, p.showCreateDialog)
+	editButton := widget.NewButtonWithIcon("Edit", widget.IconNameContentRedo, p.showEditDialog)
+	deleteButton := widget.NewButtonWithIcon("Delete", widget.IconNameContentRemove, p.deleteSelected)
+	refreshButton := widget.NewButtonWithIcon("Refresh", widget.IconNameContentRefresh, p.refreshData)
 
 	return widget.NewToolbar(
-		newButton,
-		editButton,
-		deleteButton,
-		widget.NewSeparator(),
-		refreshButton,
+		widget.NewToolbarAction(newButton),
+		widget.NewToolbarAction(editButton),
+		widget.NewToolbarAction(deleteButton),
+		widget.NewToolbarSeparator(),
+		widget.NewToolbarAction(refreshButton),
 	)
 }
 

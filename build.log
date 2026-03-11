@@ -1,0 +1,1058 @@
+go: downloading github.com/mattn/go-sqlite3 v1.14.34
+go: downloading github.com/google/uuid v1.6.0
+go: downloading fyne.io/fyne/v2 v2.7.3
+go: downloading github.com/go-text/typesetting v0.3.3
+go: downloading github.com/yuin/goldmark v1.7.8
+go: downloading golang.org/x/image v0.24.0
+go: downloading github.com/fsnotify/fsnotify v1.9.0
+go: downloading github.com/godbus/dbus/v5 v5.1.0
+go: downloading github.com/rymdport/portal v0.4.2
+go: downloading github.com/jeandeaual/go-locale v0.0.0-20250612000132-0ef82f21eade
+go: downloading github.com/nicksnyder/go-i18n/v2 v2.5.1
+go: downloading golang.org/x/text v0.22.0
+go: downloading github.com/fredbi/uri v1.1.1
+go: downloading github.com/go-text/render v0.2.0
+go: downloading github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef
+go: downloading github.com/fyne-io/oksvg v0.2.0
+go: downloading fyne.io/systray v1.12.0
+go: downloading github.com/fyne-io/image v0.1.1
+go: downloading github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240506104042-037f3cc74f2a
+go: downloading github.com/BurntSushi/toml v1.5.0
+go: downloading github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
+go: downloading golang.org/x/sys v0.30.0
+go: downloading github.com/srwiley/oksvg v0.0.0-20221011165216-be6e8873101c
+go: downloading golang.org/x/net v0.35.0
+go: downloading github.com/go-gl/gl v0.0.0-20231021071112-07e5d0ea2e71
+go: downloading github.com/jsummers/gobmp v0.0.0-20230614200233-a9de23ed2e25
+go: downloading github.com/stretchr/testify v1.11.1
+go: downloading github.com/davecgh/go-spew v1.1.1
+go: downloading github.com/pmezard/go-difflib v1.0.0
+go: downloading gopkg.in/yaml.v3 v3.0.1
+# fyne.io/fyne/v2/layout
+fatal error: out of memory allocating heap arena map
+
+runtime stack:
+runtime.throw({0xd5885d?, 0x0?})
+	/usr/lib/go-1.19/src/runtime/panic.go:1047 +0x5d fp=0x7ffccee1a990 sp=0x7ffccee1a960 pc=0x43785d
+runtime.(*mheap).sysAlloc(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:676 +0x316 fp=0x7ffccee1aa28 sp=0x7ffccee1a990 pc=0x40c836
+runtime.(*mheap).grow(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1418 +0x73 fp=0x7ffccee1aa98 sp=0x7ffccee1aa28 pc=0x428c33
+runtime.(*mheap).allocSpan(0x13fb060, 0x1, 0x0, 0x18)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1199 +0x1be fp=0x7ffccee1ab30 sp=0x7ffccee1aa98 pc=0x42853e
+runtime.(*mheap).alloc.func1()
+	/usr/lib/go-1.19/src/runtime/mheap.go:918 +0x65 fp=0x7ffccee1ab78 sp=0x7ffccee1ab30 pc=0x427fc5
+runtime.(*mheap).alloc(0x0?, 0x0?, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:912 +0x65 fp=0x7ffccee1abc0 sp=0x7ffccee1ab78 pc=0x427f05
+runtime.(*mcentral).grow(0x40480a?)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:244 +0x5b fp=0x7ffccee1ac08 sp=0x7ffccee1abc0 pc=0x417b7b
+runtime.(*mcentral).cacheSpan(0x140c4a0)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:164 +0x306 fp=0x7ffccee1ac60 sp=0x7ffccee1ac08 pc=0x4179c6
+runtime.(*mcache).refill(0x7ff27755b108, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mcache.go:181 +0x152 fp=0x7ffccee1aca0 sp=0x7ffccee1ac60 pc=0x417092
+runtime.(*mcache).nextFree(0x7ff27755b108, 0x18)
+	/usr/lib/go-1.19/src/runtime/malloc.go:819 +0x85 fp=0x7ffccee1ace8 sp=0x7ffccee1aca0 pc=0x40cd65
+runtime.mallocgc(0xa0, 0xcacac0, 0x1)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1018 +0x4c8 fp=0x7ffccee1ad60 sp=0x7ffccee1ace8 pc=0x40d3c8
+runtime.newobject(0x141ba00?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1202 +0x27 fp=0x7ffccee1ad88 sp=0x7ffccee1ad60 pc=0x40d8e7
+internal/cpu.doinit()
+	/usr/lib/go-1.19/src/internal/cpu/cpu_x86.go:50 +0x25 fp=0x7ffccee1adf0 sp=0x7ffccee1ad88 pc=0x4015e5
+({0x0, 0x0})
+	/usr/lib/go-1.19/src/internal/cpu/cpu.go:124 +0x25 fp=0x7ffccee1ae10 sp=0x7ffccee1adf0 pc=0x401025
+runtime.cpuinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:632 +0xff fp=0x7ffccee1ae50 sp=0x7ffccee1ae10 pc=0x43b11f
+runtime.schedinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:694 +0xb0 fp=0x7ffccee1aeb0 sp=0x7ffccee1ae50 pc=0x43b230
+runtime.rt0_go()
+	/usr/lib/go-1.19/src/runtime/asm_amd64.s:345 +0x11c fp=0x7ffccee1aeb8 sp=0x7ffccee1aeb0 pc=0x467f7c
+# fyne.io/fyne/v2/data/binding
+fatal error: out of memory allocating heap arena map
+
+runtime stack:
+runtime.throw({0xd5885d?, 0x0?})
+	/usr/lib/go-1.19/src/runtime/panic.go:1047 +0x5d fp=0x7ffe85cd0080 sp=0x7ffe85cd0050 pc=0x43785d
+runtime.(*mheap).sysAlloc(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:676 +0x316 fp=0x7ffe85cd0118 sp=0x7ffe85cd0080 pc=0x40c836
+runtime.(*mheap).grow(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1418 +0x73 fp=0x7ffe85cd0188 sp=0x7ffe85cd0118 pc=0x428c33
+runtime.(*mheap).allocSpan(0x13fb060, 0x1, 0x0, 0x18)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1199 +0x1be fp=0x7ffe85cd0220 sp=0x7ffe85cd0188 pc=0x42853e
+runtime.(*mheap).alloc.func1()
+	/usr/lib/go-1.19/src/runtime/mheap.go:918 +0x65 fp=0x7ffe85cd0268 sp=0x7ffe85cd0220 pc=0x427fc5
+runtime.(*mheap).alloc(0x0?, 0x0?, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:912 +0x65 fp=0x7ffe85cd02b0 sp=0x7ffe85cd0268 pc=0x427f05
+runtime.(*mcentral).grow(0x40480a?)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:244 +0x5b fp=0x7ffe85cd02f8 sp=0x7ffe85cd02b0 pc=0x417b7b
+runtime.(*mcentral).cacheSpan(0x140c4a0)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:164 +0x306 fp=0x7ffe85cd0350 sp=0x7ffe85cd02f8 pc=0x4179c6
+runtime.(*mcache).refill(0x7ff120b36108, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mcache.go:181 +0x152 fp=0x7ffe85cd0390 sp=0x7ffe85cd0350 pc=0x417092
+runtime.(*mcache).nextFree(0x7ff120b36108, 0x18)
+	/usr/lib/go-1.19/src/runtime/malloc.go:819 +0x85 fp=0x7ffe85cd03d8 sp=0x7ffe85cd0390 pc=0x40cd65
+runtime.mallocgc(0xa0, 0xcacac0, 0x1)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1018 +0x4c8 fp=0x7ffe85cd0450 sp=0x7ffe85cd03d8 pc=0x40d3c8
+runtime.newobject(0x141ba00?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1202 +0x27 fp=0x7ffe85cd0478 sp=0x7ffe85cd0450 pc=0x40d8e7
+internal/cpu.doinit()
+	/usr/lib/go-1.19/src/internal/cpu/cpu_x86.go:50 +0x25 fp=0x7ffe85cd04e0 sp=0x7ffe85cd0478 pc=0x4015e5
+({0x0, 0x0})
+	/usr/lib/go-1.19/src/internal/cpu/cpu.go:124 +0x25 fp=0x7ffe85cd0500 sp=0x7ffe85cd04e0 pc=0x401025
+runtime.cpuinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:632 +0xff fp=0x7ffe85cd0540 sp=0x7ffe85cd0500 pc=0x43b11f
+runtime.schedinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:694 +0xb0 fp=0x7ffe85cd05a0 sp=0x7ffe85cd0540 pc=0x43b230
+runtime.rt0_go()
+	/usr/lib/go-1.19/src/runtime/asm_amd64.s:345 +0x11c fp=0x7ffe85cd05a8 sp=0x7ffe85cd05a0 pc=0x467f7c
+# fyne.io/fyne/v2/driver/mobile
+fatal error: out of memory allocating heap arena map
+
+runtime stack:
+runtime.throw({0xd5885d?, 0x0?})
+	/usr/lib/go-1.19/src/runtime/panic.go:1047 +0x5d fp=0x7ffe9b85aff0 sp=0x7ffe9b85afc0 pc=0x43785d
+runtime.(*mheap).sysAlloc(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:676 +0x316 fp=0x7ffe9b85b088 sp=0x7ffe9b85aff0 pc=0x40c836
+runtime.(*mheap).grow(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1418 +0x73 fp=0x7ffe9b85b0f8 sp=0x7ffe9b85b088 pc=0x428c33
+runtime.(*mheap).allocSpan(0x13fb060, 0x1, 0x0, 0x18)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1199 +0x1be fp=0x7ffe9b85b190 sp=0x7ffe9b85b0f8 pc=0x42853e
+runtime.(*mheap).alloc.func1()
+	/usr/lib/go-1.19/src/runtime/mheap.go:918 +0x65 fp=0x7ffe9b85b1d8 sp=0x7ffe9b85b190 pc=0x427fc5
+runtime.(*mheap).alloc(0x0?, 0x0?, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:912 +0x65 fp=0x7ffe9b85b220 sp=0x7ffe9b85b1d8 pc=0x427f05
+runtime.(*mcentral).grow(0x40480a?)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:244 +0x5b fp=0x7ffe9b85b268 sp=0x7ffe9b85b220 pc=0x417b7b
+runtime.(*mcentral).cacheSpan(0x140c4a0)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:164 +0x306 fp=0x7ffe9b85b2c0 sp=0x7ffe9b85b268 pc=0x4179c6
+runtime.(*mcache).refill(0x7f6d33ea5108, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mcache.go:181 +0x152 fp=0x7ffe9b85b300 sp=0x7ffe9b85b2c0 pc=0x417092
+runtime.(*mcache).nextFree(0x7f6d33ea5108, 0x18)
+	/usr/lib/go-1.19/src/runtime/malloc.go:819 +0x85 fp=0x7ffe9b85b348 sp=0x7ffe9b85b300 pc=0x40cd65
+runtime.mallocgc(0xa0, 0xcacac0, 0x1)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1018 +0x4c8 fp=0x7ffe9b85b3c0 sp=0x7ffe9b85b348 pc=0x40d3c8
+runtime.newobject(0x141ba00?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1202 +0x27 fp=0x7ffe9b85b3e8 sp=0x7ffe9b85b3c0 pc=0x40d8e7
+internal/cpu.doinit()
+	/usr/lib/go-1.19/src/internal/cpu/cpu_x86.go:50 +0x25 fp=0x7ffe9b85b450 sp=0x7ffe9b85b3e8 pc=0x4015e5
+({0x0, 0x0})
+	/usr/lib/go-1.19/src/internal/cpu/cpu.go:124 +0x25 fp=0x7ffe9b85b470 sp=0x7ffe9b85b450 pc=0x401025
+runtime.cpuinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:632 +0xff fp=0x7ffe9b85b4b0 sp=0x7ffe9b85b470 pc=0x43b11f
+runtime.schedinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:694 +0xb0 fp=0x7ffe9b85b510 sp=0x7ffe9b85b4b0 pc=0x43b230
+runtime.rt0_go()
+	/usr/lib/go-1.19/src/runtime/asm_amd64.s:345 +0x11c fp=0x7ffe9b85b518 sp=0x7ffe9b85b510 pc=0x467f7c
+# github.com/jeandeaual/go-locale
+fatal error: out of memory allocating heap arena map
+
+runtime stack:
+runtime.throw({0xd5885d?, 0x0?})
+	/usr/lib/go-1.19/src/runtime/panic.go:1047 +0x5d fp=0x7ffc09f4c1c0 sp=0x7ffc09f4c190 pc=0x43785d
+runtime.(*mheap).sysAlloc(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:676 +0x316 fp=0x7ffc09f4c258 sp=0x7ffc09f4c1c0 pc=0x40c836
+runtime.(*mheap).grow(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1418 +0x73 fp=0x7ffc09f4c2c8 sp=0x7ffc09f4c258 pc=0x428c33
+runtime.(*mheap).allocSpan(0x13fb060, 0x1, 0x0, 0x18)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1199 +0x1be fp=0x7ffc09f4c360 sp=0x7ffc09f4c2c8 pc=0x42853e
+runtime.(*mheap).alloc.func1()
+	/usr/lib/go-1.19/src/runtime/mheap.go:918 +0x65 fp=0x7ffc09f4c3a8 sp=0x7ffc09f4c360 pc=0x427fc5
+runtime.(*mheap).alloc(0x0?, 0x0?, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:912 +0x65 fp=0x7ffc09f4c3f0 sp=0x7ffc09f4c3a8 pc=0x427f05
+runtime.(*mcentral).grow(0x40480a?)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:244 +0x5b fp=0x7ffc09f4c438 sp=0x7ffc09f4c3f0 pc=0x417b7b
+runtime.(*mcentral).cacheSpan(0x140c4a0)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:164 +0x306 fp=0x7ffc09f4c490 sp=0x7ffc09f4c438 pc=0x4179c6
+runtime.(*mcache).refill(0x7f6015036108, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mcache.go:181 +0x152 fp=0x7ffc09f4c4d0 sp=0x7ffc09f4c490 pc=0x417092
+runtime.(*mcache).nextFree(0x7f6015036108, 0x18)
+	/usr/lib/go-1.19/src/runtime/malloc.go:819 +0x85 fp=0x7ffc09f4c518 sp=0x7ffc09f4c4d0 pc=0x40cd65
+runtime.mallocgc(0xa0, 0xcacac0, 0x1)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1018 +0x4c8 fp=0x7ffc09f4c590 sp=0x7ffc09f4c518 pc=0x40d3c8
+runtime.newobject(0x141ba00?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1202 +0x27 fp=0x7ffc09f4c5b8 sp=0x7ffc09f4c590 pc=0x40d8e7
+internal/cpu.doinit()
+	/usr/lib/go-1.19/src/internal/cpu/cpu_x86.go:50 +0x25 fp=0x7ffc09f4c620 sp=0x7ffc09f4c5b8 pc=0x4015e5
+({0x0, 0x0})
+	/usr/lib/go-1.19/src/internal/cpu/cpu.go:124 +0x25 fp=0x7ffc09f4c640 sp=0x7ffc09f4c620 pc=0x401025
+runtime.cpuinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:632 +0xff fp=0x7ffc09f4c680 sp=0x7ffc09f4c640 pc=0x43b11f
+runtime.schedinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:694 +0xb0 fp=0x7ffc09f4c6e0 sp=0x7ffc09f4c680 pc=0x43b230
+runtime.rt0_go()
+	/usr/lib/go-1.19/src/runtime/asm_amd64.s:345 +0x11c fp=0x7ffc09f4c6e8 sp=0x7ffc09f4c6e0 pc=0x467f7c
+# github.com/nicksnyder/go-i18n/v2/i18n/template
+fatal error: out of memory allocating heap arena map
+
+runtime stack:
+runtime.throw({0xd5885d?, 0x0?})
+	/usr/lib/go-1.19/src/runtime/panic.go:1047 +0x5d fp=0x7fff97fb5210 sp=0x7fff97fb51e0 pc=0x43785d
+runtime.(*mheap).sysAlloc(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:676 +0x316 fp=0x7fff97fb52a8 sp=0x7fff97fb5210 pc=0x40c836
+runtime.(*mheap).grow(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1418 +0x73 fp=0x7fff97fb5318 sp=0x7fff97fb52a8 pc=0x428c33
+runtime.(*mheap).allocSpan(0x13fb060, 0x1, 0x0, 0x18)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1199 +0x1be fp=0x7fff97fb53b0 sp=0x7fff97fb5318 pc=0x42853e
+runtime.(*mheap).alloc.func1()
+	/usr/lib/go-1.19/src/runtime/mheap.go:918 +0x65 fp=0x7fff97fb53f8 sp=0x7fff97fb53b0 pc=0x427fc5
+runtime.(*mheap).alloc(0x0?, 0x0?, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:912 +0x65 fp=0x7fff97fb5440 sp=0x7fff97fb53f8 pc=0x427f05
+runtime.(*mcentral).grow(0x40480a?)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:244 +0x5b fp=0x7fff97fb5488 sp=0x7fff97fb5440 pc=0x417b7b
+runtime.(*mcentral).cacheSpan(0x140c4a0)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:164 +0x306 fp=0x7fff97fb54e0 sp=0x7fff97fb5488 pc=0x4179c6
+runtime.(*mcache).refill(0x7fd226634108, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mcache.go:181 +0x152 fp=0x7fff97fb5520 sp=0x7fff97fb54e0 pc=0x417092
+runtime.(*mcache).nextFree(0x7fd226634108, 0x18)
+	/usr/lib/go-1.19/src/runtime/malloc.go:819 +0x85 fp=0x7fff97fb5568 sp=0x7fff97fb5520 pc=0x40cd65
+runtime.mallocgc(0xa0, 0xcacac0, 0x1)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1018 +0x4c8 fp=0x7fff97fb55e0 sp=0x7fff97fb5568 pc=0x40d3c8
+runtime.newobject(0x141ba00?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1202 +0x27 fp=0x7fff97fb5608 sp=0x7fff97fb55e0 pc=0x40d8e7
+internal/cpu.doinit()
+	/usr/lib/go-1.19/src/internal/cpu/cpu_x86.go:50 +0x25 fp=0x7fff97fb5670 sp=0x7fff97fb5608 pc=0x4015e5
+({0x0, 0x0})
+	/usr/lib/go-1.19/src/internal/cpu/cpu.go:124 +0x25 fp=0x7fff97fb5690 sp=0x7fff97fb5670 pc=0x401025
+runtime.cpuinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:632 +0xff fp=0x7fff97fb56d0 sp=0x7fff97fb5690 pc=0x43b11f
+runtime.schedinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:694 +0xb0 fp=0x7fff97fb5730 sp=0x7fff97fb56d0 pc=0x43b230
+runtime.rt0_go()
+	/usr/lib/go-1.19/src/runtime/asm_amd64.s:345 +0x11c fp=0x7fff97fb5738 sp=0x7fff97fb5730 pc=0x467f7c
+# github.com/nicksnyder/go-i18n/v2/internal/plural
+fatal error: out of memory allocating heap arena map
+
+runtime stack:
+runtime.throw({0xd5885d?, 0x0?})
+	/usr/lib/go-1.19/src/runtime/panic.go:1047 +0x5d fp=0x7ffd5f1ffde0 sp=0x7ffd5f1ffdb0 pc=0x43785d
+runtime.(*mheap).sysAlloc(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:676 +0x316 fp=0x7ffd5f1ffe78 sp=0x7ffd5f1ffde0 pc=0x40c836
+runtime.(*mheap).grow(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1418 +0x73 fp=0x7ffd5f1ffee8 sp=0x7ffd5f1ffe78 pc=0x428c33
+runtime.(*mheap).allocSpan(0x13fb060, 0x1, 0x0, 0x18)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1199 +0x1be fp=0x7ffd5f1fff80 sp=0x7ffd5f1ffee8 pc=0x42853e
+runtime.(*mheap).alloc.func1()
+	/usr/lib/go-1.19/src/runtime/mheap.go:918 +0x65 fp=0x7ffd5f1fffc8 sp=0x7ffd5f1fff80 pc=0x427fc5
+runtime.(*mheap).alloc(0x0?, 0x0?, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:912 +0x65 fp=0x7ffd5f200010 sp=0x7ffd5f1fffc8 pc=0x427f05
+runtime.(*mcentral).grow(0x40480a?)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:244 +0x5b fp=0x7ffd5f200058 sp=0x7ffd5f200010 pc=0x417b7b
+runtime.(*mcentral).cacheSpan(0x140c4a0)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:164 +0x306 fp=0x7ffd5f2000b0 sp=0x7ffd5f200058 pc=0x4179c6
+runtime.(*mcache).refill(0x7f98e90d9108, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mcache.go:181 +0x152 fp=0x7ffd5f2000f0 sp=0x7ffd5f2000b0 pc=0x417092
+runtime.(*mcache).nextFree(0x7f98e90d9108, 0x18)
+	/usr/lib/go-1.19/src/runtime/malloc.go:819 +0x85 fp=0x7ffd5f200138 sp=0x7ffd5f2000f0 pc=0x40cd65
+runtime.mallocgc(0xa0, 0xcacac0, 0x1)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1018 +0x4c8 fp=0x7ffd5f2001b0 sp=0x7ffd5f200138 pc=0x40d3c8
+runtime.newobject(0x141ba00?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1202 +0x27 fp=0x7ffd5f2001d8 sp=0x7ffd5f2001b0 pc=0x40d8e7
+internal/cpu.doinit()
+	/usr/lib/go-1.19/src/internal/cpu/cpu_x86.go:50 +0x25 fp=0x7ffd5f200240 sp=0x7ffd5f2001d8 pc=0x4015e5
+({0x0, 0x0})
+	/usr/lib/go-1.19/src/internal/cpu/cpu.go:124 +0x25 fp=0x7ffd5f200260 sp=0x7ffd5f200240 pc=0x401025
+runtime.cpuinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:632 +0xff fp=0x7ffd5f2002a0 sp=0x7ffd5f200260 pc=0x43b11f
+runtime.schedinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:694 +0xb0 fp=0x7ffd5f200300 sp=0x7ffd5f2002a0 pc=0x43b230
+runtime.rt0_go()
+	/usr/lib/go-1.19/src/runtime/asm_amd64.s:345 +0x11c fp=0x7ffd5f200308 sp=0x7ffd5f200300 pc=0x467f7c
+# github.com/go-text/typesetting/font/opentype
+fatal error: out of memory allocating heap arena map
+
+runtime stack:
+runtime.throw({0xd5885d?, 0x0?})
+	/usr/lib/go-1.19/src/runtime/panic.go:1047 +0x5d fp=0x7ffd67afe760 sp=0x7ffd67afe730 pc=0x43785d
+runtime.(*mheap).sysAlloc(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:676 +0x316 fp=0x7ffd67afe7f8 sp=0x7ffd67afe760 pc=0x40c836
+runtime.(*mheap).grow(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1418 +0x73 fp=0x7ffd67afe868 sp=0x7ffd67afe7f8 pc=0x428c33
+runtime.(*mheap).allocSpan(0x13fb060, 0x1, 0x0, 0x18)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1199 +0x1be fp=0x7ffd67afe900 sp=0x7ffd67afe868 pc=0x42853e
+runtime.(*mheap).alloc.func1()
+	/usr/lib/go-1.19/src/runtime/mheap.go:918 +0x65 fp=0x7ffd67afe948 sp=0x7ffd67afe900 pc=0x427fc5
+runtime.(*mheap).alloc(0x0?, 0x0?, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:912 +0x65 fp=0x7ffd67afe990 sp=0x7ffd67afe948 pc=0x427f05
+runtime.(*mcentral).grow(0x40480a?)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:244 +0x5b fp=0x7ffd67afe9d8 sp=0x7ffd67afe990 pc=0x417b7b
+runtime.(*mcentral).cacheSpan(0x140c4a0)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:164 +0x306 fp=0x7ffd67afea30 sp=0x7ffd67afe9d8 pc=0x4179c6
+runtime.(*mcache).refill(0x7f991f9cd108, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mcache.go:181 +0x152 fp=0x7ffd67afea70 sp=0x7ffd67afea30 pc=0x417092
+runtime.(*mcache).nextFree(0x7f991f9cd108, 0x18)
+	/usr/lib/go-1.19/src/runtime/malloc.go:819 +0x85 fp=0x7ffd67afeab8 sp=0x7ffd67afea70 pc=0x40cd65
+runtime.mallocgc(0xa0, 0xcacac0, 0x1)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1018 +0x4c8 fp=0x7ffd67afeb30 sp=0x7ffd67afeab8 pc=0x40d3c8
+runtime.newobject(0x141ba00?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1202 +0x27 fp=0x7ffd67afeb58 sp=0x7ffd67afeb30 pc=0x40d8e7
+internal/cpu.doinit()
+	/usr/lib/go-1.19/src/internal/cpu/cpu_x86.go:50 +0x25 fp=0x7ffd67afebc0 sp=0x7ffd67afeb58 pc=0x4015e5
+({0x0, 0x0})
+	/usr/lib/go-1.19/src/internal/cpu/cpu.go:124 +0x25 fp=0x7ffd67afebe0 sp=0x7ffd67afebc0 pc=0x401025
+runtime.cpuinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:632 +0xff fp=0x7ffd67afec20 sp=0x7ffd67afebe0 pc=0x43b11f
+runtime.schedinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:694 +0xb0 fp=0x7ffd67afec80 sp=0x7ffd67afec20 pc=0x43b230
+runtime.rt0_go()
+	/usr/lib/go-1.19/src/runtime/asm_amd64.s:345 +0x11c fp=0x7ffd67afec88 sp=0x7ffd67afec80 pc=0x467f7c
+# github.com/go-text/typesetting/language
+fatal error: out of memory allocating heap arena map
+
+runtime stack:
+runtime.throw({0xd5885d?, 0x0?})
+	/usr/lib/go-1.19/src/runtime/panic.go:1047 +0x5d fp=0x7ffdcb99f170 sp=0x7ffdcb99f140 pc=0x43785d
+runtime.(*mheap).sysAlloc(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:676 +0x316 fp=0x7ffdcb99f208 sp=0x7ffdcb99f170 pc=0x40c836
+runtime.(*mheap).grow(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1418 +0x73 fp=0x7ffdcb99f278 sp=0x7ffdcb99f208 pc=0x428c33
+runtime.(*mheap).allocSpan(0x13fb060, 0x1, 0x0, 0x18)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1199 +0x1be fp=0x7ffdcb99f310 sp=0x7ffdcb99f278 pc=0x42853e
+runtime.(*mheap).alloc.func1()
+	/usr/lib/go-1.19/src/runtime/mheap.go:918 +0x65 fp=0x7ffdcb99f358 sp=0x7ffdcb99f310 pc=0x427fc5
+runtime.(*mheap).alloc(0x0?, 0x0?, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:912 +0x65 fp=0x7ffdcb99f3a0 sp=0x7ffdcb99f358 pc=0x427f05
+runtime.(*mcentral).grow(0x40480a?)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:244 +0x5b fp=0x7ffdcb99f3e8 sp=0x7ffdcb99f3a0 pc=0x417b7b
+runtime.(*mcentral).cacheSpan(0x140c4a0)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:164 +0x306 fp=0x7ffdcb99f440 sp=0x7ffdcb99f3e8 pc=0x4179c6
+runtime.(*mcache).refill(0x7f11db2a7108, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mcache.go:181 +0x152 fp=0x7ffdcb99f480 sp=0x7ffdcb99f440 pc=0x417092
+runtime.(*mcache).nextFree(0x7f11db2a7108, 0x18)
+	/usr/lib/go-1.19/src/runtime/malloc.go:819 +0x85 fp=0x7ffdcb99f4c8 sp=0x7ffdcb99f480 pc=0x40cd65
+runtime.mallocgc(0xa0, 0xcacac0, 0x1)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1018 +0x4c8 fp=0x7ffdcb99f540 sp=0x7ffdcb99f4c8 pc=0x40d3c8
+runtime.newobject(0x141ba00?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1202 +0x27 fp=0x7ffdcb99f568 sp=0x7ffdcb99f540 pc=0x40d8e7
+internal/cpu.doinit()
+	/usr/lib/go-1.19/src/internal/cpu/cpu_x86.go:50 +0x25 fp=0x7ffdcb99f5d0 sp=0x7ffdcb99f568 pc=0x4015e5
+({0x0, 0x0})
+	/usr/lib/go-1.19/src/internal/cpu/cpu.go:124 +0x25 fp=0x7ffdcb99f5f0 sp=0x7ffdcb99f5d0 pc=0x401025
+runtime.cpuinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:632 +0xff fp=0x7ffdcb99f630 sp=0x7ffdcb99f5f0 pc=0x43b11f
+runtime.schedinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:694 +0xb0 fp=0x7ffdcb99f690 sp=0x7ffdcb99f630 pc=0x43b230
+runtime.rt0_go()
+	/usr/lib/go-1.19/src/runtime/asm_amd64.s:345 +0x11c fp=0x7ffdcb99f698 sp=0x7ffdcb99f690 pc=0x467f7c
+# golang.org/x/image/ccitt
+fatal error: out of memory allocating heap arena map
+
+runtime stack:
+runtime.throw({0xd5885d?, 0x0?})
+	/usr/lib/go-1.19/src/runtime/panic.go:1047 +0x5d fp=0x7ffebbe5a500 sp=0x7ffebbe5a4d0 pc=0x43785d
+runtime.(*mheap).sysAlloc(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:676 +0x316 fp=0x7ffebbe5a598 sp=0x7ffebbe5a500 pc=0x40c836
+runtime.(*mheap).grow(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1418 +0x73 fp=0x7ffebbe5a608 sp=0x7ffebbe5a598 pc=0x428c33
+runtime.(*mheap).allocSpan(0x13fb060, 0x1, 0x0, 0x18)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1199 +0x1be fp=0x7ffebbe5a6a0 sp=0x7ffebbe5a608 pc=0x42853e
+runtime.(*mheap).alloc.func1()
+	/usr/lib/go-1.19/src/runtime/mheap.go:918 +0x65 fp=0x7ffebbe5a6e8 sp=0x7ffebbe5a6a0 pc=0x427fc5
+runtime.(*mheap).alloc(0x0?, 0x0?, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:912 +0x65 fp=0x7ffebbe5a730 sp=0x7ffebbe5a6e8 pc=0x427f05
+runtime.(*mcentral).grow(0x40480a?)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:244 +0x5b fp=0x7ffebbe5a778 sp=0x7ffebbe5a730 pc=0x417b7b
+runtime.(*mcentral).cacheSpan(0x140c4a0)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:164 +0x306 fp=0x7ffebbe5a7d0 sp=0x7ffebbe5a778 pc=0x4179c6
+runtime.(*mcache).refill(0x7fc330064108, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mcache.go:181 +0x152 fp=0x7ffebbe5a810 sp=0x7ffebbe5a7d0 pc=0x417092
+runtime.(*mcache).nextFree(0x7fc330064108, 0x18)
+	/usr/lib/go-1.19/src/runtime/malloc.go:819 +0x85 fp=0x7ffebbe5a858 sp=0x7ffebbe5a810 pc=0x40cd65
+runtime.mallocgc(0xa0, 0xcacac0, 0x1)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1018 +0x4c8 fp=0x7ffebbe5a8d0 sp=0x7ffebbe5a858 pc=0x40d3c8
+runtime.newobject(0x141ba00?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1202 +0x27 fp=0x7ffebbe5a8f8 sp=0x7ffebbe5a8d0 pc=0x40d8e7
+internal/cpu.doinit()
+	/usr/lib/go-1.19/src/internal/cpu/cpu_x86.go:50 +0x25 fp=0x7ffebbe5a960 sp=0x7ffebbe5a8f8 pc=0x4015e5
+({0x0, 0x0})
+	/usr/lib/go-1.19/src/internal/cpu/cpu.go:124 +0x25 fp=0x7ffebbe5a980 sp=0x7ffebbe5a960 pc=0x401025
+runtime.cpuinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:632 +0xff fp=0x7ffebbe5a9c0 sp=0x7ffebbe5a980 pc=0x43b11f
+runtime.schedinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:694 +0xb0 fp=0x7ffebbe5aa20 sp=0x7ffebbe5a9c0 pc=0x43b230
+runtime.rt0_go()
+	/usr/lib/go-1.19/src/runtime/asm_amd64.s:345 +0x11c fp=0x7ffebbe5aa28 sp=0x7ffebbe5aa20 pc=0x467f7c
+# golang.org/x/image/tiff/lzw
+fatal error: out of memory allocating heap arena map
+
+runtime stack:
+runtime.throw({0xd5885d?, 0x0?})
+	/usr/lib/go-1.19/src/runtime/panic.go:1047 +0x5d fp=0x7ffff04a30c0 sp=0x7ffff04a3090 pc=0x43785d
+runtime.(*mheap).sysAlloc(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:676 +0x316 fp=0x7ffff04a3158 sp=0x7ffff04a30c0 pc=0x40c836
+runtime.(*mheap).grow(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1418 +0x73 fp=0x7ffff04a31c8 sp=0x7ffff04a3158 pc=0x428c33
+runtime.(*mheap).allocSpan(0x13fb060, 0x1, 0x0, 0x18)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1199 +0x1be fp=0x7ffff04a3260 sp=0x7ffff04a31c8 pc=0x42853e
+runtime.(*mheap).alloc.func1()
+	/usr/lib/go-1.19/src/runtime/mheap.go:918 +0x65 fp=0x7ffff04a32a8 sp=0x7ffff04a3260 pc=0x427fc5
+runtime.(*mheap).alloc(0x0?, 0x0?, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:912 +0x65 fp=0x7ffff04a32f0 sp=0x7ffff04a32a8 pc=0x427f05
+runtime.(*mcentral).grow(0x40480a?)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:244 +0x5b fp=0x7ffff04a3338 sp=0x7ffff04a32f0 pc=0x417b7b
+runtime.(*mcentral).cacheSpan(0x140c4a0)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:164 +0x306 fp=0x7ffff04a3390 sp=0x7ffff04a3338 pc=0x4179c6
+runtime.(*mcache).refill(0x7fa4f039d108, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mcache.go:181 +0x152 fp=0x7ffff04a33d0 sp=0x7ffff04a3390 pc=0x417092
+runtime.(*mcache).nextFree(0x7fa4f039d108, 0x18)
+	/usr/lib/go-1.19/src/runtime/malloc.go:819 +0x85 fp=0x7ffff04a3418 sp=0x7ffff04a33d0 pc=0x40cd65
+runtime.mallocgc(0xa0, 0xcacac0, 0x1)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1018 +0x4c8 fp=0x7ffff04a3490 sp=0x7ffff04a3418 pc=0x40d3c8
+runtime.newobject(0x141ba00?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1202 +0x27 fp=0x7ffff04a34b8 sp=0x7ffff04a3490 pc=0x40d8e7
+internal/cpu.doinit()
+	/usr/lib/go-1.19/src/internal/cpu/cpu_x86.go:50 +0x25 fp=0x7ffff04a3520 sp=0x7ffff04a34b8 pc=0x4015e5
+({0x0, 0x0})
+	/usr/lib/go-1.19/src/internal/cpu/cpu.go:124 +0x25 fp=0x7ffff04a3540 sp=0x7ffff04a3520 pc=0x401025
+runtime.cpuinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:632 +0xff fp=0x7ffff04a3580 sp=0x7ffff04a3540 pc=0x43b11f
+runtime.schedinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:694 +0xb0 fp=0x7ffff04a35e0 sp=0x7ffff04a3580 pc=0x43b230
+runtime.rt0_go()
+	/usr/lib/go-1.19/src/runtime/asm_amd64.s:345 +0x11c fp=0x7ffff04a35e8 sp=0x7ffff04a35e0 pc=0x467f7c
+# golang.org/x/text/unicode/bidi
+fatal error: out of memory allocating heap arena map
+
+runtime stack:
+runtime.throw({0xd5885d?, 0x0?})
+	/usr/lib/go-1.19/src/runtime/panic.go:1047 +0x5d fp=0x7ffe5519e140 sp=0x7ffe5519e110 pc=0x43785d
+runtime.(*mheap).sysAlloc(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:676 +0x316 fp=0x7ffe5519e1d8 sp=0x7ffe5519e140 pc=0x40c836
+runtime.(*mheap).grow(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1418 +0x73 fp=0x7ffe5519e248 sp=0x7ffe5519e1d8 pc=0x428c33
+runtime.(*mheap).allocSpan(0x13fb060, 0x1, 0x0, 0x18)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1199 +0x1be fp=0x7ffe5519e2e0 sp=0x7ffe5519e248 pc=0x42853e
+runtime.(*mheap).alloc.func1()
+	/usr/lib/go-1.19/src/runtime/mheap.go:918 +0x65 fp=0x7ffe5519e328 sp=0x7ffe5519e2e0 pc=0x427fc5
+runtime.(*mheap).alloc(0x0?, 0x0?, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:912 +0x65 fp=0x7ffe5519e370 sp=0x7ffe5519e328 pc=0x427f05
+runtime.(*mcentral).grow(0x40480a?)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:244 +0x5b fp=0x7ffe5519e3b8 sp=0x7ffe5519e370 pc=0x417b7b
+runtime.(*mcentral).cacheSpan(0x140c4a0)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:164 +0x306 fp=0x7ffe5519e410 sp=0x7ffe5519e3b8 pc=0x4179c6
+runtime.(*mcache).refill(0x7f132a26c108, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mcache.go:181 +0x152 fp=0x7ffe5519e450 sp=0x7ffe5519e410 pc=0x417092
+runtime.(*mcache).nextFree(0x7f132a26c108, 0x18)
+	/usr/lib/go-1.19/src/runtime/malloc.go:819 +0x85 fp=0x7ffe5519e498 sp=0x7ffe5519e450 pc=0x40cd65
+runtime.mallocgc(0xa0, 0xcacac0, 0x1)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1018 +0x4c8 fp=0x7ffe5519e510 sp=0x7ffe5519e498 pc=0x40d3c8
+runtime.newobject(0x141ba00?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1202 +0x27 fp=0x7ffe5519e538 sp=0x7ffe5519e510 pc=0x40d8e7
+internal/cpu.doinit()
+	/usr/lib/go-1.19/src/internal/cpu/cpu_x86.go:50 +0x25 fp=0x7ffe5519e5a0 sp=0x7ffe5519e538 pc=0x4015e5
+({0x0, 0x0})
+	/usr/lib/go-1.19/src/internal/cpu/cpu.go:124 +0x25 fp=0x7ffe5519e5c0 sp=0x7ffe5519e5a0 pc=0x401025
+runtime.cpuinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:632 +0xff fp=0x7ffe5519e600 sp=0x7ffe5519e5c0 pc=0x43b11f
+runtime.schedinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:694 +0xb0 fp=0x7ffe5519e660 sp=0x7ffe5519e600 pc=0x43b230
+runtime.rt0_go()
+	/usr/lib/go-1.19/src/runtime/asm_amd64.s:345 +0x11c fp=0x7ffe5519e668 sp=0x7ffe5519e660 pc=0x467f7c
+# github.com/srwiley/oksvg
+fatal error: out of memory allocating heap arena map
+
+runtime stack:
+runtime.throw({0xd5885d?, 0x0?})
+	/usr/lib/go-1.19/src/runtime/panic.go:1047 +0x5d fp=0x7ffc94ce5630 sp=0x7ffc94ce5600 pc=0x43785d
+runtime.(*mheap).sysAlloc(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:676 +0x316 fp=0x7ffc94ce56c8 sp=0x7ffc94ce5630 pc=0x40c836
+runtime.(*mheap).grow(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1418 +0x73 fp=0x7ffc94ce5738 sp=0x7ffc94ce56c8 pc=0x428c33
+runtime.(*mheap).allocSpan(0x13fb060, 0x1, 0x0, 0x18)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1199 +0x1be fp=0x7ffc94ce57d0 sp=0x7ffc94ce5738 pc=0x42853e
+runtime.(*mheap).alloc.func1()
+	/usr/lib/go-1.19/src/runtime/mheap.go:918 +0x65 fp=0x7ffc94ce5818 sp=0x7ffc94ce57d0 pc=0x427fc5
+runtime.(*mheap).alloc(0x0?, 0x0?, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:912 +0x65 fp=0x7ffc94ce5860 sp=0x7ffc94ce5818 pc=0x427f05
+runtime.(*mcentral).grow(0x40480a?)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:244 +0x5b fp=0x7ffc94ce58a8 sp=0x7ffc94ce5860 pc=0x417b7b
+runtime.(*mcentral).cacheSpan(0x140c4a0)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:164 +0x306 fp=0x7ffc94ce5900 sp=0x7ffc94ce58a8 pc=0x4179c6
+runtime.(*mcache).refill(0x7ff49159f108, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mcache.go:181 +0x152 fp=0x7ffc94ce5940 sp=0x7ffc94ce5900 pc=0x417092
+runtime.(*mcache).nextFree(0x7ff49159f108, 0x18)
+	/usr/lib/go-1.19/src/runtime/malloc.go:819 +0x85 fp=0x7ffc94ce5988 sp=0x7ffc94ce5940 pc=0x40cd65
+runtime.mallocgc(0xa0, 0xcacac0, 0x1)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1018 +0x4c8 fp=0x7ffc94ce5a00 sp=0x7ffc94ce5988 pc=0x40d3c8
+runtime.newobject(0x141ba00?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1202 +0x27 fp=0x7ffc94ce5a28 sp=0x7ffc94ce5a00 pc=0x40d8e7
+internal/cpu.doinit()
+	/usr/lib/go-1.19/src/internal/cpu/cpu_x86.go:50 +0x25 fp=0x7ffc94ce5a90 sp=0x7ffc94ce5a28 pc=0x4015e5
+({0x0, 0x0})
+	/usr/lib/go-1.19/src/internal/cpu/cpu.go:124 +0x25 fp=0x7ffc94ce5ab0 sp=0x7ffc94ce5a90 pc=0x401025
+runtime.cpuinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:632 +0xff fp=0x7ffc94ce5af0 sp=0x7ffc94ce5ab0 pc=0x43b11f
+runtime.schedinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:694 +0xb0 fp=0x7ffc94ce5b50 sp=0x7ffc94ce5af0 pc=0x43b230
+runtime.rt0_go()
+	/usr/lib/go-1.19/src/runtime/asm_amd64.s:345 +0x11c fp=0x7ffc94ce5b58 sp=0x7ffc94ce5b50 pc=0x467f7c
+# golang.org/x/image/math/f64
+fatal error: out of memory allocating heap arena map
+
+runtime stack:
+runtime.throw({0xd5885d?, 0x0?})
+	/usr/lib/go-1.19/src/runtime/panic.go:1047 +0x5d fp=0x7ffc64881030 sp=0x7ffc64881000 pc=0x43785d
+runtime.(*mheap).sysAlloc(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:676 +0x316 fp=0x7ffc648810c8 sp=0x7ffc64881030 pc=0x40c836
+runtime.(*mheap).grow(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1418 +0x73 fp=0x7ffc64881138 sp=0x7ffc648810c8 pc=0x428c33
+runtime.(*mheap).allocSpan(0x13fb060, 0x1, 0x0, 0x18)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1199 +0x1be fp=0x7ffc648811d0 sp=0x7ffc64881138 pc=0x42853e
+runtime.(*mheap).alloc.func1()
+	/usr/lib/go-1.19/src/runtime/mheap.go:918 +0x65 fp=0x7ffc64881218 sp=0x7ffc648811d0 pc=0x427fc5
+runtime.(*mheap).alloc(0x0?, 0x0?, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:912 +0x65 fp=0x7ffc64881260 sp=0x7ffc64881218 pc=0x427f05
+runtime.(*mcentral).grow(0x40480a?)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:244 +0x5b fp=0x7ffc648812a8 sp=0x7ffc64881260 pc=0x417b7b
+runtime.(*mcentral).cacheSpan(0x140c4a0)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:164 +0x306 fp=0x7ffc64881300 sp=0x7ffc648812a8 pc=0x4179c6
+runtime.(*mcache).refill(0x7f3585ff1108, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mcache.go:181 +0x152 fp=0x7ffc64881340 sp=0x7ffc64881300 pc=0x417092
+runtime.(*mcache).nextFree(0x7f3585ff1108, 0x18)
+	/usr/lib/go-1.19/src/runtime/malloc.go:819 +0x85 fp=0x7ffc64881388 sp=0x7ffc64881340 pc=0x40cd65
+runtime.mallocgc(0xa0, 0xcacac0, 0x1)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1018 +0x4c8 fp=0x7ffc64881400 sp=0x7ffc64881388 pc=0x40d3c8
+runtime.newobject(0x141ba00?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1202 +0x27 fp=0x7ffc64881428 sp=0x7ffc64881400 pc=0x40d8e7
+internal/cpu.doinit()
+	/usr/lib/go-1.19/src/internal/cpu/cpu_x86.go:50 +0x25 fp=0x7ffc64881490 sp=0x7ffc64881428 pc=0x4015e5
+({0x0, 0x0})
+	/usr/lib/go-1.19/src/internal/cpu/cpu.go:124 +0x25 fp=0x7ffc648814b0 sp=0x7ffc64881490 pc=0x401025
+runtime.cpuinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:632 +0xff fp=0x7ffc648814f0 sp=0x7ffc648814b0 pc=0x43b11f
+runtime.schedinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:694 +0xb0 fp=0x7ffc64881550 sp=0x7ffc648814f0 pc=0x43b230
+runtime.rt0_go()
+	/usr/lib/go-1.19/src/runtime/asm_amd64.s:345 +0x11c fp=0x7ffc64881558 sp=0x7ffc64881550 pc=0x467f7c
+# github.com/yuin/goldmark/util
+fatal error: out of memory allocating heap arena map
+
+runtime stack:
+runtime.throw({0xd5885d?, 0x0?})
+	/usr/lib/go-1.19/src/runtime/panic.go:1047 +0x5d fp=0x7ffec6478e00 sp=0x7ffec6478dd0 pc=0x43785d
+runtime.(*mheap).sysAlloc(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:676 +0x316 fp=0x7ffec6478e98 sp=0x7ffec6478e00 pc=0x40c836
+runtime.(*mheap).grow(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1418 +0x73 fp=0x7ffec6478f08 sp=0x7ffec6478e98 pc=0x428c33
+runtime.(*mheap).allocSpan(0x13fb060, 0x1, 0x0, 0x18)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1199 +0x1be fp=0x7ffec6478fa0 sp=0x7ffec6478f08 pc=0x42853e
+runtime.(*mheap).alloc.func1()
+	/usr/lib/go-1.19/src/runtime/mheap.go:918 +0x65 fp=0x7ffec6478fe8 sp=0x7ffec6478fa0 pc=0x427fc5
+runtime.(*mheap).alloc(0x0?, 0x0?, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:912 +0x65 fp=0x7ffec6479030 sp=0x7ffec6478fe8 pc=0x427f05
+runtime.(*mcentral).grow(0x40480a?)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:244 +0x5b fp=0x7ffec6479078 sp=0x7ffec6479030 pc=0x417b7b
+runtime.(*mcentral).cacheSpan(0x140c4a0)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:164 +0x306 fp=0x7ffec64790d0 sp=0x7ffec6479078 pc=0x4179c6
+runtime.(*mcache).refill(0x7ff859b8c108, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mcache.go:181 +0x152 fp=0x7ffec6479110 sp=0x7ffec64790d0 pc=0x417092
+runtime.(*mcache).nextFree(0x7ff859b8c108, 0x18)
+	/usr/lib/go-1.19/src/runtime/malloc.go:819 +0x85 fp=0x7ffec6479158 sp=0x7ffec6479110 pc=0x40cd65
+runtime.mallocgc(0xa0, 0xcacac0, 0x1)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1018 +0x4c8 fp=0x7ffec64791d0 sp=0x7ffec6479158 pc=0x40d3c8
+runtime.newobject(0x141ba00?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1202 +0x27 fp=0x7ffec64791f8 sp=0x7ffec64791d0 pc=0x40d8e7
+internal/cpu.doinit()
+	/usr/lib/go-1.19/src/internal/cpu/cpu_x86.go:50 +0x25 fp=0x7ffec6479260 sp=0x7ffec64791f8 pc=0x4015e5
+({0x0, 0x0})
+	/usr/lib/go-1.19/src/internal/cpu/cpu.go:124 +0x25 fp=0x7ffec6479280 sp=0x7ffec6479260 pc=0x401025
+runtime.cpuinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:632 +0xff fp=0x7ffec64792c0 sp=0x7ffec6479280 pc=0x43b11f
+runtime.schedinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:694 +0xb0 fp=0x7ffec6479320 sp=0x7ffec64792c0 pc=0x43b230
+runtime.rt0_go()
+	/usr/lib/go-1.19/src/runtime/asm_amd64.s:345 +0x11c fp=0x7ffec6479328 sp=0x7ffec6479320 pc=0x467f7c
+# fyne.io/fyne/v2/driver
+fatal error: out of memory allocating heap arena map
+
+runtime stack:
+runtime.throw({0xd5885d?, 0x0?})
+	/usr/lib/go-1.19/src/runtime/panic.go:1047 +0x5d fp=0x7ffe643fada0 sp=0x7ffe643fad70 pc=0x43785d
+runtime.(*mheap).sysAlloc(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:676 +0x316 fp=0x7ffe643fae38 sp=0x7ffe643fada0 pc=0x40c836
+runtime.(*mheap).grow(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1418 +0x73 fp=0x7ffe643faea8 sp=0x7ffe643fae38 pc=0x428c33
+runtime.(*mheap).allocSpan(0x13fb060, 0x1, 0x0, 0x18)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1199 +0x1be fp=0x7ffe643faf40 sp=0x7ffe643faea8 pc=0x42853e
+runtime.(*mheap).alloc.func1()
+	/usr/lib/go-1.19/src/runtime/mheap.go:918 +0x65 fp=0x7ffe643faf88 sp=0x7ffe643faf40 pc=0x427fc5
+runtime.(*mheap).alloc(0x0?, 0x0?, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:912 +0x65 fp=0x7ffe643fafd0 sp=0x7ffe643faf88 pc=0x427f05
+runtime.(*mcentral).grow(0x40480a?)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:244 +0x5b fp=0x7ffe643fb018 sp=0x7ffe643fafd0 pc=0x417b7b
+runtime.(*mcentral).cacheSpan(0x140c4a0)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:164 +0x306 fp=0x7ffe643fb070 sp=0x7ffe643fb018 pc=0x4179c6
+runtime.(*mcache).refill(0x7f81624f9108, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mcache.go:181 +0x152 fp=0x7ffe643fb0b0 sp=0x7ffe643fb070 pc=0x417092
+runtime.(*mcache).nextFree(0x7f81624f9108, 0x18)
+	/usr/lib/go-1.19/src/runtime/malloc.go:819 +0x85 fp=0x7ffe643fb0f8 sp=0x7ffe643fb0b0 pc=0x40cd65
+runtime.mallocgc(0xa0, 0xcacac0, 0x1)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1018 +0x4c8 fp=0x7ffe643fb170 sp=0x7ffe643fb0f8 pc=0x40d3c8
+runtime.newobject(0x141ba00?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1202 +0x27 fp=0x7ffe643fb198 sp=0x7ffe643fb170 pc=0x40d8e7
+internal/cpu.doinit()
+	/usr/lib/go-1.19/src/internal/cpu/cpu_x86.go:50 +0x25 fp=0x7ffe643fb200 sp=0x7ffe643fb198 pc=0x4015e5
+({0x0, 0x0})
+	/usr/lib/go-1.19/src/internal/cpu/cpu.go:124 +0x25 fp=0x7ffe643fb220 sp=0x7ffe643fb200 pc=0x401025
+runtime.cpuinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:632 +0xff fp=0x7ffe643fb260 sp=0x7ffe643fb220 pc=0x43b11f
+runtime.schedinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:694 +0xb0 fp=0x7ffe643fb2c0 sp=0x7ffe643fb260 pc=0x43b230
+runtime.rt0_go()
+	/usr/lib/go-1.19/src/runtime/asm_amd64.s:345 +0x11c fp=0x7ffe643fb2c8 sp=0x7ffe643fb2c0 pc=0x467f7c
+# fyne.io/fyne/v2/internal/repository
+fatal error: out of memory allocating heap arena map
+
+runtime stack:
+runtime.throw({0xd5885d?, 0x0?})
+	/usr/lib/go-1.19/src/runtime/panic.go:1047 +0x5d fp=0x7ffe26d357d0 sp=0x7ffe26d357a0 pc=0x43785d
+runtime.(*mheap).sysAlloc(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:676 +0x316 fp=0x7ffe26d35868 sp=0x7ffe26d357d0 pc=0x40c836
+runtime.(*mheap).grow(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1418 +0x73 fp=0x7ffe26d358d8 sp=0x7ffe26d35868 pc=0x428c33
+runtime.(*mheap).allocSpan(0x13fb060, 0x1, 0x0, 0x18)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1199 +0x1be fp=0x7ffe26d35970 sp=0x7ffe26d358d8 pc=0x42853e
+runtime.(*mheap).alloc.func1()
+	/usr/lib/go-1.19/src/runtime/mheap.go:918 +0x65 fp=0x7ffe26d359b8 sp=0x7ffe26d35970 pc=0x427fc5
+runtime.(*mheap).alloc(0x0?, 0x0?, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:912 +0x65 fp=0x7ffe26d35a00 sp=0x7ffe26d359b8 pc=0x427f05
+runtime.(*mcentral).grow(0x40480a?)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:244 +0x5b fp=0x7ffe26d35a48 sp=0x7ffe26d35a00 pc=0x417b7b
+runtime.(*mcentral).cacheSpan(0x140c4a0)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:164 +0x306 fp=0x7ffe26d35aa0 sp=0x7ffe26d35a48 pc=0x4179c6
+runtime.(*mcache).refill(0x7faa6d810108, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mcache.go:181 +0x152 fp=0x7ffe26d35ae0 sp=0x7ffe26d35aa0 pc=0x417092
+runtime.(*mcache).nextFree(0x7faa6d810108, 0x18)
+	/usr/lib/go-1.19/src/runtime/malloc.go:819 +0x85 fp=0x7ffe26d35b28 sp=0x7ffe26d35ae0 pc=0x40cd65
+runtime.mallocgc(0xa0, 0xcacac0, 0x1)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1018 +0x4c8 fp=0x7ffe26d35ba0 sp=0x7ffe26d35b28 pc=0x40d3c8
+runtime.newobject(0x141ba00?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1202 +0x27 fp=0x7ffe26d35bc8 sp=0x7ffe26d35ba0 pc=0x40d8e7
+internal/cpu.doinit()
+	/usr/lib/go-1.19/src/internal/cpu/cpu_x86.go:50 +0x25 fp=0x7ffe26d35c30 sp=0x7ffe26d35bc8 pc=0x4015e5
+({0x0, 0x0})
+	/usr/lib/go-1.19/src/internal/cpu/cpu.go:124 +0x25 fp=0x7ffe26d35c50 sp=0x7ffe26d35c30 pc=0x401025
+runtime.cpuinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:632 +0xff fp=0x7ffe26d35c90 sp=0x7ffe26d35c50 pc=0x43b11f
+runtime.schedinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:694 +0xb0 fp=0x7ffe26d35cf0 sp=0x7ffe26d35c90 pc=0x43b230
+runtime.rt0_go()
+	/usr/lib/go-1.19/src/runtime/asm_amd64.s:345 +0x11c fp=0x7ffe26d35cf8 sp=0x7ffe26d35cf0 pc=0x467f7c
+# github.com/davecgh/go-spew/spew
+fatal error: out of memory allocating heap arena map
+
+runtime stack:
+runtime.throw({0xd5885d?, 0x0?})
+	/usr/lib/go-1.19/src/runtime/panic.go:1047 +0x5d fp=0x7ffc01680240 sp=0x7ffc01680210 pc=0x43785d
+runtime.(*mheap).sysAlloc(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:676 +0x316 fp=0x7ffc016802d8 sp=0x7ffc01680240 pc=0x40c836
+runtime.(*mheap).grow(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1418 +0x73 fp=0x7ffc01680348 sp=0x7ffc016802d8 pc=0x428c33
+runtime.(*mheap).allocSpan(0x13fb060, 0x1, 0x0, 0x18)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1199 +0x1be fp=0x7ffc016803e0 sp=0x7ffc01680348 pc=0x42853e
+runtime.(*mheap).alloc.func1()
+	/usr/lib/go-1.19/src/runtime/mheap.go:918 +0x65 fp=0x7ffc01680428 sp=0x7ffc016803e0 pc=0x427fc5
+runtime.(*mheap).alloc(0x0?, 0x0?, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:912 +0x65 fp=0x7ffc01680470 sp=0x7ffc01680428 pc=0x427f05
+runtime.(*mcentral).grow(0x40480a?)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:244 +0x5b fp=0x7ffc016804b8 sp=0x7ffc01680470 pc=0x417b7b
+runtime.(*mcentral).cacheSpan(0x140c4a0)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:164 +0x306 fp=0x7ffc01680510 sp=0x7ffc016804b8 pc=0x4179c6
+runtime.(*mcache).refill(0x7fc9c5e4e108, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mcache.go:181 +0x152 fp=0x7ffc01680550 sp=0x7ffc01680510 pc=0x417092
+runtime.(*mcache).nextFree(0x7fc9c5e4e108, 0x18)
+	/usr/lib/go-1.19/src/runtime/malloc.go:819 +0x85 fp=0x7ffc01680598 sp=0x7ffc01680550 pc=0x40cd65
+runtime.mallocgc(0xa0, 0xcacac0, 0x1)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1018 +0x4c8 fp=0x7ffc01680610 sp=0x7ffc01680598 pc=0x40d3c8
+runtime.newobject(0x141ba00?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1202 +0x27 fp=0x7ffc01680638 sp=0x7ffc01680610 pc=0x40d8e7
+internal/cpu.doinit()
+	/usr/lib/go-1.19/src/internal/cpu/cpu_x86.go:50 +0x25 fp=0x7ffc016806a0 sp=0x7ffc01680638 pc=0x4015e5
+({0x0, 0x0})
+	/usr/lib/go-1.19/src/internal/cpu/cpu.go:124 +0x25 fp=0x7ffc016806c0 sp=0x7ffc016806a0 pc=0x401025
+runtime.cpuinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:632 +0xff fp=0x7ffc01680700 sp=0x7ffc016806c0 pc=0x43b11f
+runtime.schedinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:694 +0xb0 fp=0x7ffc01680760 sp=0x7ffc01680700 pc=0x43b230
+runtime.rt0_go()
+	/usr/lib/go-1.19/src/runtime/asm_amd64.s:345 +0x11c fp=0x7ffc01680768 sp=0x7ffc01680760 pc=0x467f7c
+# github.com/pmezard/go-difflib/difflib
+fatal error: out of memory allocating heap arena map
+
+runtime stack:
+runtime.throw({0xd5885d?, 0x0?})
+	/usr/lib/go-1.19/src/runtime/panic.go:1047 +0x5d fp=0x7ffdf8c5a8f0 sp=0x7ffdf8c5a8c0 pc=0x43785d
+runtime.(*mheap).sysAlloc(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:676 +0x316 fp=0x7ffdf8c5a988 sp=0x7ffdf8c5a8f0 pc=0x40c836
+runtime.(*mheap).grow(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1418 +0x73 fp=0x7ffdf8c5a9f8 sp=0x7ffdf8c5a988 pc=0x428c33
+runtime.(*mheap).allocSpan(0x13fb060, 0x1, 0x0, 0x18)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1199 +0x1be fp=0x7ffdf8c5aa90 sp=0x7ffdf8c5a9f8 pc=0x42853e
+runtime.(*mheap).alloc.func1()
+	/usr/lib/go-1.19/src/runtime/mheap.go:918 +0x65 fp=0x7ffdf8c5aad8 sp=0x7ffdf8c5aa90 pc=0x427fc5
+runtime.(*mheap).alloc(0x0?, 0x0?, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:912 +0x65 fp=0x7ffdf8c5ab20 sp=0x7ffdf8c5aad8 pc=0x427f05
+runtime.(*mcentral).grow(0x40480a?)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:244 +0x5b fp=0x7ffdf8c5ab68 sp=0x7ffdf8c5ab20 pc=0x417b7b
+runtime.(*mcentral).cacheSpan(0x140c4a0)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:164 +0x306 fp=0x7ffdf8c5abc0 sp=0x7ffdf8c5ab68 pc=0x4179c6
+runtime.(*mcache).refill(0x7fb8def3d108, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mcache.go:181 +0x152 fp=0x7ffdf8c5ac00 sp=0x7ffdf8c5abc0 pc=0x417092
+runtime.(*mcache).nextFree(0x7fb8def3d108, 0x18)
+	/usr/lib/go-1.19/src/runtime/malloc.go:819 +0x85 fp=0x7ffdf8c5ac48 sp=0x7ffdf8c5ac00 pc=0x40cd65
+runtime.mallocgc(0xa0, 0xcacac0, 0x1)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1018 +0x4c8 fp=0x7ffdf8c5acc0 sp=0x7ffdf8c5ac48 pc=0x40d3c8
+runtime.newobject(0x141ba00?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1202 +0x27 fp=0x7ffdf8c5ace8 sp=0x7ffdf8c5acc0 pc=0x40d8e7
+internal/cpu.doinit()
+	/usr/lib/go-1.19/src/internal/cpu/cpu_x86.go:50 +0x25 fp=0x7ffdf8c5ad50 sp=0x7ffdf8c5ace8 pc=0x4015e5
+({0x0, 0x0})
+	/usr/lib/go-1.19/src/internal/cpu/cpu.go:124 +0x25 fp=0x7ffdf8c5ad70 sp=0x7ffdf8c5ad50 pc=0x401025
+runtime.cpuinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:632 +0xff fp=0x7ffdf8c5adb0 sp=0x7ffdf8c5ad70 pc=0x43b11f
+runtime.schedinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:694 +0xb0 fp=0x7ffdf8c5ae10 sp=0x7ffdf8c5adb0 pc=0x43b230
+runtime.rt0_go()
+	/usr/lib/go-1.19/src/runtime/asm_amd64.s:345 +0x11c fp=0x7ffdf8c5ae18 sp=0x7ffdf8c5ae10 pc=0x467f7c
+# gopkg.in/yaml.v3
+fatal error: out of memory allocating heap arena map
+
+runtime stack:
+runtime.throw({0xd5885d?, 0x0?})
+	/usr/lib/go-1.19/src/runtime/panic.go:1047 +0x5d fp=0x7ffdc40be5c0 sp=0x7ffdc40be590 pc=0x43785d
+runtime.(*mheap).sysAlloc(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:676 +0x316 fp=0x7ffdc40be658 sp=0x7ffdc40be5c0 pc=0x40c836
+runtime.(*mheap).grow(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1418 +0x73 fp=0x7ffdc40be6c8 sp=0x7ffdc40be658 pc=0x428c33
+runtime.(*mheap).allocSpan(0x13fb060, 0x1, 0x0, 0x18)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1199 +0x1be fp=0x7ffdc40be760 sp=0x7ffdc40be6c8 pc=0x42853e
+runtime.(*mheap).alloc.func1()
+	/usr/lib/go-1.19/src/runtime/mheap.go:918 +0x65 fp=0x7ffdc40be7a8 sp=0x7ffdc40be760 pc=0x427fc5
+runtime.(*mheap).alloc(0x0?, 0x0?, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:912 +0x65 fp=0x7ffdc40be7f0 sp=0x7ffdc40be7a8 pc=0x427f05
+runtime.(*mcentral).grow(0x40480a?)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:244 +0x5b fp=0x7ffdc40be838 sp=0x7ffdc40be7f0 pc=0x417b7b
+runtime.(*mcentral).cacheSpan(0x140c4a0)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:164 +0x306 fp=0x7ffdc40be890 sp=0x7ffdc40be838 pc=0x4179c6
+runtime.(*mcache).refill(0x7f9e0f8f7108, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mcache.go:181 +0x152 fp=0x7ffdc40be8d0 sp=0x7ffdc40be890 pc=0x417092
+runtime.(*mcache).nextFree(0x7f9e0f8f7108, 0x18)
+	/usr/lib/go-1.19/src/runtime/malloc.go:819 +0x85 fp=0x7ffdc40be918 sp=0x7ffdc40be8d0 pc=0x40cd65
+runtime.mallocgc(0xa0, 0xcacac0, 0x1)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1018 +0x4c8 fp=0x7ffdc40be990 sp=0x7ffdc40be918 pc=0x40d3c8
+runtime.newobject(0x141ba00?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1202 +0x27 fp=0x7ffdc40be9b8 sp=0x7ffdc40be990 pc=0x40d8e7
+internal/cpu.doinit()
+	/usr/lib/go-1.19/src/internal/cpu/cpu_x86.go:50 +0x25 fp=0x7ffdc40bea20 sp=0x7ffdc40be9b8 pc=0x4015e5
+({0x0, 0x0})
+	/usr/lib/go-1.19/src/internal/cpu/cpu.go:124 +0x25 fp=0x7ffdc40bea40 sp=0x7ffdc40bea20 pc=0x401025
+runtime.cpuinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:632 +0xff fp=0x7ffdc40bea80 sp=0x7ffdc40bea40 pc=0x43b11f
+runtime.schedinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:694 +0xb0 fp=0x7ffdc40beae0 sp=0x7ffdc40bea80 pc=0x43b230
+runtime.rt0_go()
+	/usr/lib/go-1.19/src/runtime/asm_amd64.s:345 +0x11c fp=0x7ffdc40beae8 sp=0x7ffdc40beae0 pc=0x467f7c
+# fyne.io/fyne/v2/internal/animation
+fatal error: out of memory allocating heap arena map
+
+runtime stack:
+runtime.throw({0xd5885d?, 0x0?})
+	/usr/lib/go-1.19/src/runtime/panic.go:1047 +0x5d fp=0x7ffd485e8ac0 sp=0x7ffd485e8a90 pc=0x43785d
+runtime.(*mheap).sysAlloc(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:676 +0x316 fp=0x7ffd485e8b58 sp=0x7ffd485e8ac0 pc=0x40c836
+runtime.(*mheap).grow(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1418 +0x73 fp=0x7ffd485e8bc8 sp=0x7ffd485e8b58 pc=0x428c33
+runtime.(*mheap).allocSpan(0x13fb060, 0x1, 0x0, 0x18)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1199 +0x1be fp=0x7ffd485e8c60 sp=0x7ffd485e8bc8 pc=0x42853e
+runtime.(*mheap).alloc.func1()
+	/usr/lib/go-1.19/src/runtime/mheap.go:918 +0x65 fp=0x7ffd485e8ca8 sp=0x7ffd485e8c60 pc=0x427fc5
+runtime.(*mheap).alloc(0x0?, 0x0?, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:912 +0x65 fp=0x7ffd485e8cf0 sp=0x7ffd485e8ca8 pc=0x427f05
+runtime.(*mcentral).grow(0x40480a?)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:244 +0x5b fp=0x7ffd485e8d38 sp=0x7ffd485e8cf0 pc=0x417b7b
+runtime.(*mcentral).cacheSpan(0x140c4a0)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:164 +0x306 fp=0x7ffd485e8d90 sp=0x7ffd485e8d38 pc=0x4179c6
+runtime.(*mcache).refill(0x7febd641d108, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mcache.go:181 +0x152 fp=0x7ffd485e8dd0 sp=0x7ffd485e8d90 pc=0x417092
+runtime.(*mcache).nextFree(0x7febd641d108, 0x18)
+	/usr/lib/go-1.19/src/runtime/malloc.go:819 +0x85 fp=0x7ffd485e8e18 sp=0x7ffd485e8dd0 pc=0x40cd65
+runtime.mallocgc(0xa0, 0xcacac0, 0x1)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1018 +0x4c8 fp=0x7ffd485e8e90 sp=0x7ffd485e8e18 pc=0x40d3c8
+runtime.newobject(0x141ba00?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1202 +0x27 fp=0x7ffd485e8eb8 sp=0x7ffd485e8e90 pc=0x40d8e7
+internal/cpu.doinit()
+	/usr/lib/go-1.19/src/internal/cpu/cpu_x86.go:50 +0x25 fp=0x7ffd485e8f20 sp=0x7ffd485e8eb8 pc=0x4015e5
+({0x0, 0x0})
+	/usr/lib/go-1.19/src/internal/cpu/cpu.go:124 +0x25 fp=0x7ffd485e8f40 sp=0x7ffd485e8f20 pc=0x401025
+runtime.cpuinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:632 +0xff fp=0x7ffd485e8f80 sp=0x7ffd485e8f40 pc=0x43b11f
+runtime.schedinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:694 +0xb0 fp=0x7ffd485e8fe0 sp=0x7ffd485e8f80 pc=0x43b230
+runtime.rt0_go()
+	/usr/lib/go-1.19/src/runtime/asm_amd64.s:345 +0x11c fp=0x7ffd485e8fe8 sp=0x7ffd485e8fe0 pc=0x467f7c
+# pkg-config --cflags  -- gl gl
+pkg-config: exec: "pkg-config": executable file not found in $PATH
+# github.com/godbus/dbus/v5
+fatal error: out of memory allocating heap arena map
+
+runtime stack:
+runtime.throw({0xd5885d?, 0x0?})
+	/usr/lib/go-1.19/src/runtime/panic.go:1047 +0x5d fp=0x7ffe2da6cfe0 sp=0x7ffe2da6cfb0 pc=0x43785d
+runtime.(*mheap).sysAlloc(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:676 +0x316 fp=0x7ffe2da6d078 sp=0x7ffe2da6cfe0 pc=0x40c836
+runtime.(*mheap).grow(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1418 +0x73 fp=0x7ffe2da6d0e8 sp=0x7ffe2da6d078 pc=0x428c33
+runtime.(*mheap).allocSpan(0x13fb060, 0x1, 0x0, 0x18)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1199 +0x1be fp=0x7ffe2da6d180 sp=0x7ffe2da6d0e8 pc=0x42853e
+runtime.(*mheap).alloc.func1()
+	/usr/lib/go-1.19/src/runtime/mheap.go:918 +0x65 fp=0x7ffe2da6d1c8 sp=0x7ffe2da6d180 pc=0x427fc5
+runtime.(*mheap).alloc(0x0?, 0x0?, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:912 +0x65 fp=0x7ffe2da6d210 sp=0x7ffe2da6d1c8 pc=0x427f05
+runtime.(*mcentral).grow(0x40480a?)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:244 +0x5b fp=0x7ffe2da6d258 sp=0x7ffe2da6d210 pc=0x417b7b
+runtime.(*mcentral).cacheSpan(0x140c4a0)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:164 +0x306 fp=0x7ffe2da6d2b0 sp=0x7ffe2da6d258 pc=0x4179c6
+runtime.(*mcache).refill(0x7fcfd802e108, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mcache.go:181 +0x152 fp=0x7ffe2da6d2f0 sp=0x7ffe2da6d2b0 pc=0x417092
+runtime.(*mcache).nextFree(0x7fcfd802e108, 0x18)
+	/usr/lib/go-1.19/src/runtime/malloc.go:819 +0x85 fp=0x7ffe2da6d338 sp=0x7ffe2da6d2f0 pc=0x40cd65
+runtime.mallocgc(0xa0, 0xcacac0, 0x1)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1018 +0x4c8 fp=0x7ffe2da6d3b0 sp=0x7ffe2da6d338 pc=0x40d3c8
+runtime.newobject(0x141ba00?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1202 +0x27 fp=0x7ffe2da6d3d8 sp=0x7ffe2da6d3b0 pc=0x40d8e7
+internal/cpu.doinit()
+	/usr/lib/go-1.19/src/internal/cpu/cpu_x86.go:50 +0x25 fp=0x7ffe2da6d440 sp=0x7ffe2da6d3d8 pc=0x4015e5
+({0x0, 0x0})
+	/usr/lib/go-1.19/src/internal/cpu/cpu.go:124 +0x25 fp=0x7ffe2da6d460 sp=0x7ffe2da6d440 pc=0x401025
+runtime.cpuinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:632 +0xff fp=0x7ffe2da6d4a0 sp=0x7ffe2da6d460 pc=0x43b11f
+runtime.schedinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:694 +0xb0 fp=0x7ffe2da6d500 sp=0x7ffe2da6d4a0 pc=0x43b230
+runtime.rt0_go()
+	/usr/lib/go-1.19/src/runtime/asm_amd64.s:345 +0x11c fp=0x7ffe2da6d508 sp=0x7ffe2da6d500 pc=0x467f7c
+# github.com/jsummers/gobmp
+fatal error: out of memory allocating heap arena map
+
+runtime stack:
+runtime.throw({0xd5885d?, 0x0?})
+	/usr/lib/go-1.19/src/runtime/panic.go:1047 +0x5d fp=0x7ffc478c15b0 sp=0x7ffc478c1580 pc=0x43785d
+runtime.(*mheap).sysAlloc(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:676 +0x316 fp=0x7ffc478c1648 sp=0x7ffc478c15b0 pc=0x40c836
+runtime.(*mheap).grow(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1418 +0x73 fp=0x7ffc478c16b8 sp=0x7ffc478c1648 pc=0x428c33
+runtime.(*mheap).allocSpan(0x13fb060, 0x1, 0x0, 0x18)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1199 +0x1be fp=0x7ffc478c1750 sp=0x7ffc478c16b8 pc=0x42853e
+runtime.(*mheap).alloc.func1()
+	/usr/lib/go-1.19/src/runtime/mheap.go:918 +0x65 fp=0x7ffc478c1798 sp=0x7ffc478c1750 pc=0x427fc5
+runtime.(*mheap).alloc(0x0?, 0x0?, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:912 +0x65 fp=0x7ffc478c17e0 sp=0x7ffc478c1798 pc=0x427f05
+runtime.(*mcentral).grow(0x40480a?)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:244 +0x5b fp=0x7ffc478c1828 sp=0x7ffc478c17e0 pc=0x417b7b
+runtime.(*mcentral).cacheSpan(0x140c4a0)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:164 +0x306 fp=0x7ffc478c1880 sp=0x7ffc478c1828 pc=0x4179c6
+runtime.(*mcache).refill(0x7f93edcf4108, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mcache.go:181 +0x152 fp=0x7ffc478c18c0 sp=0x7ffc478c1880 pc=0x417092
+runtime.(*mcache).nextFree(0x7f93edcf4108, 0x18)
+	/usr/lib/go-1.19/src/runtime/malloc.go:819 +0x85 fp=0x7ffc478c1908 sp=0x7ffc478c18c0 pc=0x40cd65
+runtime.mallocgc(0xa0, 0xcacac0, 0x1)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1018 +0x4c8 fp=0x7ffc478c1980 sp=0x7ffc478c1908 pc=0x40d3c8
+runtime.newobject(0x141ba00?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1202 +0x27 fp=0x7ffc478c19a8 sp=0x7ffc478c1980 pc=0x40d8e7
+internal/cpu.doinit()
+	/usr/lib/go-1.19/src/internal/cpu/cpu_x86.go:50 +0x25 fp=0x7ffc478c1a10 sp=0x7ffc478c19a8 pc=0x4015e5
+({0x0, 0x0})
+	/usr/lib/go-1.19/src/internal/cpu/cpu.go:124 +0x25 fp=0x7ffc478c1a30 sp=0x7ffc478c1a10 pc=0x401025
+runtime.cpuinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:632 +0xff fp=0x7ffc478c1a70 sp=0x7ffc478c1a30 pc=0x43b11f
+runtime.schedinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:694 +0xb0 fp=0x7ffc478c1ad0 sp=0x7ffc478c1a70 pc=0x43b230
+runtime.rt0_go()
+	/usr/lib/go-1.19/src/runtime/asm_amd64.s:345 +0x11c fp=0x7ffc478c1ad8 sp=0x7ffc478c1ad0 pc=0x467f7c
+# github.com/go-gl/glfw/v3.3/glfw
+fatal error: out of memory allocating heap arena map
+
+runtime stack:
+runtime.throw({0x5d6645?, 0x0?})
+	/usr/lib/go-1.19/src/runtime/panic.go:1047 +0x5d fp=0x7fff15d166c0 sp=0x7fff15d16690 pc=0x4340dd
+runtime.(*mheap).sysAlloc(0x717580, 0x0?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:676 +0x316 fp=0x7fff15d16758 sp=0x7fff15d166c0 pc=0x40bcd6
+runtime.(*mheap).grow(0x717580, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1418 +0x73 fp=0x7fff15d167c8 sp=0x7fff15d16758 pc=0x4278f3
+runtime.(*mheap).allocSpan(0x717580, 0x1, 0x0, 0x18)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1199 +0x1be fp=0x7fff15d16860 sp=0x7fff15d167c8 pc=0x4271fe
+runtime.(*mheap).alloc.func1()
+	/usr/lib/go-1.19/src/runtime/mheap.go:918 +0x65 fp=0x7fff15d168a8 sp=0x7fff15d16860 pc=0x426c85
+runtime.(*mheap).alloc(0x0?, 0x0?, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:912 +0x65 fp=0x7fff15d168f0 sp=0x7fff15d168a8 pc=0x426bc5
+runtime.(*mcentral).grow(0x40410a?)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:244 +0x5b fp=0x7fff15d16938 sp=0x7fff15d168f0 pc=0x416a3b
+runtime.(*mcentral).cacheSpan(0x7289c0)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:164 +0x306 fp=0x7fff15d16990 sp=0x7fff15d16938 pc=0x416886
+runtime.(*mcache).refill(0x7f1b85568108, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mcache.go:181 +0x152 fp=0x7fff15d169d0 sp=0x7fff15d16990 pc=0x415f52
+runtime.(*mcache).nextFree(0x7f1b85568108, 0x18)
+	/usr/lib/go-1.19/src/runtime/malloc.go:819 +0x85 fp=0x7fff15d16a18 sp=0x7fff15d169d0 pc=0x40c205
+runtime.mallocgc(0xa0, 0x599380, 0x1)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1018 +0x4c8 fp=0x7fff15d16a90 sp=0x7fff15d16a18 pc=0x40c868
+runtime.newobject(0x730520?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1202 +0x27 fp=0x7fff15d16ab8 sp=0x7fff15d16a90 pc=0x40cd87
+internal/cpu.doinit()
+	/usr/lib/go-1.19/src/internal/cpu/cpu_x86.go:50 +0x25 fp=0x7fff15d16b20 sp=0x7fff15d16ab8 pc=0x4015e5
+({0x0, 0x0})
+	/usr/lib/go-1.19/src/internal/cpu/cpu.go:124 +0x25 fp=0x7fff15d16b40 sp=0x7fff15d16b20 pc=0x401025
+runtime.cpuinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:632 +0xff fp=0x7fff15d16b80 sp=0x7fff15d16b40 pc=0x43799f
+runtime.schedinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:694 +0xb0 fp=0x7fff15d16be0 sp=0x7fff15d16b80 pc=0x437ab0
+runtime.rt0_go()
+	/usr/lib/go-1.19/src/runtime/asm_amd64.s:345 +0x11c fp=0x7fff15d16be8 sp=0x7fff15d16be0 pc=0x46023c
+# github.com/BurntSushi/toml/internal
+fatal error: out of memory allocating heap arena map
+
+runtime stack:
+runtime.throw({0xd5885d?, 0x0?})
+	/usr/lib/go-1.19/src/runtime/panic.go:1047 +0x5d fp=0x7ffe05116cc0 sp=0x7ffe05116c90 pc=0x43785d
+runtime.(*mheap).sysAlloc(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:676 +0x316 fp=0x7ffe05116d58 sp=0x7ffe05116cc0 pc=0x40c836
+runtime.(*mheap).grow(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1418 +0x73 fp=0x7ffe05116dc8 sp=0x7ffe05116d58 pc=0x428c33
+runtime.(*mheap).allocSpan(0x13fb060, 0x1, 0x0, 0x18)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1199 +0x1be fp=0x7ffe05116e60 sp=0x7ffe05116dc8 pc=0x42853e
+runtime.(*mheap).alloc.func1()
+	/usr/lib/go-1.19/src/runtime/mheap.go:918 +0x65 fp=0x7ffe05116ea8 sp=0x7ffe05116e60 pc=0x427fc5
+runtime.(*mheap).alloc(0x0?, 0x0?, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:912 +0x65 fp=0x7ffe05116ef0 sp=0x7ffe05116ea8 pc=0x427f05
+runtime.(*mcentral).grow(0x40480a?)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:244 +0x5b fp=0x7ffe05116f38 sp=0x7ffe05116ef0 pc=0x417b7b
+runtime.(*mcentral).cacheSpan(0x140c4a0)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:164 +0x306 fp=0x7ffe05116f90 sp=0x7ffe05116f38 pc=0x4179c6
+runtime.(*mcache).refill(0x7f890e0ab108, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mcache.go:181 +0x152 fp=0x7ffe05116fd0 sp=0x7ffe05116f90 pc=0x417092
+runtime.(*mcache).nextFree(0x7f890e0ab108, 0x18)
+	/usr/lib/go-1.19/src/runtime/malloc.go:819 +0x85 fp=0x7ffe05117018 sp=0x7ffe05116fd0 pc=0x40cd65
+runtime.mallocgc(0xa0, 0xcacac0, 0x1)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1018 +0x4c8 fp=0x7ffe05117090 sp=0x7ffe05117018 pc=0x40d3c8
+runtime.newobject(0x141ba00?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1202 +0x27 fp=0x7ffe051170b8 sp=0x7ffe05117090 pc=0x40d8e7
+internal/cpu.doinit()
+	/usr/lib/go-1.19/src/internal/cpu/cpu_x86.go:50 +0x25 fp=0x7ffe05117120 sp=0x7ffe051170b8 pc=0x4015e5
+({0x0, 0x0})
+	/usr/lib/go-1.19/src/internal/cpu/cpu.go:124 +0x25 fp=0x7ffe05117140 sp=0x7ffe05117120 pc=0x401025
+runtime.cpuinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:632 +0xff fp=0x7ffe05117180 sp=0x7ffe05117140 pc=0x43b11f
+runtime.schedinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:694 +0xb0 fp=0x7ffe051171e0 sp=0x7ffe05117180 pc=0x43b230
+runtime.rt0_go()
+	/usr/lib/go-1.19/src/runtime/asm_amd64.s:345 +0x11c fp=0x7ffe051171e8 sp=0x7ffe051171e0 pc=0x467f7c
+# github.com/nfnt/resize
+fatal error: out of memory allocating heap arena map
+
+runtime stack:
+runtime.throw({0xd5885d?, 0x0?})
+	/usr/lib/go-1.19/src/runtime/panic.go:1047 +0x5d fp=0x7fff6f0ae430 sp=0x7fff6f0ae400 pc=0x43785d
+runtime.(*mheap).sysAlloc(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:676 +0x316 fp=0x7fff6f0ae4c8 sp=0x7fff6f0ae430 pc=0x40c836
+runtime.(*mheap).grow(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1418 +0x73 fp=0x7fff6f0ae538 sp=0x7fff6f0ae4c8 pc=0x428c33
+runtime.(*mheap).allocSpan(0x13fb060, 0x1, 0x0, 0x18)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1199 +0x1be fp=0x7fff6f0ae5d0 sp=0x7fff6f0ae538 pc=0x42853e
+runtime.(*mheap).alloc.func1()
+	/usr/lib/go-1.19/src/runtime/mheap.go:918 +0x65 fp=0x7fff6f0ae618 sp=0x7fff6f0ae5d0 pc=0x427fc5
+runtime.(*mheap).alloc(0x0?, 0x0?, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:912 +0x65 fp=0x7fff6f0ae660 sp=0x7fff6f0ae618 pc=0x427f05
+runtime.(*mcentral).grow(0x40480a?)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:244 +0x5b fp=0x7fff6f0ae6a8 sp=0x7fff6f0ae660 pc=0x417b7b
+runtime.(*mcentral).cacheSpan(0x140c4a0)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:164 +0x306 fp=0x7fff6f0ae700 sp=0x7fff6f0ae6a8 pc=0x4179c6
+runtime.(*mcache).refill(0x7f54d6bbd108, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mcache.go:181 +0x152 fp=0x7fff6f0ae740 sp=0x7fff6f0ae700 pc=0x417092
+runtime.(*mcache).nextFree(0x7f54d6bbd108, 0x18)
+	/usr/lib/go-1.19/src/runtime/malloc.go:819 +0x85 fp=0x7fff6f0ae788 sp=0x7fff6f0ae740 pc=0x40cd65
+runtime.mallocgc(0xa0, 0xcacac0, 0x1)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1018 +0x4c8 fp=0x7fff6f0ae800 sp=0x7fff6f0ae788 pc=0x40d3c8
+runtime.newobject(0x141ba00?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1202 +0x27 fp=0x7fff6f0ae828 sp=0x7fff6f0ae800 pc=0x40d8e7
+internal/cpu.doinit()
+	/usr/lib/go-1.19/src/internal/cpu/cpu_x86.go:50 +0x25 fp=0x7fff6f0ae890 sp=0x7fff6f0ae828 pc=0x4015e5
+({0x0, 0x0})
+	/usr/lib/go-1.19/src/internal/cpu/cpu.go:124 +0x25 fp=0x7fff6f0ae8b0 sp=0x7fff6f0ae890 pc=0x401025
+runtime.cpuinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:632 +0xff fp=0x7fff6f0ae8f0 sp=0x7fff6f0ae8b0 pc=0x43b11f
+runtime.schedinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:694 +0xb0 fp=0x7fff6f0ae950 sp=0x7fff6f0ae8f0 pc=0x43b230
+runtime.rt0_go()
+	/usr/lib/go-1.19/src/runtime/asm_amd64.s:345 +0x11c fp=0x7fff6f0ae958 sp=0x7fff6f0ae950 pc=0x467f7c
+# golang.org/x/sys/unix
+fatal error: out of memory allocating heap arena map
+
+runtime stack:
+runtime.throw({0x5d224c?, 0x0?})
+	/usr/lib/go-1.19/src/runtime/panic.go:1047 +0x5d fp=0x7fff81f3ba50 sp=0x7fff81f3ba20 pc=0x4339dd
+runtime.(*mheap).sysAlloc(0x76f880, 0x0?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:676 +0x316 fp=0x7fff81f3bae8 sp=0x7fff81f3ba50 pc=0x40ba56
+runtime.(*mheap).grow(0x76f880, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1418 +0x73 fp=0x7fff81f3bb58 sp=0x7fff81f3bae8 pc=0x427393
+runtime.(*mheap).allocSpan(0x76f880, 0x1, 0x0, 0x18)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1199 +0x1be fp=0x7fff81f3bbf0 sp=0x7fff81f3bb58 pc=0x426c9e
+runtime.(*mheap).alloc.func1()
+	/usr/lib/go-1.19/src/runtime/mheap.go:918 +0x65 fp=0x7fff81f3bc38 sp=0x7fff81f3bbf0 pc=0x426725
+runtime.(*mheap).alloc(0x0?, 0x0?, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:912 +0x65 fp=0x7fff81f3bc80 sp=0x7fff81f3bc38 pc=0x426665
+runtime.(*mcentral).grow(0x403dea?)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:244 +0x5b fp=0x7fff81f3bcc8 sp=0x7fff81f3bc80 pc=0x4164db
+runtime.(*mcentral).cacheSpan(0x780cc0)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:164 +0x306 fp=0x7fff81f3bd20 sp=0x7fff81f3bcc8 pc=0x416326
+runtime.(*mcache).refill(0x7f6886da1108, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mcache.go:181 +0x152 fp=0x7fff81f3bd60 sp=0x7fff81f3bd20 pc=0x4159f2
+runtime.(*mcache).nextFree(0x7f6886da1108, 0x18)
+	/usr/lib/go-1.19/src/runtime/malloc.go:819 +0x85 fp=0x7fff81f3bda8 sp=0x7fff81f3bd60 pc=0x40bf85
+runtime.mallocgc(0xa0, 0x59ede0, 0x1)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1018 +0x4c8 fp=0x7fff81f3be20 sp=0x7fff81f3bda8 pc=0x40c5e8
+runtime.newobject(0x78fa60?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1202 +0x27 fp=0x7fff81f3be48 sp=0x7fff81f3be20 pc=0x40cb07
+internal/cpu.doinit()
+	/usr/lib/go-1.19/src/internal/cpu/cpu_x86.go:50 +0x25 fp=0x7fff81f3beb0 sp=0x7fff81f3be48 pc=0x4015e5
+({0x0, 0x0})
+	/usr/lib/go-1.19/src/internal/cpu/cpu.go:124 +0x25 fp=0x7fff81f3bed0 sp=0x7fff81f3beb0 pc=0x401025
+runtime.cpuinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:632 +0xff fp=0x7fff81f3bf10 sp=0x7fff81f3bed0 pc=0x43729f
+runtime.schedinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:694 +0xb0 fp=0x7fff81f3bf70 sp=0x7fff81f3bf10 pc=0x4373b0
+runtime.rt0_go()
+	/usr/lib/go-1.19/src/runtime/asm_amd64.s:345 +0x11c fp=0x7fff81f3bf78 sp=0x7fff81f3bf70 pc=0x45d83c
+# trackpulse/pkg/logger
+fatal error: out of memory allocating heap arena map
+
+runtime stack:
+runtime.throw({0xd5885d?, 0x0?})
+	/usr/lib/go-1.19/src/runtime/panic.go:1047 +0x5d fp=0x7ffe0198da70 sp=0x7ffe0198da40 pc=0x43785d
+runtime.(*mheap).sysAlloc(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:676 +0x316 fp=0x7ffe0198db08 sp=0x7ffe0198da70 pc=0x40c836
+runtime.(*mheap).grow(0x13fb060, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1418 +0x73 fp=0x7ffe0198db78 sp=0x7ffe0198db08 pc=0x428c33
+runtime.(*mheap).allocSpan(0x13fb060, 0x1, 0x0, 0x18)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1199 +0x1be fp=0x7ffe0198dc10 sp=0x7ffe0198db78 pc=0x42853e
+runtime.(*mheap).alloc.func1()
+	/usr/lib/go-1.19/src/runtime/mheap.go:918 +0x65 fp=0x7ffe0198dc58 sp=0x7ffe0198dc10 pc=0x427fc5
+runtime.(*mheap).alloc(0x0?, 0x0?, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:912 +0x65 fp=0x7ffe0198dca0 sp=0x7ffe0198dc58 pc=0x427f05
+runtime.(*mcentral).grow(0x40480a?)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:244 +0x5b fp=0x7ffe0198dce8 sp=0x7ffe0198dca0 pc=0x417b7b
+runtime.(*mcentral).cacheSpan(0x140c4a0)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:164 +0x306 fp=0x7ffe0198dd40 sp=0x7ffe0198dce8 pc=0x4179c6
+runtime.(*mcache).refill(0x7ff6ba1e5108, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mcache.go:181 +0x152 fp=0x7ffe0198dd80 sp=0x7ffe0198dd40 pc=0x417092
+runtime.(*mcache).nextFree(0x7ff6ba1e5108, 0x18)
+	/usr/lib/go-1.19/src/runtime/malloc.go:819 +0x85 fp=0x7ffe0198ddc8 sp=0x7ffe0198dd80 pc=0x40cd65
+runtime.mallocgc(0xa0, 0xcacac0, 0x1)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1018 +0x4c8 fp=0x7ffe0198de40 sp=0x7ffe0198ddc8 pc=0x40d3c8
+runtime.newobject(0x141ba00?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1202 +0x27 fp=0x7ffe0198de68 sp=0x7ffe0198de40 pc=0x40d8e7
+internal/cpu.doinit()
+	/usr/lib/go-1.19/src/internal/cpu/cpu_x86.go:50 +0x25 fp=0x7ffe0198ded0 sp=0x7ffe0198de68 pc=0x4015e5
+({0x0, 0x0})
+	/usr/lib/go-1.19/src/internal/cpu/cpu.go:124 +0x25 fp=0x7ffe0198def0 sp=0x7ffe0198ded0 pc=0x401025
+runtime.cpuinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:632 +0xff fp=0x7ffe0198df30 sp=0x7ffe0198def0 pc=0x43b11f
+runtime.schedinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:694 +0xb0 fp=0x7ffe0198df90 sp=0x7ffe0198df30 pc=0x43b230
+runtime.rt0_go()
+	/usr/lib/go-1.19/src/runtime/asm_amd64.s:345 +0x11c fp=0x7ffe0198df98 sp=0x7ffe0198df90 pc=0x467f7c

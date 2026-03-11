@@ -46,7 +46,7 @@ func (a *App) Run() {
 }
 
 // createMainContent builds the main tabbed interface
-func (a *App) createMainContent() *container.Tabs {
+func (a *App) createMainContent() *container.AppTabs {
 	tabs := container.NewAppTabs(
 		container.NewTabItem("Monitoring", a.createMonitoringTab()),
 		container.NewTabItem("Racers", a.createRacersTab()),
