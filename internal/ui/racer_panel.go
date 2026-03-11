@@ -127,14 +127,15 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 		},
 	)
 
-	// Set column headers
-	headers := []string{"#", "Full Name", "Country", "City", "Birthday (DD.MM.YYYY)", "Rating", "Updated"}
-	for col, header := range headers {
-		table.SetColumnWidth(col, 120)
-		_ = header // используется в UpdateHeader
-	}
+        // Set column widths for better visibility
+        p.table.SetColumnWidth(0, 80)   // Number
+        p.table.SetColumnWidth(1, 250)  // Full Name
+        p.table.SetColumnWidth(2, 120)  // Country
+        p.table.SetColumnWidth(3, 120)  // City
+        p.table.SetColumnWidth(4, 140)  // Birthday (DD.MM.YYYY)
+        p.table.SetColumnWidth(5, 80)   // Rating
+        p.table.SetColumnWidth(6, 150)  // Updated
 
-	// Обработка выбора строки
 	table.OnSelected = func(id widget.TableCellID) {
 		if id.Row >= 0 && id.Row < len(p.allRacers) {
 			p.selectedRacerID = p.allRacers[id.Row].ID
