@@ -128,13 +128,13 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 	)
 
         // Set column widths for better visibility
-        p.table.SetColumnWidth(0, 80)   // Number
-        p.table.SetColumnWidth(1, 250)  // Full Name
-        p.table.SetColumnWidth(2, 120)  // Country
-        p.table.SetColumnWidth(3, 120)  // City
-        p.table.SetColumnWidth(4, 140)  // Birthday (DD.MM.YYYY)
-        p.table.SetColumnWidth(5, 80)   // Rating
-        p.table.SetColumnWidth(6, 150)  // Updated
+        table.SetColumnWidth(0, 80)   // Number
+        table.SetColumnWidth(1, 250)  // Full Name
+        table.SetColumnWidth(2, 120)  // Country
+        table.SetColumnWidth(3, 120)  // City
+        table.SetColumnWidth(4, 140)  // Birthday (DD.MM.YYYY)
+        table.SetColumnWidth(5, 80)   // Rating
+        table.SetColumnWidth(6, 150)  // Updated
 
 	table.OnSelected = func(id widget.TableCellID) {
 		if id.Row >= 0 && id.Row < len(p.allRacers) {
