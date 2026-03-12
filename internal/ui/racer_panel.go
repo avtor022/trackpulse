@@ -348,9 +348,11 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 			}
 			p.statusLabel.SetText("Racer updated successfully")
 
-			// Close dialog and refresh data
+			// Close dialog and refresh data in main thread
 			d.Hide()
-			p.refreshData()
+			fyne.Do(func() {
+				p.refreshData()
+			})
 		} else {
 			// Create new
 			r = &models.Racer{
@@ -380,9 +382,11 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 			}
 			p.statusLabel.SetText("Racer created successfully")
 
-			// Close dialog and refresh data
+			// Close dialog and refresh data in main thread
 			d.Hide()
-			p.refreshData()
+			fyne.Do(func() {
+				p.refreshData()
+			})
 		}
 	})
 	
@@ -395,26 +399,25 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 	// Set dialog buttons
 	d.SetButtons([]fyne.CanvasObject{cancelBtn, saveBtn})
 
+	// Show dialog first
 	d.Show()
 
-	// Set dialog size to 50% of parent window after it's shown
-	fyne.DoAndWait(func() {
-		// Get parent window size
-		parentSize := p.window.Canvas().Size()
+	// Set dialog size to 50% of parent window
+	// Get parent window size
+	parentSize := p.window.Canvas().Size()
 
-		// Calculate 50% of parent width for dialog
-		dialogWidth := parentSize.Width * 0.5
-		if dialogWidth < 600 {
-			dialogWidth = 600 // Minimum width
-		}
+	// Calculate 50% of parent width for dialog
+	dialogWidth := parentSize.Width * 0.5
+	if dialogWidth < 600 {
+		dialogWidth = 600 // Minimum width
+	}
 
-		// Calculate dialog height (reasonable portion of parent)
-		dialogHeight := parentSize.Height * 0.7
-		if dialogHeight < 500 {
-			dialogHeight = 500 // Minimum height
-		}
+	// Calculate dialog height (reasonable portion of parent)
+	dialogHeight := parentSize.Height * 0.7
+	if dialogHeight < 500 {
+		dialogHeight = 500 // Minimum height
+	}
 
-		// Resize the dialog window
-		d.Resize(fyne.NewSize(dialogWidth, dialogHeight))
-	})
+	// Resize the dialog window
+	d.Resize(fyne.NewSize(dialogWidth, dialogHeight))
 }
