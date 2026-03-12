@@ -272,30 +272,22 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 	birthdayEntry.SetPlaceHolder("")
 	ratingEntry.SetPlaceHolder("")
 	
-	// Оборачиваем каждое поле в контейнер с фиксированной минимальной шириной
-	numberWrapper := container.NewMax(container.NewHBox(numberEntry))
-	nameWrapper := container.NewMax(container.NewHBox(nameEntry))
-	countryWrapper := container.NewMax(container.NewHBox(countryEntry))
-	cityWrapper := container.NewMax(container.NewHBox(cityEntry))
-	birthdayWrapper := container.NewMax(container.NewHBox(birthdayEntry))
-	ratingWrapper := container.NewMax(container.NewHBox(ratingEntry))
-	
-	// Устанавливаем минимальный размер для оберток
-	numberWrapper.SetMinSize(fyne.NewSize(minWidth, 0))
-	nameWrapper.SetMinSize(fyne.NewSize(minWidth, 0))
-	countryWrapper.SetMinSize(fyne.NewSize(minWidth, 0))
-	cityWrapper.SetMinSize(fyne.NewSize(minWidth, 0))
-	birthdayWrapper.SetMinSize(fyne.NewSize(minWidth, 0))
-	ratingWrapper.SetMinSize(fyne.NewSize(minWidth, 0))
+	// Устанавливаем минимальную ширину для каждого поля
+	numberEntry.Resize(fyne.NewSize(minWidth, numberEntry.MinSize().Height))
+	nameEntry.Resize(fyne.NewSize(minWidth, nameEntry.MinSize().Height))
+	countryEntry.Resize(fyne.NewSize(minWidth, countryEntry.MinSize().Height))
+	cityEntry.Resize(fyne.NewSize(minWidth, cityEntry.MinSize().Height))
+	birthdayEntry.Resize(fyne.NewSize(minWidth, birthdayEntry.MinSize().Height))
+	ratingEntry.Resize(fyne.NewSize(minWidth, ratingEntry.MinSize().Height))
 
-	// Пересоздаем форму с обертками
+	// Пересоздаем форму с полями
 	form = widget.NewForm(
-		widget.NewFormItem("Number", numberWrapper),
-		widget.NewFormItem("Name", nameWrapper),
-		widget.NewFormItem("Country", countryWrapper),
-		widget.NewFormItem("City", cityWrapper),
-		widget.NewFormItem("Birthday (DD.MM.YYYY)", birthdayWrapper),
-		widget.NewFormItem("Rating", ratingWrapper),
+		widget.NewFormItem("Number", numberEntry),
+		widget.NewFormItem("Name", nameEntry),
+		widget.NewFormItem("Country", countryEntry),
+		widget.NewFormItem("City", cityEntry),
+		widget.NewFormItem("Birthday (DD.MM.YYYY)", birthdayEntry),
+		widget.NewFormItem("Rating", ratingEntry),
 	)
 
 	// Создаем диалог с двумя кнопками: Save и Cancel
