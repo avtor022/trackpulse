@@ -291,14 +291,11 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 		widget.NewFormItem("Rating", ratingEntry),
 	)
 
-	// Создаем диалог с двумя кнопками: Save и Cancel
-	d := dialog.NewCustomConfirm(title, "Save", "Cancel", form, func(confirmed bool) {
-		if !confirmed {
-			// User clicked Cancel
-			p.statusLabel.SetText("Operation cancelled")
-			return
-		}
-
+	// Create dialog without buttons first so we can reference it in the callback
+	d := dialog.NewCustomWithoutButtons(title, form, p.window)
+	
+	// Create save button with callback that has access to 'd'
+	saveBtn := widget.NewButton("Save", func() {
 		// Debug: print values
 		fmt.Printf("DEBUG: Number=%s, Name=%s, Country=%s, City=%s, Birthday=%s, Rating=%s\n",
 			numberEntry.Text, nameEntry.Text, countryEntry.Text, cityEntry.Text, birthdayEntry.Text, ratingEntry.Text)
@@ -387,7 +384,16 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 			d.Hide()
 			p.refreshData()
 		}
-	}, p.window)
+	})
+	
+	// Create cancel button
+	cancelBtn := widget.NewButton("Cancel", func() {
+		p.statusLabel.SetText("Operation cancelled")
+		d.Hide()
+	})
+	
+	// Set dialog buttons
+	d.SetButtons([]fyne.CanvasObject{cancelBtn, saveBtn})
 
 	d.Show()
 
