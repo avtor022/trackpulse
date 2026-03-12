@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -298,16 +299,26 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 			return
 		}
 
+		// Debug: print values
+		fmt.Printf("DEBUG: Number=%s, Name=%s, Country=%s, City=%s, Birthday=%s, Rating=%s\n",
+			numberEntry.Text, nameEntry.Text, countryEntry.Text, cityEntry.Text, birthdayEntry.Text, ratingEntry.Text)
+
 		// Parse values
-		number, err := strconv.Atoi(numberEntry.Text)
+		number, err := strconv.Atoi(strings.TrimSpace(numberEntry.Text))
 		if err != nil {
-			dialog.ShowError(fmt.Errorf("invalid racer number: %v", err), p.window)
+			errMsg := fmt.Sprintf("invalid racer number: %v (got: '%s')", err, numberEntry.Text)
+			fmt.Println("ERROR:", errMsg)
+			dialog.ShowError(fmt.Errorf(errMsg), p.window)
 			return
 		}
 
-		rating, err := strconv.Atoi(ratingEntry.Text)
-		if err != nil {
-			rating = 0
+		ratingStr := strings.TrimSpace(ratingEntry.Text)
+		rating := 0
+		if ratingStr != "" {
+			rating, err = strconv.Atoi(ratingStr)
+			if err != nil {
+				rating = 0
+			}
 		}
 
 		var r *models.Racer
@@ -315,15 +326,18 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 			// Update existing
 			r = racer
 			r.RacerNumber = number
-			r.FullName = nameEntry.Text
-			r.Country = countryEntry.Text
-			r.City = cityEntry.Text
+			r.FullName = strings.TrimSpace(nameEntry.Text)
+			r.Country = strings.TrimSpace(countryEntry.Text)
+			r.City = strings.TrimSpace(cityEntry.Text)
 			if birthdayEntry.Text != "" {
-				birthday, err := time.Parse("02.01.2006", birthdayEntry.Text)
+				birthdayStr := strings.TrimSpace(birthdayEntry.Text)
+				birthday, err := time.Parse("02.01.2006", birthdayStr)
 				if err == nil {
 					r.Birthday = &birthday
 				} else {
-					dialog.ShowError(fmt.Errorf("invalid date format (use DD.MM.YYYY): %v", err), p.window)
+					errMsg := fmt.Sprintf("invalid date format (use DD.MM.YYYY): %v (got: '%s')", err, birthdayStr)
+					fmt.Println("ERROR:", errMsg)
+					dialog.ShowError(fmt.Errorf(errMsg), p.window)
 					return
 				}
 			} else {
@@ -331,6 +345,7 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 			}
 			r.Rating = rating
 			if err := p.racerService.UpdateRacer(r); err != nil {
+				fmt.Println("ERROR updating racer:", err)
 				dialog.ShowError(err, p.window)
 				return
 			}
@@ -339,21 +354,26 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 			// Create new
 			r = &models.Racer{
 				RacerNumber: number,
-				FullName:    nameEntry.Text,
-				Country:     countryEntry.Text,
-				City:        cityEntry.Text,
+				FullName:    strings.TrimSpace(nameEntry.Text),
+				Country:     strings.TrimSpace(countryEntry.Text),
+				City:        strings.TrimSpace(cityEntry.Text),
 				Rating:      rating,
 			}
 			if birthdayEntry.Text != "" {
-				birthday, err := time.Parse("02.01.2006", birthdayEntry.Text)
+				birthdayStr := strings.TrimSpace(birthdayEntry.Text)
+				birthday, err := time.Parse("02.01.2006", birthdayStr)
 				if err == nil {
 					r.Birthday = &birthday
 				} else {
-					dialog.ShowError(fmt.Errorf("invalid date format (use DD.MM.YYYY): %v", err), p.window)
+					errMsg := fmt.Sprintf("invalid date format (use DD.MM.YYYY): %v (got: '%s')", err, birthdayStr)
+					fmt.Println("ERROR:", errMsg)
+					dialog.ShowError(fmt.Errorf(errMsg), p.window)
 					return
 				}
 			}
+			fmt.Printf("DEBUG: Creating racer: %+v\n", r)
 			if err := p.racerService.CreateRacer(r); err != nil {
+				fmt.Println("ERROR creating racer:", err)
 				dialog.ShowError(err, p.window)
 				return
 			}
