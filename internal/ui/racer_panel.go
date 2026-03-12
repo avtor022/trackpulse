@@ -301,7 +301,7 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 		// Parse values
 		number, err := strconv.Atoi(numberEntry.Text)
 		if err != nil {
-			dialog.ShowError(fmt.Errorf("invalid racer number"), p.window)
+			dialog.ShowError(fmt.Errorf("invalid racer number: %v", err), p.window)
 			return
 		}
 
@@ -323,7 +323,7 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 				if err == nil {
 					r.Birthday = &birthday
 				} else {
-					dialog.ShowError(fmt.Errorf("invalid date format (use DD.MM.YYYY)"), p.window)
+					dialog.ShowError(fmt.Errorf("invalid date format (use DD.MM.YYYY): %v", err), p.window)
 					return
 				}
 			} else {
@@ -349,7 +349,7 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 				if err == nil {
 					r.Birthday = &birthday
 				} else {
-					dialog.ShowError(fmt.Errorf("invalid date format (use DD.MM.YYYY)"), p.window)
+					dialog.ShowError(fmt.Errorf("invalid date format (use DD.MM.YYYY): %v", err), p.window)
 					return
 				}
 			}
