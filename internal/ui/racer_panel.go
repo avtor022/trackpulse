@@ -263,14 +263,40 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 		widget.NewFormItem("Rating", ratingEntry),
 	)
 
-	// Устанавливаем минимальную ширину для полей ввода
+	// Устанавливаем минимальную ширину для полей ввода через обертку
 	minWidth := float32(400)
-	numberEntry.SetMinSize(fyne.NewSize(minWidth, 0))
-	nameEntry.SetMinSize(fyne.NewSize(minWidth, 0))
-	countryEntry.SetMinSize(fyne.NewSize(minWidth, 0))
-	cityEntry.SetMinSize(fyne.NewSize(minWidth, 0))
-	birthdayEntry.SetMinSize(fyne.NewSize(minWidth, 0))
-	ratingEntry.SetMinSize(fyne.NewSize(minWidth, 0))
+	numberEntry.SetPlaceHolder("")
+	nameEntry.SetPlaceHolder("")
+	countryEntry.SetPlaceHolder("")
+	cityEntry.SetPlaceHolder("")
+	birthdayEntry.SetPlaceHolder("")
+	ratingEntry.SetPlaceHolder("")
+	
+	// Оборачиваем каждое поле в контейнер с фиксированной минимальной шириной
+	numberWrapper := container.NewMax(container.NewHBox(numberEntry))
+	nameWrapper := container.NewMax(container.NewHBox(nameEntry))
+	countryWrapper := container.NewMax(container.NewHBox(countryEntry))
+	cityWrapper := container.NewMax(container.NewHBox(cityEntry))
+	birthdayWrapper := container.NewMax(container.NewHBox(birthdayEntry))
+	ratingWrapper := container.NewMax(container.NewHBox(ratingEntry))
+	
+	// Устанавливаем минимальный размер для оберток
+	numberWrapper.SetMinSize(fyne.NewSize(minWidth, 0))
+	nameWrapper.SetMinSize(fyne.NewSize(minWidth, 0))
+	countryWrapper.SetMinSize(fyne.NewSize(minWidth, 0))
+	cityWrapper.SetMinSize(fyne.NewSize(minWidth, 0))
+	birthdayWrapper.SetMinSize(fyne.NewSize(minWidth, 0))
+	ratingWrapper.SetMinSize(fyne.NewSize(minWidth, 0))
+
+	// Пересоздаем форму с обертками
+	form = widget.NewForm(
+		widget.NewFormItem("Number", numberWrapper),
+		widget.NewFormItem("Name", nameWrapper),
+		widget.NewFormItem("Country", countryWrapper),
+		widget.NewFormItem("City", cityWrapper),
+		widget.NewFormItem("Birthday (DD.MM.YYYY)", birthdayWrapper),
+		widget.NewFormItem("Rating", ratingWrapper),
+	)
 
 	// Создаем диалог с двумя кнопками: Save и Cancel
 	d := dialog.NewCustomConfirm(title, "Save", "Cancel", form, func(confirmed bool) {
