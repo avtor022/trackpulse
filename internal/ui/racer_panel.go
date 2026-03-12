@@ -366,10 +366,7 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 	d.Show()
 
 	// Set dialog size to 50% of parent window after it's shown
-	go func() {
-		// Give the dialog time to be created and shown
-		time.Sleep(50 * time.Millisecond)
-		
+	fyne.DoAndWait(func() {
 		// Get parent window size
 		parentSize := p.window.Canvas().Size()
 		
@@ -387,5 +384,5 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 		
 		// Resize the dialog window
 		d.Resize(fyne.NewSize(dialogWidth, dialogHeight))
-	}()
+	})
 }
