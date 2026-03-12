@@ -263,6 +263,15 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 		widget.NewFormItem("Rating", ratingEntry),
 	)
 
+	// Устанавливаем минимальную ширину для полей ввода
+	minWidth := float32(400)
+	numberEntry.SetMinSize(fyne.NewSize(minWidth, 0))
+	nameEntry.SetMinSize(fyne.NewSize(minWidth, 0))
+	countryEntry.SetMinSize(fyne.NewSize(minWidth, 0))
+	cityEntry.SetMinSize(fyne.NewSize(minWidth, 0))
+	birthdayEntry.SetMinSize(fyne.NewSize(minWidth, 0))
+	ratingEntry.SetMinSize(fyne.NewSize(minWidth, 0))
+
 	// Создаем диалог с двумя кнопками: Save и Cancel
 	d := dialog.NewCustomConfirm(title, "Save", "Cancel", form, func(confirmed bool) {
 		if !confirmed {
@@ -336,34 +345,29 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 		p.refreshData()
 	}, p.window)
 
-	// Set dialog width to 50% of parent window and increase field widths
+	d.Show()
+
+	// Set dialog size to 50% of parent window after it's shown
 	go func() {
-		// Give the dialog time to be created
-		time.Sleep(10 * time.Millisecond)
+		// Give the dialog time to be created and shown
+		time.Sleep(50 * time.Millisecond)
 		
 		// Get parent window size
-		parentWidth := p.window.Canvas().Size().Width
+		parentSize := p.window.Canvas().Size()
 		
 		// Calculate 50% of parent width for dialog
-		dialogWidth := parentWidth * 0.5
-		if dialogWidth < 500 {
-			dialogWidth = 500 // Minimum width
+		dialogWidth := parentSize.Width * 0.5
+		if dialogWidth < 600 {
+			dialogWidth = 600 // Minimum width
 		}
 		
-		// Calculate field width (dialog width minus padding)
-		fieldWidth := dialogWidth - 80
+		// Calculate dialog height (reasonable portion of parent)
+		dialogHeight := parentSize.Height * 0.7
+		if dialogHeight < 500 {
+			dialogHeight = 500 // Minimum height
+		}
 		
-		// Resize form fields
-		numberEntry.Resize(fyne.NewSize(fieldWidth, numberEntry.MinSize().Height))
-		nameEntry.Resize(fyne.NewSize(fieldWidth, nameEntry.MinSize().Height))
-		countryEntry.Resize(fyne.NewSize(fieldWidth, countryEntry.MinSize().Height))
-		cityEntry.Resize(fyne.NewSize(fieldWidth, cityEntry.MinSize().Height))
-		birthdayEntry.Resize(fyne.NewSize(fieldWidth, birthdayEntry.MinSize().Height))
-		ratingEntry.Resize(fyne.NewSize(fieldWidth, ratingEntry.MinSize().Height))
-		
-		// Resize the dialog content container
-		form.Resize(fyne.NewSize(dialogWidth, form.MinSize().Height))
+		// Resize the dialog window
+		d.Resize(fyne.NewSize(dialogWidth, dialogHeight))
 	}()
-
-	d.Show()
 }
