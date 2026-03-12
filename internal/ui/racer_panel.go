@@ -252,15 +252,6 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 		}
 		ratingEntry.SetText(strconv.Itoa(racer.Rating))
 	}
-	
-	// Увеличиваем ширину полей ввода для лучшей видимости
-	minWidth := float32(400)
-	numberEntry.Resize(fyne.NewSize(minWidth, numberEntry.MinSize().Height))
-	nameEntry.Resize(fyne.NewSize(minWidth, nameEntry.MinSize().Height))
-	countryEntry.Resize(fyne.NewSize(minWidth, countryEntry.MinSize().Height))
-	cityEntry.Resize(fyne.NewSize(minWidth, cityEntry.MinSize().Height))
-	birthdayEntry.Resize(fyne.NewSize(minWidth, birthdayEntry.MinSize().Height))
-	ratingEntry.Resize(fyne.NewSize(minWidth, ratingEntry.MinSize().Height))
 
 	// Создаем форму
 	form := widget.NewForm(
@@ -344,6 +335,35 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 
 		p.refreshData()
 	}, p.window)
+
+	// Set dialog width to 50% of parent window and increase field widths
+	go func() {
+		// Give the dialog time to be created
+		time.Sleep(10 * time.Millisecond)
+		
+		// Get parent window size
+		parentWidth := p.window.Canvas().Size().Width
+		
+		// Calculate 50% of parent width for dialog
+		dialogWidth := parentWidth * 0.5
+		if dialogWidth < 500 {
+			dialogWidth = 500 // Minimum width
+		}
+		
+		// Calculate field width (dialog width minus padding)
+		fieldWidth := dialogWidth - 80
+		
+		// Resize form fields
+		numberEntry.Resize(fyne.NewSize(fieldWidth, numberEntry.MinSize().Height))
+		nameEntry.Resize(fyne.NewSize(fieldWidth, nameEntry.MinSize().Height))
+		countryEntry.Resize(fyne.NewSize(fieldWidth, countryEntry.MinSize().Height))
+		cityEntry.Resize(fyne.NewSize(fieldWidth, cityEntry.MinSize().Height))
+		birthdayEntry.Resize(fyne.NewSize(fieldWidth, birthdayEntry.MinSize().Height))
+		ratingEntry.Resize(fyne.NewSize(fieldWidth, ratingEntry.MinSize().Height))
+		
+		// Resize the dialog content container
+		form.Resize(fyne.NewSize(dialogWidth, form.MinSize().Height))
+	}()
 
 	d.Show()
 }
