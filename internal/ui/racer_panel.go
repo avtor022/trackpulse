@@ -8,8 +8,8 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
-	"fyne.io/fyne/v2/widget"
 	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 	"strconv"
 	"trackpulse/internal/models"
 	"trackpulse/internal/service"
@@ -21,8 +21,8 @@ type RacerPanel struct {
 	content         *fyne.Container
 	table           *widget.Table
 	statusLabel     *widget.Label
-	window          fyne.Window // Ссылка на окно для диалогов
-	selectedRacerID string      // ID выбранного гонщика
+	window          fyne.Window    // Ссылка на окно для диалогов
+	selectedRacerID string         // ID выбранного гонщика
 	allRacers       []models.Racer // Кэш всех гонщиков
 }
 
@@ -49,9 +49,9 @@ func (p *RacerPanel) buildUI() *fyne.Container {
 	// Layout
 	content := container.NewBorder(
 		container.NewHBox(toolbar, p.statusLabel), // Top
-		nil, // Bottom
-		nil, // Left
-		nil, // Right
+		nil,     // Bottom
+		nil,     // Left
+		nil,     // Right
 		p.table, // Content
 	)
 
@@ -128,14 +128,14 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 		},
 	)
 
-        // Set column widths for better visibility
-        table.SetColumnWidth(0, 80)   // Number
-        table.SetColumnWidth(1, 250)  // Full Name
-        table.SetColumnWidth(2, 120)  // Country
-        table.SetColumnWidth(3, 120)  // City
-        table.SetColumnWidth(4, 140)  // Birthday (DD.MM.YYYY)
-        table.SetColumnWidth(5, 80)   // Rating
-        table.SetColumnWidth(6, 150)  // Updated
+	// Set column widths for better visibility
+	table.SetColumnWidth(0, 80)  // Number
+	table.SetColumnWidth(1, 250) // Full Name
+	table.SetColumnWidth(2, 120) // Country
+	table.SetColumnWidth(3, 120) // City
+	table.SetColumnWidth(4, 140) // Birthday (DD.MM.YYYY)
+	table.SetColumnWidth(5, 80)  // Rating
+	table.SetColumnWidth(6, 150) // Updated
 
 	table.OnSelected = func(id widget.TableCellID) {
 		if id.Row >= 0 && id.Row < len(p.allRacers) {
@@ -226,19 +226,19 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 	// Create form fields with placeholders and increased width
 	numberEntry := widget.NewEntry()
 	numberEntry.SetPlaceHolder("Например: 7")
-	
+
 	nameEntry := widget.NewEntry()
 	nameEntry.SetPlaceHolder("Иванов Иван Иванович")
-	
+
 	countryEntry := widget.NewEntry()
 	countryEntry.SetPlaceHolder("Россия")
-	
+
 	cityEntry := widget.NewEntry()
 	cityEntry.SetPlaceHolder("Москва")
-	
+
 	birthdayEntry := widget.NewEntry()
 	birthdayEntry.SetPlaceHolder("ДД.ММ.ГГГГ")
-	
+
 	ratingEntry := widget.NewEntry()
 	ratingEntry.SetPlaceHolder("0")
 
@@ -272,7 +272,7 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 	cityEntry.SetPlaceHolder("")
 	birthdayEntry.SetPlaceHolder("")
 	ratingEntry.SetPlaceHolder("")
-	
+
 	// Устанавливаем минимальную ширину для каждого поля
 	numberEntry.Resize(fyne.NewSize(minWidth, numberEntry.MinSize().Height))
 	nameEntry.Resize(fyne.NewSize(minWidth, nameEntry.MinSize().Height))
@@ -350,6 +350,10 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 				return
 			}
 			p.statusLabel.SetText("Racer updated successfully")
+
+			// Close dialog and refresh data in the main thread
+			d.Hide()
+			p.refreshData()
 		} else {
 			// Create new
 			r = &models.Racer{
@@ -378,9 +382,11 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 				return
 			}
 			p.statusLabel.SetText("Racer created successfully")
-		}
 
-		p.refreshData()
+			// Close dialog and refresh data in the main thread
+			d.Hide()
+			p.refreshData()
+		}
 	}, p.window)
 
 	d.Show()
@@ -389,19 +395,19 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 	fyne.DoAndWait(func() {
 		// Get parent window size
 		parentSize := p.window.Canvas().Size()
-		
+
 		// Calculate 50% of parent width for dialog
 		dialogWidth := parentSize.Width * 0.5
 		if dialogWidth < 600 {
 			dialogWidth = 600 // Minimum width
 		}
-		
+
 		// Calculate dialog height (reasonable portion of parent)
 		dialogHeight := parentSize.Height * 0.7
 		if dialogHeight < 500 {
 			dialogHeight = 500 // Minimum height
 		}
-		
+
 		// Resize the dialog window
 		d.Resize(fyne.NewSize(dialogWidth, dialogHeight))
 	})
