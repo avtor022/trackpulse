@@ -281,7 +281,7 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 	birthdayEntry.Resize(fyne.NewSize(minWidth, birthdayEntry.MinSize().Height))
 	ratingEntry.Resize(fyne.NewSize(minWidth, ratingEntry.MinSize().Height))
 
-	// Пересоздаем форму с полями
+	// Создаем форму с полями
 	form = widget.NewForm(
 		widget.NewFormItem("Number", numberEntry),
 		widget.NewFormItem("Name", nameEntry),
@@ -351,7 +351,7 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 			}
 			p.statusLabel.SetText("Racer updated successfully")
 
-			// Close dialog and refresh data in the main thread
+			// Close dialog and refresh data
 			d.Hide()
 			p.refreshData()
 		} else {
@@ -383,7 +383,7 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 			}
 			p.statusLabel.SetText("Racer created successfully")
 
-			// Close dialog and refresh data in the main thread
+			// Close dialog and refresh data
 			d.Hide()
 			p.refreshData()
 		}
