@@ -34,6 +34,7 @@ func (r *RacerRepository) GetAll() ([]models.Racer, error) {
 	for rows.Next() {
 		var racer models.Racer
 		var birthday sql.NullString
+		var createdAtStr, updatedAtStr string
 		err := rows.Scan(
 			&racer.ID,
 			&racer.RacerNumber,
@@ -42,8 +43,8 @@ func (r *RacerRepository) GetAll() ([]models.Racer, error) {
 			&racer.Country,
 			&racer.City,
 			&racer.Rating,
-			&racer.CreatedAt,
-			&racer.UpdatedAt,
+			&createdAtStr,
+			&updatedAtStr,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan racer: %w", err)
@@ -54,6 +55,13 @@ func (r *RacerRepository) GetAll() ([]models.Racer, error) {
 			if err == nil {
 				racer.Birthday = &t
 			}
+		}
+
+		if t, err := time.Parse(time.RFC3339, createdAtStr); err == nil {
+			racer.CreatedAt = t
+		}
+		if t, err := time.Parse(time.RFC3339, updatedAtStr); err == nil {
+			racer.UpdatedAt = t
 		}
 
 		racers = append(racers, racer)
@@ -72,6 +80,7 @@ func (r *RacerRepository) GetByID(id string) (*models.Racer, error) {
 
 	var racer models.Racer
 	var birthday sql.NullString
+	var createdAtStr, updatedAtStr string
 	err := row.Scan(
 		&racer.ID,
 		&racer.RacerNumber,
@@ -80,8 +89,8 @@ func (r *RacerRepository) GetByID(id string) (*models.Racer, error) {
 		&racer.Country,
 		&racer.City,
 		&racer.Rating,
-		&racer.CreatedAt,
-		&racer.UpdatedAt,
+		&createdAtStr,
+		&updatedAtStr,
 	)
 	if err == sql.ErrNoRows {
 		return nil, nil
@@ -97,6 +106,13 @@ func (r *RacerRepository) GetByID(id string) (*models.Racer, error) {
 		}
 	}
 
+	if t, err := time.Parse(time.RFC3339, createdAtStr); err == nil {
+		racer.CreatedAt = t
+	}
+	if t, err := time.Parse(time.RFC3339, updatedAtStr); err == nil {
+		racer.UpdatedAt = t
+	}
+
 	return &racer, nil
 }
 
@@ -110,6 +126,7 @@ func (r *RacerRepository) GetByNumber(number int) (*models.Racer, error) {
 
 	var racer models.Racer
 	var birthday sql.NullString
+	var createdAtStr, updatedAtStr string
 	err := row.Scan(
 		&racer.ID,
 		&racer.RacerNumber,
@@ -118,8 +135,8 @@ func (r *RacerRepository) GetByNumber(number int) (*models.Racer, error) {
 		&racer.Country,
 		&racer.City,
 		&racer.Rating,
-		&racer.CreatedAt,
-		&racer.UpdatedAt,
+		&createdAtStr,
+		&updatedAtStr,
 	)
 	if err == sql.ErrNoRows {
 		return nil, nil
@@ -133,6 +150,13 @@ func (r *RacerRepository) GetByNumber(number int) (*models.Racer, error) {
 		if err == nil {
 			racer.Birthday = &t
 		}
+	}
+
+	if t, err := time.Parse(time.RFC3339, createdAtStr); err == nil {
+		racer.CreatedAt = t
+	}
+	if t, err := time.Parse(time.RFC3339, updatedAtStr); err == nil {
+		racer.UpdatedAt = t
 	}
 
 	return &racer, nil
