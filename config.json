@@ -1,0 +1,9 @@
+{
+  "db_path": "./trackpulse.db",
+  "hardware_com_port": "",
+  "hardware_reader_type": "EM4095",
+  "hardware_debounce_ms": 2000,
+  "ui_language": "en",
+  "time_limit_minutes": 5,
+  "default_track_name": ""
+}
