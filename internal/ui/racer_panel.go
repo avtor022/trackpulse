@@ -382,11 +382,9 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 			}
 			p.statusLabel.SetText("Racer created successfully")
 
-			// Close dialog and refresh data in main thread
+			// Close dialog and refresh data
 			d.Hide()
-			fyne.Do(func() {
-				p.refreshData()
-			})
+			p.refreshData()
 		}
 	})
 	
