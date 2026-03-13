@@ -151,9 +151,26 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 func (p *RacerPanel) refreshData() {
 	if p.table != nil {
 		// Обновляем кэш данных
-		p.allRacers, _ = p.racerService.GetAllRacers()
+		var err error
+		p.allRacers, err = p.racerService.GetAllRacers()
+		if err != nil {
+			fmt.Println("ERROR refreshing data:", err)
+			p.statusLabel.SetText("Error refreshing data")
+			return
+		}
+		// Force table to recalculate rows count first
 		p.table.Refresh()
-		p.statusLabel.SetText("Data refreshed")
+		// Then update cell contents
+		p.table.RefreshItemCallback()
+		if len(p.allRacers) == 0 {
+			p.statusLabel.SetText("No racers found")
+		} else {
+			p.statusLabel.SetText(fmt.Sprintf("Loaded %d racers", len(p.allRacers)))
+		}
+		fmt.Printf("DEBUG: refreshData completed, total racers: %d\n", len(p.allRacers))
+		for i, r := range p.allRacers {
+			fmt.Printf("DEBUG: Racer[%d]: ID=%s, Number=%d, Name=%s\n", i, r.ID, r.RacerNumber, r.FullName)
+		}
 	}
 }
 
