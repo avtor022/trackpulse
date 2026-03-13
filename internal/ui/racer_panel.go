@@ -158,10 +158,8 @@ func (p *RacerPanel) refreshData() {
 			p.statusLabel.SetText("Error refreshing data")
 			return
 		}
-		// Force table to recalculate rows count first
+		// Force table to recalculate rows count and update cell contents
 		p.table.Refresh()
-		// Then update cell contents
-		p.table.RefreshItemCallback()
 		if len(p.allRacers) == 0 {
 			p.statusLabel.SetText("No racers found")
 		} else {
