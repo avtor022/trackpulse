@@ -195,3 +195,28 @@ func (r *RCModelRepository) Count() (int, error) {
 	}
 	return count, nil
 }
+
+// GetUniqueBrands returns a list of unique brand names from all models
+func (r *RCModelRepository) GetUniqueBrands() ([]string, error) {
+	rows, err := r.db.Query(`
+		SELECT DISTINCT brand
+		FROM rc_models
+		ORDER BY brand ASC
+	`)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query unique brands: %w", err)
+	}
+	defer rows.Close()
+
+	var brands []string
+	for rows.Next() {
+		var brand string
+		err := rows.Scan(&brand)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan brand: %w", err)
+		}
+		brands = append(brands, brand)
+	}
+
+	return brands, rows.Err()
+}

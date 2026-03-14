@@ -93,3 +93,8 @@ func (s *RCModelService) DeleteModel(id string) error {
 func (s *RCModelService) GetModelCount() (int, error) {
 	return s.repo.Count()
 }
+
+// GetUniqueBrands returns a list of unique brand names from all models
+func (s *RCModelService) GetUniqueBrands() ([]string, error) {
+	return s.repo.GetUniqueBrands()
+}

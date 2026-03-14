@@ -266,9 +266,75 @@ func (p *ModelPanel) deleteSelected() {
 
 // showModelDialog shows a dialog for creating or editing a model
 func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
-	// Create form fields with placeholders
-	brandEntry := widget.NewEntry()
-	brandEntry.SetPlaceHolder("Например: Traxxas")
+	// Получаем список уникальных брендов из базы данных
+	existingBrands, err := p.modelService.GetUniqueBrands()
+	if err != nil {
+		fmt.Println("ERROR getting brands:", err)
+		// Продолжаем работу даже если не удалось получить бренды
+	}
+
+	// Создаем виджет для выбора бренда
+	var brandWidget fyne.CanvasObject
+	var brandEntry *widget.Entry
+	var brandSelect *widget.Select
+
+	if len(existingBrands) > 0 {
+		// Добавляем опцию для ввода нового бренда
+		brandOptions := append(existingBrands, "<Новый бренд>")
+		
+		brandSelect = widget.NewSelect(brandOptions, func(value string) {
+			// Если выбрано "<Новый бренд>", показываем поле ввода
+			if value == "<Новый бренд>" {
+				// Показываем диалог для ввода нового бренда
+				newBrandEntry := widget.NewEntry()
+				newBrandEntry.SetPlaceHolder("Введите название бренда")
+				
+				d := dialog.NewForm("Новый бренд", "OK", "Cancel", 
+					[]*widget.FormItem{widget.NewFormItem("Бренд", newBrandEntry)},
+					func(ok bool) {
+						if ok && newBrandEntry.Text != "" {
+							// Обновляем список опций и выбираем новый бренд
+							updatedOptions := append(existingBrands, newBrandEntry.Text, "<Новый бренд>")
+							brandSelect.Options = updatedOptions
+							brandSelect.SetSelected(newBrandEntry.Text)
+						} else {
+							// Сбрасываем выбор если отменили или пустое значение
+							brandSelect.SetSelected("")
+						}
+					}, p.window)
+				d.Show()
+			}
+		})
+		brandSelect.SetPlaceHolder("Выберите бренд")
+		brandWidget = brandSelect
+		
+		// Если редактируем модель, выбираем существующий бренд
+		if model != nil && model.Brand != "" {
+			// Проверяем, есть ли бренд в списке
+			found := false
+			for _, b := range existingBrands {
+				if b == model.Brand {
+					found = true
+					break
+				}
+			}
+			if found {
+				brandSelect.SetSelected(model.Brand)
+			} else {
+				// Если бренда нет в списке (редкий случай), добавляем его
+				brandSelect.Options = append(existingBrands, model.Brand, "<Новый бренд>")
+				brandSelect.SetSelected(model.Brand)
+			}
+		}
+	} else {
+		// Если брендов нет, используем обычное поле ввода
+		brandEntry = widget.NewEntry()
+		brandEntry.SetPlaceHolder("Например: Traxxas")
+		if model != nil && model.Brand != "" {
+			brandEntry.SetText(model.Brand)
+		}
+		brandWidget = brandEntry
+	}
 
 	modelNameEntry := widget.NewEntry()
 	modelNameEntry.SetPlaceHolder("Например: X-Maxx")
@@ -285,9 +351,8 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 	driveTypeEntry := widget.NewEntry()
 	driveTypeEntry.SetPlaceHolder("Например: 4WD")
 
-	if model != nil {
-		// Edit mode - populate fields
-		brandEntry.SetText(model.Brand)
+	if model != nil && model.Brand != "" && brandSelect == nil {
+		// Edit mode - populate fields (кроме бренда, который уже установлен)
 		modelNameEntry.SetText(model.ModelName)
 		scaleEntry.SetText(model.Scale)
 		modelTypeEntry.SetText(model.ModelType)
@@ -299,33 +364,38 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 		}
 	}
 
-	// Создаем форму
-	form := widget.NewForm(
-		widget.NewFormItem("Brand", brandEntry),
-		widget.NewFormItem("Model Name", modelNameEntry),
-		widget.NewFormItem("Scale", scaleEntry),
-		widget.NewFormItem("Model Type", modelTypeEntry),
-		widget.NewFormItem("Motor Type", motorTypeEntry),
-		widget.NewFormItem("Drive Type", driveTypeEntry),
-	)
-
 	// Создаем форму с полями
-	form = widget.NewForm(
-		widget.NewFormItem("Brand", brandEntry),
+	formItems := []*widget.FormItem{
+		widget.NewFormItem("Brand", brandWidget),
 		widget.NewFormItem("Model Name", modelNameEntry),
 		widget.NewFormItem("Scale", scaleEntry),
 		widget.NewFormItem("Model Type", modelTypeEntry),
 		widget.NewFormItem("Motor Type", motorTypeEntry),
 		widget.NewFormItem("Drive Type", driveTypeEntry),
-	)
+	}
+	
+	form := widget.NewForm(formItems...)
 
 	// Create dialog without buttons first so we can reference it in the callback
 	d := dialog.NewCustomWithoutButtons(title, form, p.window)
 
 	// Create save button with callback that has access to 'd'
 	saveBtn := widget.NewButton("Save", func() {
+		// Получаем значение бренда
+		var brand string
+		if brandSelect != nil {
+			brand = brandSelect.Selected
+			// Проверяем, не выбран ли placeholder
+			if brand == "" || brand == "<Новый бренд>" {
+				dialog.ShowError(fmt.Errorf("please select or enter a brand"), p.window)
+				return
+			}
+		} else if brandEntry != nil {
+			brand = brandEntry.Text
+		}
+
 		// Validate required fields
-		if brandEntry.Text == "" {
+		if brand == "" {
 			dialog.ShowError(fmt.Errorf("brand is required"), p.window)
 			return
 		}
@@ -346,7 +416,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 		if model != nil {
 			// Update existing
 			m = model
-			m.Brand = brandEntry.Text
+			m.Brand = brand
 			m.ModelName = modelNameEntry.Text
 			m.Scale = scaleEntry.Text
 			m.ModelType = modelTypeEntry.Text
@@ -367,7 +437,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 		} else {
 			// Create new
 			m = &models.RCModel{
-				Brand:     brandEntry.Text,
+				Brand:     brand,
 				ModelName: modelNameEntry.Text,
 				Scale:     scaleEntry.Text,
 				ModelType: modelTypeEntry.Text,
