@@ -90,7 +90,7 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 			if len(p.allRacers) == 0 {
 				return 0, 0
 			}
-			return len(p.allRacers), 7 // rows, columns
+			return len(p.allRacers), 8 // rows, columns
 		},
 		func() fyne.CanvasObject {
 			return widget.NewLabel("Template")
@@ -119,6 +119,12 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 			case 5:
 				o.(*widget.Label).SetText(strconv.Itoa(racer.Rating))
 			case 6:
+				if !racer.CreatedAt.IsZero() {
+					o.(*widget.Label).SetText(racer.CreatedAt.Format("2006-01-02 15:04:05"))
+				} else {
+					o.(*widget.Label).SetText("-")
+				}
+			case 7:
 				if !racer.UpdatedAt.IsZero() {
 					o.(*widget.Label).SetText(racer.UpdatedAt.Format("2006-01-02 15:04:05"))
 				} else {
@@ -129,13 +135,14 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 	)
 
 	// Set column widths for better visibility
-	table.SetColumnWidth(0, 80)  // Number
+	table.SetColumnWidth(0, 80)  // Racer Number
 	table.SetColumnWidth(1, 250) // Full Name
 	table.SetColumnWidth(2, 120) // Country
 	table.SetColumnWidth(3, 120) // City
-	table.SetColumnWidth(4, 140) // Birthday (DD.MM.YYYY)
+	table.SetColumnWidth(4, 140) // Birthday
 	table.SetColumnWidth(5, 80)  // Rating
-	table.SetColumnWidth(6, 150) // Updated
+	table.SetColumnWidth(6, 150) // Created At
+	table.SetColumnWidth(7, 150) // Updated At
 
 	table.OnSelected = func(id widget.TableCellID) {
 		if id.Row >= 0 && id.Row < len(p.allRacers) {
