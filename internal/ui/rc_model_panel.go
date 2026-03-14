@@ -266,17 +266,17 @@ func (p *ModelPanel) deleteSelected() {
 
 // showModelDialog shows a dialog for creating or editing a model
 func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
-	// Получаем список уникальных брендов и названий моделей из базы данных
-	existingBrands, err := p.modelService.GetUniqueBrands()
+	// Получаем список всех брендов из отдельной таблицы справочника
+	allBrands, err := p.modelService.GetAllBrands()
 	if err != nil {
 		fmt.Println("ERROR getting brands:", err)
 		// Продолжаем работу даже если не удалось получить бренды
 	}
 
-	existingModelNames, err := p.modelService.GetUniqueModelNames()
-	if err != nil {
-		fmt.Println("ERROR getting model names:", err)
-		// Продолжаем работу даже если не удалось получить названия моделей
+	// Извлекаем имена брендов
+	var existingBrands []string
+	for _, brand := range allBrands {
+		existingBrands = append(existingBrands, brand.Name)
 	}
 
 	// Создаем виджет для выбора бренда
@@ -300,6 +300,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 					[]*widget.FormItem{widget.NewFormItem("Бренд", newBrandEntry)},
 					func(ok bool) {
 						if ok && newBrandEntry.Text != "" {
+							// Новый бренд будет создан при сохранении модели
 							// Обновляем список опций и выбираем новый бренд
 							updatedOptions := append([]string{}, existingBrands...)
 							updatedOptions = append(updatedOptions, newBrandEntry.Text, "<Новый бренд>")

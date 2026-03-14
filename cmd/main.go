@@ -59,10 +59,11 @@ func main() {
 	// Initialize repositories
 	racerRepo := repository.NewRacerRepository(db.DB)
 	modelRepo := repository.NewRCModelRepository(db.DB)
+	brandRepo := repository.NewRCModelBrandRepository(db.DB)
 
 	// Initialize services
 	racerService := service.NewRacerService(racerRepo)
-	modelService := service.NewRCModelService(modelRepo)
+	modelService := service.NewRCModelService(modelRepo, brandRepo)
 
 	log.Info("TrackPulse initialization complete!")
 

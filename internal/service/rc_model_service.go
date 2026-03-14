@@ -10,22 +10,23 @@ import (
 
 // RCModelService handles business logic for RC models
 type RCModelService struct {
-	repo *repository.RCModelRepository
+	modelRepo *repository.RCModelRepository
+	brandRepo *repository.RCModelBrandRepository
 }
 
 // NewRCModelService creates a new RC model service
-func NewRCModelService(repo *repository.RCModelRepository) *RCModelService {
-	return &RCModelService{repo: repo}
+func NewRCModelService(modelRepo *repository.RCModelRepository, brandRepo *repository.RCModelBrandRepository) *RCModelService {
+	return &RCModelService{modelRepo: modelRepo, brandRepo: brandRepo}
 }
 
 // GetAllModels returns all RC models
 func (s *RCModelService) GetAllModels() ([]models.RCModel, error) {
-	return s.repo.GetAll()
+	return s.modelRepo.GetAll()
 }
 
 // GetModelByID returns an RC model by ID
 func (s *RCModelService) GetModelByID(id string) (*models.RCModel, error) {
-	return s.repo.GetByID(id)
+	return s.modelRepo.GetByID(id)
 }
 
 // CreateModel creates a new RC model with validation
@@ -44,10 +45,16 @@ func (s *RCModelService) CreateModel(model *models.RCModel) error {
 		return fmt.Errorf("model type is required")
 	}
 
+	// Ensure brand exists in the brands table
+	_, err := s.brandRepo.GetOrCreate(model.Brand)
+	if err != nil {
+		return fmt.Errorf("failed to ensure brand exists: %w", err)
+	}
+
 	// Generate UUID
 	model.ID = uuid.New().String()
 
-	return s.repo.Create(model)
+	return s.modelRepo.Create(model)
 }
 
 // UpdateModel updates an existing RC model with validation
@@ -70,7 +77,7 @@ func (s *RCModelService) UpdateModel(model *models.RCModel) error {
 	}
 
 	// Check if model exists
-	existing, err := s.repo.GetByID(model.ID)
+	existing, err := s.modelRepo.GetByID(model.ID)
 	if err != nil {
 		return fmt.Errorf("failed to get existing model: %w", err)
 	}
@@ -78,7 +85,13 @@ func (s *RCModelService) UpdateModel(model *models.RCModel) error {
 		return fmt.Errorf("model not found")
 	}
 
-	return s.repo.Update(model)
+	// Ensure brand exists in the brands table
+	_, err = s.brandRepo.GetOrCreate(model.Brand)
+	if err != nil {
+		return fmt.Errorf("failed to ensure brand exists: %w", err)
+	}
+
+	return s.modelRepo.Update(model)
 }
 
 // DeleteModel deletes an RC model by ID
@@ -86,20 +99,15 @@ func (s *RCModelService) DeleteModel(id string) error {
 	if id == "" {
 		return fmt.Errorf("model ID is required")
 	}
-	return s.repo.Delete(id)
+	return s.modelRepo.Delete(id)
 }
 
 // GetModelCount returns total number of RC models
 func (s *RCModelService) GetModelCount() (int, error) {
-	return s.repo.Count()
+	return s.modelRepo.Count()
 }
 
-// GetUniqueBrands returns a list of unique brand names from all models
-func (s *RCModelService) GetUniqueBrands() ([]string, error) {
-	return s.repo.GetUniqueBrands()
-}
-
-// GetUniqueModelNames returns a list of unique model names from all models
-func (s *RCModelService) GetUniqueModelNames() ([]string, error) {
-	return s.repo.GetUniqueModelNames()
+// GetAllBrands returns all RC model brands
+func (s *RCModelService) GetAllBrands() ([]models.RCModelBrand, error) {
+	return s.brandRepo.GetAll()
 }
