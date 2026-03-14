@@ -151,7 +151,7 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 	table.ShowHeaderRow = true
 
 	// Set column widths for better visibility
-	table.SetColumnWidth(0, 250) // ID
+	table.SetColumnWidth(0, 280) // ID
 	table.SetColumnWidth(1, 80)  // Racer Number
 	table.SetColumnWidth(2, 250) // Full Name
 	table.SetColumnWidth(3, 120) // Country
