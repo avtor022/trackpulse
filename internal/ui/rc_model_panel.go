@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -286,133 +287,160 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 		// Продолжаем работу даже если не удалось получить названия моделей
 	}
 
-	// Создаем виджет для выбора бренда
+	// Создаем виджет для выбора бренда с автодополнением
 	var brandWidget fyne.CanvasObject
 	var brandEntry *widget.Entry
-	var brandSelect *widget.Select
+	var selectedBrand string
 
 	if len(existingBrands) > 0 {
-		// Добавляем опцию для ввода нового бренда
-		brandOptions := append([]string{}, existingBrands...)
-		brandOptions = append(brandOptions, "<Новый бренд>")
+		// Используем Entry с автодополнением
+		brandEntry = widget.NewEntry()
+		brandEntry.SetPlaceHolder("Например: Traxxas")
 		
-		brandSelect = widget.NewSelect(brandOptions, func(value string) {
-			// Если выбрано "<Новый бренд>", показываем поле ввода
-			if value == "<Новый бренд>" {
-				// Показываем диалог для ввода нового бренда
-				newBrandEntry := widget.NewEntry()
-				newBrandEntry.SetPlaceHolder("Введите название бренда")
-				
-				dialog.ShowForm("Новый бренд", "OK", "Cancel", 
-					[]*widget.FormItem{widget.NewFormItem("Бренд", newBrandEntry)},
-					func(ok bool) {
-						if ok && newBrandEntry.Text != "" {
-							// Новый бренд будет создан при сохранении модели
-							// Обновляем список опций и выбираем новый бренд
-							updatedOptions := append([]string{}, existingBrands...)
-							updatedOptions = append(updatedOptions, newBrandEntry.Text, "<Новый бренд>")
-							brandSelect.Options = updatedOptions
-							brandSelect.SetSelected(newBrandEntry.Text)
-						} else {
-							// Сбрасываем выбор если отменили или пустое значение
-							brandSelect.SetSelected("")
-						}
-					}, p.window)
-			}
-		})
-		// widget.Select не имеет метода SetPlaceHolder, используем пустой выбор
-		brandSelect.SetSelected("")
-		
-		// Если редактируем модель, выбираем существующий бренд
 		if model != nil && model.Brand != "" {
-			// Проверяем, есть ли бренд в списке
-			found := false
-			for _, b := range existingBrands {
-				if b == model.Brand {
-					found = true
-					break
+			brandEntry.SetText(model.Brand)
+			selectedBrand = model.Brand
+		}
+
+		// Создаем контейнер с полем ввода и кнопкой dropdown
+		dropdownBtn := widget.NewButtonWithIcon("", theme.MenuDropDownIcon(), func() {
+			showFullDropdown(existingBrands, p.window, brandEntry, func(selected string) {
+				selectedBrand = selected
+			})
+		})
+
+		brandWidget = container.NewHBox(
+			container.NewStack(brandEntry),
+			dropdownBtn,
+		)
+
+		// Обработчик изменения текста для фильтрации
+		var popup *widget.PopUp
+		
+		brandEntry.OnChanged = func(text string) {
+			if popup != nil {
+				popup.Hide()
+			}
+			
+			if text == "" {
+				return
+			}
+
+			// Фильтруем опции
+			var filtered []string
+			textLower := strings.ToLower(text)
+			
+			for _, opt := range existingBrands {
+				if strings.Contains(strings.ToLower(opt), textLower) {
+					filtered = append(filtered, opt)
 				}
 			}
-			if found {
-				brandSelect.SetSelected(model.Brand)
-			} else {
-				// Если бренда нет в списке (редкий случай), добавляем его
-				brandSelect.Options = append(existingBrands, model.Brand, "<Новый бренд>")
-				brandSelect.SetSelected(model.Brand)
+
+			if len(filtered) > 0 {
+				showFilterPopup(brandEntry, filtered, p.window, func(selected string) {
+					brandEntry.SetText(selected)
+					selectedBrand = selected
+					if popup != nil {
+						popup.Hide()
+					}
+				})
 			}
 		}
-		brandWidget = brandSelect
+
+		brandEntry.OnSubmitted = func(text string) {
+			if popup != nil {
+				popup.Hide()
+			}
+			selectedBrand = text
+		}
+
+		_ = popup
 	} else {
 		// Если брендов нет, используем обычное поле ввода
 		brandEntry = widget.NewEntry()
 		brandEntry.SetPlaceHolder("Например: Traxxas")
 		if model != nil && model.Brand != "" {
 			brandEntry.SetText(model.Brand)
+			selectedBrand = model.Brand
 		}
 		brandWidget = brandEntry
 	}
 
-	// Создаем виджет для выбора названия модели
+	// Создаем виджет для выбора названия модели с автодополнением
 	var modelNameWidget fyne.CanvasObject
 	var modelNameEntry *widget.Entry
-	var modelNameSelect *widget.Select
+	var selectedModelName string
 
 	if len(allModelNames) > 0 {
-		// Добавляем опцию для ввода нового названия модели
-		modelNameOptions := append([]string{}, allModelNames...)
-		modelNameOptions = append(modelNameOptions, "<Новая модель>")
+		// Используем Entry с автодополнением
+		modelNameEntry = widget.NewEntry()
+		modelNameEntry.SetPlaceHolder("Например: X-Maxx")
 		
-		modelNameSelect = widget.NewSelect(modelNameOptions, func(value string) {
-			// Если выбрано "<Новая модель>", показываем поле ввода
-			if value == "<Новая модель>" {
-				// Показываем диалог для ввода нового названия модели
-				newModelNameEntry := widget.NewEntry()
-				newModelNameEntry.SetPlaceHolder("Введите название модели")
-				
-				dialog.ShowForm("Новая модель", "OK", "Cancel", 
-					[]*widget.FormItem{widget.NewFormItem("Модель", newModelNameEntry)},
-					func(ok bool) {
-						if ok && newModelNameEntry.Text != "" {
-							// Обновляем список опций и выбираем новую модель
-							updatedOptions := append([]string{}, allModelNames...)
-							updatedOptions = append(updatedOptions, newModelNameEntry.Text, "<Новая модель>")
-							modelNameSelect.Options = updatedOptions
-							modelNameSelect.SetSelected(newModelNameEntry.Text)
-						} else {
-							// Сбрасываем выбор если отменили или пустое значение
-							modelNameSelect.SetSelected("")
-						}
-					}, p.window)
-			}
-		})
-		// widget.Select не имеет метода SetPlaceHolder, используем пустой выбор
-		modelNameSelect.SetSelected("")
-		
-		// Если редактируем модель, выбираем существующее название
 		if model != nil && model.ModelName != "" {
-			// Проверяем, есть ли название модели в списке
-			found := false
-			for _, mn := range allModelNames {
-				if mn == model.ModelName {
-					found = true
-					break
+			modelNameEntry.SetText(model.ModelName)
+			selectedModelName = model.ModelName
+		}
+
+		// Создаем контейнер с полем ввода и кнопкой dropdown
+		dropdownBtn := widget.NewButtonWithIcon("", theme.MenuDropDownIcon(), func() {
+			showFullDropdown(allModelNames, p.window, modelNameEntry, func(selected string) {
+				selectedModelName = selected
+			})
+		})
+
+		modelNameWidget = container.NewHBox(
+			container.NewStack(modelNameEntry),
+			dropdownBtn,
+		)
+
+		// Обработчик изменения текста для фильтрации
+		var popup *widget.PopUp
+		
+		modelNameEntry.OnChanged = func(text string) {
+			if popup != nil {
+				popup.Hide()
+			}
+			
+			if text == "" {
+				return
+			}
+
+			// Фильтруем опции
+			var filtered []string
+			textLower := strings.ToLower(text)
+			
+			for _, opt := range allModelNames {
+				if strings.Contains(strings.ToLower(opt), textLower) {
+					filtered = append(filtered, opt)
 				}
 			}
-			if found {
-				modelNameSelect.SetSelected(model.ModelName)
-			} else {
-				// Если названия нет в списке (редкий случай), добавляем его
-				modelNameSelect.Options = append(allModelNames, model.ModelName, "<Новая модель>")
-				modelNameSelect.SetSelected(model.ModelName)
+
+			if len(filtered) > 0 {
+				showFilterPopup(modelNameEntry, filtered, p.window, func(selected string) {
+					modelNameEntry.SetText(selected)
+					selectedModelName = selected
+					if popup != nil {
+						popup.Hide()
+					}
+				})
 			}
 		}
-		modelNameWidget = modelNameSelect
+
+		modelNameEntry.OnSubmitted = func(text string) {
+			if popup != nil {
+				popup.Hide()
+			}
+			selectedModelName = text
+		}
+
+		_ = popup
 	} else {
 		// Если названий моделей нет, используем обычное поле ввода
 		modelNameEntry = widget.NewEntry()
 		modelNameEntry.SetPlaceHolder("Например: X-Maxx")
 		if model != nil && model.ModelName != "" {
 			modelNameEntry.SetText(model.ModelName)
+			selectedModelName = model.ModelName
 		}
 		modelNameWidget = modelNameEntry
 	}
@@ -464,27 +492,13 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 	saveBtn := widget.NewButton("Save", func() {
 		// Получаем значение бренда
 		var brand string
-		if brandSelect != nil {
-			brand = brandSelect.Selected
-			// Проверяем, не выбран ли placeholder
-			if brand == "" || brand == "<Новый бренд>" {
-				dialog.ShowError(fmt.Errorf("please select or enter a brand"), p.window)
-				return
-			}
-		} else if brandEntry != nil {
+		if brandEntry != nil {
 			brand = brandEntry.Text
 		}
 
 		// Получаем значение названия модели
 		var modelName string
-		if modelNameSelect != nil {
-			modelName = modelNameSelect.Selected
-			// Проверяем, не выбран ли placeholder
-			if modelName == "" || modelName == "<Новая модель>" {
-				dialog.ShowError(fmt.Errorf("please select or enter a model name"), p.window)
-				return
-			}
-		} else if modelNameEntry != nil {
+		if modelNameEntry != nil {
 			modelName = modelNameEntry.Text
 		}
 
