@@ -266,11 +266,17 @@ func (p *ModelPanel) deleteSelected() {
 
 // showModelDialog shows a dialog for creating or editing a model
 func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
-	// Получаем список уникальных брендов из базы данных
+	// Получаем список уникальных брендов и названий моделей из базы данных
 	existingBrands, err := p.modelService.GetUniqueBrands()
 	if err != nil {
 		fmt.Println("ERROR getting brands:", err)
 		// Продолжаем работу даже если не удалось получить бренды
+	}
+
+	existingModelNames, err := p.modelService.GetUniqueModelNames()
+	if err != nil {
+		fmt.Println("ERROR getting model names:", err)
+		// Продолжаем работу даже если не удалось получить названия моделей
 	}
 
 	// Создаем виджет для выбора бренда
@@ -338,8 +344,70 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 		brandWidget = brandEntry
 	}
 
-	modelNameEntry := widget.NewEntry()
-	modelNameEntry.SetPlaceHolder("Например: X-Maxx")
+	// Создаем виджет для выбора названия модели
+	var modelNameWidget fyne.CanvasObject
+	var modelNameEntry *widget.Entry
+	var modelNameSelect *widget.Select
+
+	if len(existingModelNames) > 0 {
+		// Добавляем опцию для ввода нового названия модели
+		modelNameOptions := append([]string{}, existingModelNames...)
+		modelNameOptions = append(modelNameOptions, "<Новая модель>")
+		
+		modelNameSelect = widget.NewSelect(modelNameOptions, func(value string) {
+			// Если выбрано "<Новая модель>", показываем поле ввода
+			if value == "<Новая модель>" {
+				// Показываем диалог для ввода нового названия модели
+				newModelNameEntry := widget.NewEntry()
+				newModelNameEntry.SetPlaceHolder("Введите название модели")
+				
+				dialog.ShowForm("Новая модель", "OK", "Cancel", 
+					[]*widget.FormItem{widget.NewFormItem("Модель", newModelNameEntry)},
+					func(ok bool) {
+						if ok && newModelNameEntry.Text != "" {
+							// Обновляем список опций и выбираем новую модель
+							updatedOptions := append([]string{}, existingModelNames...)
+							updatedOptions = append(updatedOptions, newModelNameEntry.Text, "<Новая модель>")
+							modelNameSelect.Options = updatedOptions
+							modelNameSelect.SetSelected(newModelNameEntry.Text)
+						} else {
+							// Сбрасываем выбор если отменили или пустое значение
+							modelNameSelect.SetSelected("")
+						}
+					}, p.window)
+			}
+		})
+		// widget.Select не имеет метода SetPlaceHolder, используем пустой выбор
+		modelNameSelect.SetSelected("")
+		
+		// Если редактируем модель, выбираем существующее название
+		if model != nil && model.ModelName != "" {
+			// Проверяем, есть ли название модели в списке
+			found := false
+			for _, mn := range existingModelNames {
+				if mn == model.ModelName {
+					found = true
+					break
+				}
+			}
+			if found {
+				modelNameSelect.SetSelected(model.ModelName)
+			} else {
+				// Если названия нет в списке (редкий случай), добавляем его
+				modelNameSelect.Options = append(existingModelNames, model.ModelName, "<Новая модель>")
+				modelNameSelect.SetSelected(model.ModelName)
+			}
+		}
+		modelNameWidget = modelNameSelect
+	} else {
+		// Если названий моделей нет, используем обычное поле ввода
+		modelNameEntry = widget.NewEntry()
+		modelNameEntry.SetPlaceHolder("Например: X-Maxx")
+		if model != nil && model.ModelName != "" {
+			modelNameEntry.SetText(model.ModelName)
+		}
+		modelNameWidget = modelNameEntry
+	}
 
 	scaleEntry := widget.NewEntry()
 	scaleEntry.SetPlaceHolder("Например: 1:8")
@@ -354,14 +422,17 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 	driveTypeEntry.SetPlaceHolder("Например: 4WD")
 
 	if model != nil {
-		// Edit mode - populate all fields
-		modelNameEntry.SetText(model.ModelName)
-		scaleEntry.SetText(model.Scale)
-		modelTypeEntry.SetText(model.ModelType)
-		if model.MotorType != "" {
+		// Edit mode - populate fields that are not select widgets
+		if scaleEntry != nil {
+			scaleEntry.SetText(model.Scale)
+		}
+		if modelTypeEntry != nil {
+			modelTypeEntry.SetText(model.ModelType)
+		}
+		if motorTypeEntry != nil && model.MotorType != "" {
 			motorTypeEntry.SetText(model.MotorType)
 		}
-		if model.DriveType != "" {
+		if driveTypeEntry != nil && model.DriveType != "" {
 			driveTypeEntry.SetText(model.DriveType)
 		}
 	}
@@ -369,7 +440,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 	// Создаем форму с полями
 	formItems := []*widget.FormItem{
 		widget.NewFormItem("Brand", brandWidget),
-		widget.NewFormItem("Model Name", modelNameEntry),
+		widget.NewFormItem("Model Name", modelNameWidget),
 		widget.NewFormItem("Scale", scaleEntry),
 		widget.NewFormItem("Model Type", modelTypeEntry),
 		widget.NewFormItem("Motor Type", motorTypeEntry),
@@ -396,12 +467,25 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			brand = brandEntry.Text
 		}
 
+		// Получаем значение названия модели
+		var modelName string
+		if modelNameSelect != nil {
+			modelName = modelNameSelect.Selected
+			// Проверяем, не выбран ли placeholder
+			if modelName == "" || modelName == "<Новая модель>" {
+				dialog.ShowError(fmt.Errorf("please select or enter a model name"), p.window)
+				return
+			}
+		} else if modelNameEntry != nil {
+			modelName = modelNameEntry.Text
+		}
+
 		// Validate required fields
 		if brand == "" {
 			dialog.ShowError(fmt.Errorf("brand is required"), p.window)
 			return
 		}
-		if modelNameEntry.Text == "" {
+		if modelName == "" {
 			dialog.ShowError(fmt.Errorf("model name is required"), p.window)
 			return
 		}
@@ -419,7 +503,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			// Update existing
 			m = model
 			m.Brand = brand
-			m.ModelName = modelNameEntry.Text
+			m.ModelName = modelName
 			m.Scale = scaleEntry.Text
 			m.ModelType = modelTypeEntry.Text
 			m.MotorType = motorTypeEntry.Text
@@ -440,7 +524,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			// Create new
 			m = &models.RCModel{
 				Brand:     brand,
-				ModelName: modelNameEntry.Text,
+				ModelName: modelName,
 				Scale:     scaleEntry.Text,
 				ModelType: modelTypeEntry.Text,
 				MotorType: motorTypeEntry.Text,
