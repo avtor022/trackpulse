@@ -279,6 +279,13 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 		existingBrands = append(existingBrands, brand.Name)
 	}
 
+	// Получаем список всех названий моделей
+	allModelNames, err := p.modelService.GetAllModelNames()
+	if err != nil {
+		fmt.Println("ERROR getting model names:", err)
+		// Продолжаем работу даже если не удалось получить названия моделей
+	}
+
 	// Создаем виджет для выбора бренда
 	var brandWidget fyne.CanvasObject
 	var brandEntry *widget.Entry
@@ -350,9 +357,9 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 	var modelNameEntry *widget.Entry
 	var modelNameSelect *widget.Select
 
-	if len(existingModelNames) > 0 {
+	if len(allModelNames) > 0 {
 		// Добавляем опцию для ввода нового названия модели
-		modelNameOptions := append([]string{}, existingModelNames...)
+		modelNameOptions := append([]string{}, allModelNames...)
 		modelNameOptions = append(modelNameOptions, "<Новая модель>")
 		
 		modelNameSelect = widget.NewSelect(modelNameOptions, func(value string) {
@@ -367,7 +374,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 					func(ok bool) {
 						if ok && newModelNameEntry.Text != "" {
 							// Обновляем список опций и выбираем новую модель
-							updatedOptions := append([]string{}, existingModelNames...)
+							updatedOptions := append([]string{}, allModelNames...)
 							updatedOptions = append(updatedOptions, newModelNameEntry.Text, "<Новая модель>")
 							modelNameSelect.Options = updatedOptions
 							modelNameSelect.SetSelected(newModelNameEntry.Text)
@@ -385,7 +392,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 		if model != nil && model.ModelName != "" {
 			// Проверяем, есть ли название модели в списке
 			found := false
-			for _, mn := range existingModelNames {
+			for _, mn := range allModelNames {
 				if mn == model.ModelName {
 					found = true
 					break
@@ -395,7 +402,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 				modelNameSelect.SetSelected(model.ModelName)
 			} else {
 				// Если названия нет в списке (редкий случай), добавляем его
-				modelNameSelect.Options = append(existingModelNames, model.ModelName, "<Новая модель>")
+				modelNameSelect.Options = append(allModelNames, model.ModelName, "<Новая модель>")
 				modelNameSelect.SetSelected(model.ModelName)
 			}
 		}

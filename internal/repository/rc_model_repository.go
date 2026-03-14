@@ -245,3 +245,8 @@ func (r *RCModelRepository) GetUniqueModelNames() ([]string, error) {
 
 	return modelNames, rows.Err()
 }
+
+// GetAllModelNames returns all unique model names
+func (r *RCModelRepository) GetAllModelNames() ([]string, error) {
+	return r.GetUniqueModelNames()
+}

@@ -111,3 +111,8 @@ func (s *RCModelService) GetModelCount() (int, error) {
 func (s *RCModelService) GetAllBrands() ([]models.RCModelBrand, error) {
 	return s.brandRepo.GetAll()
 }
+
+// GetAllModelNames returns all unique model names
+func (s *RCModelService) GetAllModelNames() ([]string, error) {
+	return s.modelRepo.GetAllModelNames()
+}
