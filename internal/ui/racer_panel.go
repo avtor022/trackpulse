@@ -85,7 +85,7 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 	// Сначала загружаем данные
 	p.allRacers, _ = p.racerService.GetAllRacers()
 
-	table := widget.NewTableWithHeaders(
+	table := widget.NewTable(
 		func() (int, int) {
 			if len(p.allRacers) == 0 {
 				return 0, 0
@@ -133,17 +133,21 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 					o.(*widget.Label).SetText("-")
 				}
 			}
-	},
-		func(id widget.TableCellID) fyne.CanvasObject {
-			labels := []string{"id", "racer_number", "full_name", "country", "city", "birthday", "rating", "created_at", "updated_at"}
-			if id.Col >= 0 && id.Col < len(labels) {
-				return widget.NewLabel(labels[id.Col])
-			}
-			return widget.NewLabel("")
 		},
-	),
+	)
 
-// Set column widths for better visibility
+	// Создаем заголовки
+	headers := []string{"id", "racer_number", "full_name", "country", "city", "birthday", "rating", "created_at", "updated_at"}
+	table.CreateHeader = func() fyne.CanvasObject {
+		return widget.NewLabel("Header")
+	}
+	table.UpdateHeader = func(id widget.TableCellID, o fyne.CanvasObject) {
+		if id.Col >= 0 && id.Col < len(headers) {
+			o.(*widget.Label).SetText(headers[id.Col])
+		}
+	}
+
+	// Set column widths for better visibility
 	table.SetColumnWidth(0, 250) // ID
 	table.SetColumnWidth(1, 80)  // Racer Number
 	table.SetColumnWidth(2, 250) // Full Name
