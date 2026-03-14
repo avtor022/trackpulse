@@ -136,8 +136,8 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 		},
 	)
 
-	// Set headers
-	table.SetHeaderContent(func(i widget.TableCellID, o fyne.CanvasObject) {
+	// Set headers using OnHeaderCell (compatible with Fyne v2.5+)
+	table.OnHeaderCell = func(i widget.TableCellID, o fyne.CanvasObject) {
 		lbl := o.(*widget.Label)
 		switch i.Col {
 		case 0:
@@ -159,7 +159,7 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 		case 8:
 			lbl.SetText("updated_at")
 		}
-	})
+	}
 
 	// Set column widths for better visibility
 	table.SetColumnWidth(0, 250) // ID
