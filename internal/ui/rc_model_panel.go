@@ -280,7 +280,8 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 
 	if len(existingBrands) > 0 {
 		// Добавляем опцию для ввода нового бренда
-		brandOptions := append(existingBrands, "<Новый бренд>")
+		brandOptions := append([]string{}, existingBrands...)
+		brandOptions = append(brandOptions, "<Новый бренд>")
 		
 		brandSelect = widget.NewSelect(brandOptions, func(value string) {
 			// Если выбрано "<Новый бренд>", показываем поле ввода
@@ -289,12 +290,13 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 				newBrandEntry := widget.NewEntry()
 				newBrandEntry.SetPlaceHolder("Введите название бренда")
 				
-				d := dialog.NewForm("Новый бренд", "OK", "Cancel", 
+				dialog.ShowForm("Новый бренд", "OK", "Cancel", 
 					[]*widget.FormItem{widget.NewFormItem("Бренд", newBrandEntry)},
 					func(ok bool) {
 						if ok && newBrandEntry.Text != "" {
 							// Обновляем список опций и выбираем новый бренд
-							updatedOptions := append(existingBrands, newBrandEntry.Text, "<Новый бренд>")
+							updatedOptions := append([]string{}, existingBrands...)
+							updatedOptions = append(updatedOptions, newBrandEntry.Text, "<Новый бренд>")
 							brandSelect.Options = updatedOptions
 							brandSelect.SetSelected(newBrandEntry.Text)
 						} else {
@@ -302,11 +304,10 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 							brandSelect.SetSelected("")
 						}
 					}, p.window)
-				d.Show()
 			}
 		})
-			// widget.Select не имеет метода SetPlaceHolder, используем пустой выбор
-			if len(existingBrands) > 0 { brandSelect.SetSelected("") }
+		// widget.Select не имеет метода SetPlaceHolder, используем пустой выбор
+		brandSelect.SetSelected("")
 		
 		// Если редактируем модель, выбираем существующий бренд
 		if model != nil && model.Brand != "" {
@@ -326,6 +327,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 				brandSelect.SetSelected(model.Brand)
 			}
 		}
+		brandWidget = brandSelect
 	} else {
 		// Если брендов нет, используем обычное поле ввода
 		brandEntry = widget.NewEntry()
