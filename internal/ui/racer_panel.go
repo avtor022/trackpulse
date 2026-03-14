@@ -93,7 +93,9 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 			return len(p.allRacers), 9 // rows, columns
 		},
 		func() fyne.CanvasObject {
-			return widget.NewLabel("Template")
+			label := widget.NewLabel("Template")
+			label.Truncation = fyne.TextTruncateEllipsis
+			return label
 		},
 		func(i widget.TableCellID, o fyne.CanvasObject) {
 			if i.Row >= len(p.allRacers) {
@@ -133,17 +135,22 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 					o.(*widget.Label).SetText("-")
 				}
 			}
+			// Ensure text truncation with ellipsis to prevent overflow
+			o.(*widget.Label).Truncation = fyne.TextTruncateEllipsis
 		},
 	)
 
 	// Создаем заголовки
 	headers := []string{"ID", "Number", "Name", "Country", "City", "Birthday", "Rating", "Created At", "Updated At"}
 	table.CreateHeader = func() fyne.CanvasObject {
-		return widget.NewLabel("Header")
+		label := widget.NewLabel("Header")
+		label.Truncation = fyne.TextTruncateEllipsis
+		return label
 	}
 	table.UpdateHeader = func(id widget.TableCellID, o fyne.CanvasObject) {
 		if id.Col >= 0 && id.Col < len(headers) {
 			o.(*widget.Label).SetText(headers[id.Col])
+			o.(*widget.Label).Truncation = fyne.TextTruncateEllipsis
 		}
 	}
 	
