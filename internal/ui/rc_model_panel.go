@@ -295,6 +295,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 		// Используем Entry с автодополнением
 		brandEntry = widget.NewEntry()
 		brandEntry.SetPlaceHolder("Например: Traxxas")
+		brandEntry.Resize(fyne.NewSize(250, brandEntry.MinSize().Height))
 		
 		if model != nil && model.Brand != "" {
 			brandEntry.SetText(model.Brand)
@@ -355,6 +356,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 		// Если брендов нет, используем обычное поле ввода
 		brandEntry = widget.NewEntry()
 		brandEntry.SetPlaceHolder("Например: Traxxas")
+		brandEntry.Resize(fyne.NewSize(250, brandEntry.MinSize().Height))
 		if model != nil && model.Brand != "" {
 			brandEntry.SetText(model.Brand)
 		}
@@ -369,6 +371,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 		// Используем Entry с автодополнением
 		modelNameEntry = widget.NewEntry()
 		modelNameEntry.SetPlaceHolder("Например: X-Maxx")
+		modelNameEntry.Resize(fyne.NewSize(250, modelNameEntry.MinSize().Height))
 		
 		if model != nil && model.ModelName != "" {
 			modelNameEntry.SetText(model.ModelName)
@@ -429,6 +432,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 		// Если названий моделей нет, используем обычное поле ввода
 		modelNameEntry = widget.NewEntry()
 		modelNameEntry.SetPlaceHolder("Например: X-Maxx")
+		modelNameEntry.Resize(fyne.NewSize(250, modelNameEntry.MinSize().Height))
 		if model != nil && model.ModelName != "" {
 			modelNameEntry.SetText(model.ModelName)
 		}
