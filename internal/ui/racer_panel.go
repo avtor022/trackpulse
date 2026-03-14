@@ -137,7 +137,7 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 	)
 
 	// Создаем заголовки
-	headers := []string{"id", "racer_number", "full_name", "country", "city", "birthday", "rating", "created_at", "updated_at"}
+	headers := []string{"ID", "Number", "Name", "Country", "City", "Birthday", "Rating", "Created At", "Updated At"}
 	table.CreateHeader = func() fyne.CanvasObject {
 		return widget.NewLabel("Header")
 	}
@@ -146,6 +146,9 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 			o.(*widget.Label).SetText(headers[id.Col])
 		}
 	}
+	
+	// Включаем отображение строки заголовков
+	table.ShowHeaderRow = true
 
 	// Set column widths for better visibility
 	table.SetColumnWidth(0, 250) // ID
