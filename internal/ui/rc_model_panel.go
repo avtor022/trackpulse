@@ -411,7 +411,6 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			if len(filtered) > 0 {
 				showFilterPopup(modelNameEntry, filtered, p.window, func(selected string) {
 					modelNameEntry.SetText(selected)
-					selectedModelName = selected
 					if popup != nil {
 						popup.Hide()
 					}
@@ -423,7 +422,6 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			if popup != nil {
 				popup.Hide()
 			}
-			selectedModelName = text
 		}
 
 		_ = popup
@@ -433,7 +431,6 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 		modelNameEntry.SetPlaceHolder("Например: X-Maxx")
 		if model != nil && model.ModelName != "" {
 			modelNameEntry.SetText(model.ModelName)
-			selectedModelName = model.ModelName
 		}
 		modelNameWidget = modelNameEntry
 	}
