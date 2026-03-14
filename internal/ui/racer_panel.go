@@ -133,10 +133,17 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 					o.(*widget.Label).SetText("-")
 				}
 			}
+	},
+		func(id widget.TableCellID) fyne.CanvasObject {
+			labels := []string{"id", "racer_number", "full_name", "country", "city", "birthday", "rating", "created_at", "updated_at"}
+			if id.Col >= 0 && id.Col < len(labels) {
+				return widget.NewLabel(labels[id.Col])
+			}
+			return widget.NewLabel("")
 		},
-	)
+	),
 
-	// Set column widths for better visibility
+// Set column widths for better visibility
 	table.SetColumnWidth(0, 250) // ID
 	table.SetColumnWidth(1, 80)  // Racer Number
 	table.SetColumnWidth(2, 250) // Full Name
