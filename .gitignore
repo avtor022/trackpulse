@@ -23,29 +23,11 @@ venv/
 dist/
 build/
 target/
-.gradle/
-
-# Python specific
-*.pyc
-__pycache__/
-*.pyo
-*.pyd
-.Python
-*.so
-.Python
-*.egg-info/
-.eggs/
 .mypy_cache/
 .pytest_cache/
 .coverage
 coverage/
 htmlcov/
-
-# Logs and temp files
-*.log
-*.tmp
-*.swp
-*.swo
 
 # Editors
 .vscode/
@@ -53,11 +35,15 @@ htmlcov/
 *.swp
 *.swo
 
+# Logs and temp files
+*.log
+*.tmp
+
 # System files
 .DS_Store
 Thumbs.db
 
-# Archives
+# Compressed files
 *.zip
 *.gz
 *.tar
@@ -80,4 +66,11 @@ Thumbs.db
 *.tar.bz2
 *.tar.xz
 *.tar.zst
+
+# Gradle
+.gradle/
+
+# Go build artifacts (if applicable)
+*.a
+*.o
 ```

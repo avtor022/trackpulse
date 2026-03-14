@@ -353,8 +353,8 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 	driveTypeEntry := widget.NewEntry()
 	driveTypeEntry.SetPlaceHolder("Например: 4WD")
 
-	if model != nil && model.Brand != "" && brandSelect == nil {
-		// Edit mode - populate fields (кроме бренда, который уже установлен)
+	if model != nil {
+		// Edit mode - populate all fields
 		modelNameEntry.SetText(model.ModelName)
 		scaleEntry.SetText(model.Scale)
 		modelTypeEntry.SetText(model.ModelType)
