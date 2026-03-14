@@ -295,7 +295,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 		// Используем Entry с автодополнением
 		brandEntry = widget.NewEntry()
 		brandEntry.SetPlaceHolder("Например: Traxxas")
-		brandEntry.Resize(fyne.NewSize(350, brandEntry.MinSize().Height))
+		brandEntry.SetMinSize(fyne.NewSize(350, 0))
 		
 		if model != nil && model.Brand != "" {
 			brandEntry.SetText(model.Brand)
@@ -307,6 +307,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 				brandEntry.SetText(selected)
 			})
 		})
+		dropdownBtn.SetMinSize(fyne.NewSize(40, 0))
 
 		brandWidget = container.NewHBox(
 			container.NewStack(brandEntry),
@@ -356,7 +357,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 		// Если брендов нет, используем обычное поле ввода
 		brandEntry = widget.NewEntry()
 		brandEntry.SetPlaceHolder("Например: Traxxas")
-		brandEntry.Resize(fyne.NewSize(350, brandEntry.MinSize().Height))
+		brandEntry.SetMinSize(fyne.NewSize(350, 0))
 		if model != nil && model.Brand != "" {
 			brandEntry.SetText(model.Brand)
 		}
