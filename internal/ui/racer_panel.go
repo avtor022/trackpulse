@@ -126,26 +126,6 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 				}
 			}
 		},
-		// Header labels
-		func(i widget.TableCellID, o fyne.CanvasObject) {
-			label := o.(*widget.Label)
-			switch i.Col {
-			case 0:
-				label.SetText("Racer Number")
-			case 1:
-				label.SetText("Full Name")
-			case 2:
-				label.SetText("Country")
-			case 3:
-				label.SetText("City")
-			case 4:
-				label.SetText("Birthday")
-			case 5:
-				label.SetText("Rating")
-			case 6:
-				label.SetText("Updated At")
-			}
-		},
 	)
 
 	// Set column widths for better visibility
