@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/google/uuid"
 	"trackpulse/internal/models"
 )
 
@@ -93,23 +94,24 @@ func (r *RCModelBrandRepository) GetByName(name string) (*models.RCModelBrand, e
 // Create inserts a new brand
 func (r *RCModelBrandRepository) Create(name string) (*models.RCModelBrand, error) {
 	now := time.Now().Format(time.RFC3339)
+	id := uuid.New().String()
 
 	result, err := r.db.Exec(`
-		INSERT INTO rc_model_brands (name, created_at, updated_at)
-		VALUES (?, ?, ?)
-	`, name, now, now)
+		INSERT INTO rc_model_brands (id, name, created_at, updated_at)
+		VALUES (?, ?, ?, ?)
+	`, id, name, now, now)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to create brand: %w", err)
 	}
 
-	id, err := result.LastInsertId()
+	_, err = result.LastInsertId()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get last insert id: %w", err)
 	}
 
 	brand := &models.RCModelBrand{
-		ID:        int(id),
+		ID:        id,
 		Name:      name,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),

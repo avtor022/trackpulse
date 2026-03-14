@@ -73,7 +73,7 @@ func (db *DB) Initialize() error {
 
 	-- RC Model Brands dictionary table
 	CREATE TABLE IF NOT EXISTS rc_model_brands (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		id TEXT PRIMARY KEY NOT NULL,
 		name TEXT UNIQUE NOT NULL,
 		created_at TEXT NOT NULL,
 		updated_at TEXT NOT NULL
