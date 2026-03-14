@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"time"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
@@ -147,9 +149,9 @@ func (ace *AutoCompleteEntry) FocusGained() {
 func (ace *AutoCompleteEntry) FocusLost() {
 	ace.entry.FocusLost()
 	// Небольшая задержка перед скрытием popup, чтобы успеть выбрать элемент
-	fyne.DoDelayed(func() {
+	time.AfterFunc(200*time.Millisecond, func() {
 		ace.hidePopup()
-	}, 200)
+	})
 }
 
 // Tapped is called when a pointer tapped event is captured and triggers any tap handler
@@ -291,7 +293,6 @@ func showFilterPopup(entry *widget.Entry, options []string, window fyne.Window, 
 	popup := widget.NewPopUp(list, window.Canvas())
 	
 	// Вычисляем позицию под полем ввода
-	canvas := window.Canvas()
 	entryPos := entry.Position()
 	entrySize := entry.Size()
 	

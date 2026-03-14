@@ -290,7 +290,6 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 	// Создаем виджет для выбора бренда с автодополнением
 	var brandWidget fyne.CanvasObject
 	var brandEntry *widget.Entry
-	var selectedBrand string
 
 	if len(existingBrands) > 0 {
 		// Используем Entry с автодополнением
@@ -299,13 +298,12 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 		
 		if model != nil && model.Brand != "" {
 			brandEntry.SetText(model.Brand)
-			selectedBrand = model.Brand
 		}
 
 		// Создаем контейнер с полем ввода и кнопкой dropdown
 		dropdownBtn := widget.NewButtonWithIcon("", theme.MenuDropDownIcon(), func() {
 			showFullDropdown(existingBrands, p.window, brandEntry, func(selected string) {
-				selectedBrand = selected
+				brandEntry.SetText(selected)
 			})
 		})
 
@@ -339,7 +337,6 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			if len(filtered) > 0 {
 				showFilterPopup(brandEntry, filtered, p.window, func(selected string) {
 					brandEntry.SetText(selected)
-					selectedBrand = selected
 					if popup != nil {
 						popup.Hide()
 					}
@@ -351,7 +348,6 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			if popup != nil {
 				popup.Hide()
 			}
-			selectedBrand = text
 		}
 
 		_ = popup
@@ -361,7 +357,6 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 		brandEntry.SetPlaceHolder("Например: Traxxas")
 		if model != nil && model.Brand != "" {
 			brandEntry.SetText(model.Brand)
-			selectedBrand = model.Brand
 		}
 		brandWidget = brandEntry
 	}
@@ -369,7 +364,6 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 	// Создаем виджет для выбора названия модели с автодополнением
 	var modelNameWidget fyne.CanvasObject
 	var modelNameEntry *widget.Entry
-	var selectedModelName string
 
 	if len(allModelNames) > 0 {
 		// Используем Entry с автодополнением
@@ -378,13 +372,12 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 		
 		if model != nil && model.ModelName != "" {
 			modelNameEntry.SetText(model.ModelName)
-			selectedModelName = model.ModelName
 		}
 
 		// Создаем контейнер с полем ввода и кнопкой dropdown
 		dropdownBtn := widget.NewButtonWithIcon("", theme.MenuDropDownIcon(), func() {
 			showFullDropdown(allModelNames, p.window, modelNameEntry, func(selected string) {
-				selectedModelName = selected
+				modelNameEntry.SetText(selected)
 			})
 		})
 
