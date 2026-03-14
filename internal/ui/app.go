@@ -13,6 +13,7 @@ type App struct {
 	fyneApp      fyne.App
 	mainWindow   fyne.Window
 	racerService *service.RacerService
+	modelService *service.RCModelService
 	config       *Config
 }
 
@@ -23,7 +24,7 @@ type Config struct {
 }
 
 // NewApp creates a new TrackPulse application
-func NewApp(racerService *service.RacerService, language string) *App {
+func NewApp(racerService *service.RacerService, modelService *service.RCModelService, language string) *App {
 	fyneApp := app.New()
 	mainWindow := fyneApp.NewWindow("TrackPulse")
 
@@ -31,6 +32,7 @@ func NewApp(racerService *service.RacerService, language string) *App {
 		fyneApp:      fyneApp,
 		mainWindow:   mainWindow,
 		racerService: racerService,
+		modelService: modelService,
 		config: &Config{
 			Language: language,
 			Title:    "TrackPulse",
@@ -75,9 +77,7 @@ func (a *App) createRacersTab() fyne.CanvasObject {
 
 // createModelsTab creates the Models management tab
 func (a *App) createModelsTab() fyne.CanvasObject {
-	content := widget.NewLabel("RC Models Management - Coming Soon")
-	content.Alignment = fyne.TextAlignCenter
-	return container.NewCenter(content)
+	return NewModelPanel(a.modelService, a.mainWindow)
 }
 
 // createTranspondersTab creates the Transponders management tab

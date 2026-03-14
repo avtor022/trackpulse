@@ -153,7 +153,7 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 			o.(*widget.Label).Truncation = fyne.TextTruncateEllipsis
 		}
 	}
-	
+
 	// Включаем отображение строки заголовков
 	table.ShowHeaderRow = true
 
@@ -339,7 +339,7 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 
 	// Create dialog without buttons first so we can reference it in the callback
 	d := dialog.NewCustomWithoutButtons(title, form, p.window)
-	
+
 	// Create save button with callback that has access to 'd'
 	saveBtn := widget.NewButton("Save", func() {
 		// Debug: print values
@@ -435,13 +435,13 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 			})
 		}
 	})
-	
+
 	// Create cancel button
 	cancelBtn := widget.NewButton("Cancel", func() {
 		p.statusLabel.SetText("Operation cancelled")
 		d.Hide()
 	})
-	
+
 	// Set dialog buttons
 	d.SetButtons([]fyne.CanvasObject{cancelBtn, saveBtn})
 

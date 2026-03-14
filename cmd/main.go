@@ -58,17 +58,19 @@ func main() {
 
 	// Initialize repositories
 	racerRepo := repository.NewRacerRepository(db.DB)
+	modelRepo := repository.NewRCModelRepository(db.DB)
 
 	// Initialize services
 	racerService := service.NewRacerService(racerRepo)
+	modelService := service.NewRCModelService(modelRepo)
 
 	log.Info("TrackPulse initialization complete!")
-	
+
 	// Start UI
 	fmt.Println("Starting TrackPulse UI...")
 	fmt.Printf("Database: %s\n", cfg.DBPath)
 	fmt.Printf("Language: %s\n", cfg.UILanguage)
-	
-	uiApp := ui.NewApp(racerService, cfg.UILanguage)
+
+	uiApp := ui.NewApp(racerService, modelService, cfg.UILanguage)
 	uiApp.Run()
 }
