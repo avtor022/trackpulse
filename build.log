@@ -1,30 +1,37 @@
-go: downloading github.com/google/uuid v1.6.0
-go: downloading github.com/mattn/go-sqlite3 v1.14.34
-go: downloading fyne.io/fyne/v2 v2.7.3
-go: downloading github.com/fsnotify/fsnotify v1.9.0
-go: downloading github.com/godbus/dbus/v5 v5.1.0
-go: downloading github.com/rymdport/portal v0.4.2
-go: downloading github.com/go-text/typesetting v0.3.3
-go: downloading github.com/yuin/goldmark v1.7.8
-go: downloading golang.org/x/image v0.24.0
-go: downloading github.com/jeandeaual/go-locale v0.0.0-20250612000132-0ef82f21eade
-go: downloading github.com/nicksnyder/go-i18n/v2 v2.5.1
-go: downloading golang.org/x/text v0.22.0
-go: downloading github.com/fredbi/uri v1.1.1
-go: downloading fyne.io/systray v1.12.0
-go: downloading github.com/fyne-io/image v0.1.1
-go: downloading github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240506104042-037f3cc74f2a
-go: downloading github.com/BurntSushi/toml v1.5.0
-go: downloading github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
-go: downloading golang.org/x/sys v0.30.0
-go: downloading github.com/fyne-io/oksvg v0.2.0
-go: downloading github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef
-go: downloading github.com/go-text/render v0.2.0
-go: downloading github.com/go-gl/gl v0.0.0-20231021071112-07e5d0ea2e71
-go: downloading github.com/jsummers/gobmp v0.0.0-20230614200233-a9de23ed2e25
-go: downloading golang.org/x/net v0.35.0
-go: downloading github.com/stretchr/testify v1.11.1
-go: downloading github.com/srwiley/oksvg v0.0.0-20221011165216-be6e8873101c
-go: downloading github.com/davecgh/go-spew v1.1.1
-go: downloading github.com/pmezard/go-difflib v1.0.0
-go: downloading gopkg.in/yaml.v3 v3.0.1
+fatal error: out of memory allocating heap arena map
+
+runtime stack:
+runtime.throw({0xa40c88?, 0x0?})
+	/usr/lib/go-1.19/src/runtime/panic.go:1047 +0x5d fp=0x7ffc6f4c3cf0 sp=0x7ffc6f4c3cc0 pc=0x43765d
+runtime.(*mheap).sysAlloc(0xe55ba0, 0x0?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:676 +0x316 fp=0x7ffc6f4c3d88 sp=0x7ffc6f4c3cf0 pc=0x40e176
+runtime.(*mheap).grow(0xe55ba0, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1418 +0x73 fp=0x7ffc6f4c3df8 sp=0x7ffc6f4c3d88 pc=0x42a573
+runtime.(*mheap).allocSpan(0xe55ba0, 0x1, 0x0, 0x18)
+	/usr/lib/go-1.19/src/runtime/mheap.go:1199 +0x1be fp=0x7ffc6f4c3e90 sp=0x7ffc6f4c3df8 pc=0x429e7e
+runtime.(*mheap).alloc.func1()
+	/usr/lib/go-1.19/src/runtime/mheap.go:918 +0x65 fp=0x7ffc6f4c3ed8 sp=0x7ffc6f4c3e90 pc=0x429905
+runtime.(*mheap).alloc(0x7ffc6f4c3f60?, 0x40526f?, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mheap.go:912 +0x65 fp=0x7ffc6f4c3f20 sp=0x7ffc6f4c3ed8 pc=0x429845
+runtime.(*mcentral).grow(0x405196?)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:244 +0x5b fp=0x7ffc6f4c3f68 sp=0x7ffc6f4c3f20 pc=0x4194bb
+runtime.(*mcentral).cacheSpan(0xe66fe0)
+	/usr/lib/go-1.19/src/runtime/mcentral.go:164 +0x306 fp=0x7ffc6f4c3fc0 sp=0x7ffc6f4c3f68 pc=0x419306
+runtime.(*mcache).refill(0x7fdd825b7108, 0x0?)
+	/usr/lib/go-1.19/src/runtime/mcache.go:181 +0x152 fp=0x7ffc6f4c4000 sp=0x7ffc6f4c3fc0 pc=0x4189d2
+runtime.(*mcache).nextFree(0x7fdd825b7108, 0x18)
+	/usr/lib/go-1.19/src/runtime/malloc.go:819 +0x85 fp=0x7ffc6f4c4048 sp=0x7ffc6f4c4000 pc=0x40e6a5
+runtime.mallocgc(0xa0, 0x9845c0, 0x1)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1018 +0x4c8 fp=0x7ffc6f4c40c0 sp=0x7ffc6f4c4048 pc=0x40ed08
+runtime.newobject(0xe718a0?)
+	/usr/lib/go-1.19/src/runtime/malloc.go:1202 +0x27 fp=0x7ffc6f4c40e8 sp=0x7ffc6f4c40c0 pc=0x40f227
+internal/cpu.doinit()
+	/usr/lib/go-1.19/src/internal/cpu/cpu_x86.go:50 +0x25 fp=0x7ffc6f4c4150 sp=0x7ffc6f4c40e8 pc=0x401e25
+internal/cpu.Initialize({0x0, 0x0})
+	/usr/lib/go-1.19/src/internal/cpu/cpu.go:124 +0x25 fp=0x7ffc6f4c4170 sp=0x7ffc6f4c4150 pc=0x401865
+runtime.cpuinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:632 +0xff fp=0x7ffc6f4c41b0 sp=0x7ffc6f4c4170 pc=0x43af1f
+runtime.schedinit()
+	/usr/lib/go-1.19/src/runtime/proc.go:694 +0xb0 fp=0x7ffc6f4c4210 sp=0x7ffc6f4c41b0 pc=0x43b030
+runtime.rt0_go()
+	/usr/lib/go-1.19/src/runtime/asm_amd64.s:345 +0x11c fp=0x7ffc6f4c4218 sp=0x7ffc6f4c4210 pc=0x465d1c

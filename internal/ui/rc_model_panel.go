@@ -314,8 +314,12 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 		
 		// Устанавливаем минимальный размер для контейнера, а не для виджетов
 		brandWrapper := container.NewHBox(brandWidget)
-		brandWrapper.MinSize = fyne.NewSize(390, 0) // 350 для поля + 40 для кнопки
-		brandWidget = brandWrapper
+		brandWrapper = container.NewMax(brandWrapper)
+		brandWrapper.MinSize() // Ensure MinSize is calculated
+		// Создаем обертку с фиксированным минимальным размером
+		fixedWidthContainer := container.NewStack(brandWrapper)
+		fixedWidthContainer.Resize(fyne.NewSize(390, 30))
+		brandWidget = fixedWidthContainer
 
 		// Обработчик изменения текста для фильтрации
 		var popup *widget.PopUp
@@ -365,8 +369,10 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 		}
 		// Устанавливаем минимальный размер через контейнер
 		brandWrapper := container.NewHBox(brandEntry)
-		brandWrapper.MinSize = fyne.NewSize(350, 0)
-		brandWidget = brandWrapper
+		brandWrapper = container.NewMax(brandWrapper)
+		fixedWidthContainer := container.NewStack(brandWrapper)
+		fixedWidthContainer.Resize(fyne.NewSize(350, 30))
+		brandWidget = fixedWidthContainer
 	}
 
 	// Создаем виджет для выбора названия модели с автодополнением
