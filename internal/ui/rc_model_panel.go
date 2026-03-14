@@ -305,8 +305,8 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 				d.Show()
 			}
 		})
-		brandSelect.SetPlaceHolder("Выберите бренд")
-		brandWidget = brandSelect
+			// widget.Select не имеет метода SetPlaceHolder, используем пустой выбор
+			if len(existingBrands) > 0 { brandSelect.SetSelected("") }
 		
 		// Если редактируем модель, выбираем существующий бренд
 		if model != nil && model.Brand != "" {
