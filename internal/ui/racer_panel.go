@@ -136,31 +136,6 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 		},
 	)
 
-	// Set headers using OnHeaderCell (compatible with Fyne v2.5+)
-	table.OnHeaderCell = func(i widget.TableCellID, o fyne.CanvasObject) {
-		lbl := o.(*widget.Label)
-		switch i.Col {
-		case 0:
-			lbl.SetText("id")
-		case 1:
-			lbl.SetText("racer_number")
-		case 2:
-			lbl.SetText("full_name")
-		case 3:
-			lbl.SetText("country")
-		case 4:
-			lbl.SetText("city")
-		case 5:
-			lbl.SetText("birthday")
-		case 6:
-			lbl.SetText("rating")
-		case 7:
-			lbl.SetText("created_at")
-		case 8:
-			lbl.SetText("updated_at")
-		}
-	}
-
 	// Set column widths for better visibility
 	table.SetColumnWidth(0, 250) // ID
 	table.SetColumnWidth(1, 80)  // Racer Number
