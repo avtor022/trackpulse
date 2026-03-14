@@ -141,23 +141,23 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 		lbl := o.(*widget.Label)
 		switch i.Col {
 		case 0:
-			lbl.SetText("ID")
+			lbl.SetText("id")
 		case 1:
-			lbl.SetText("Номер гонщика")
+			lbl.SetText("racer_number")
 		case 2:
-			lbl.SetText("ФИО")
+			lbl.SetText("full_name")
 		case 3:
-			lbl.SetText("Страна")
+			lbl.SetText("country")
 		case 4:
-			lbl.SetText("Город")
+			lbl.SetText("city")
 		case 5:
-			lbl.SetText("Дата рождения")
+			lbl.SetText("birthday")
 		case 6:
-			lbl.SetText("Рейтинг")
+			lbl.SetText("rating")
 		case 7:
-			lbl.SetText("Дата создания")
+			lbl.SetText("created_at")
 		case 8:
-			lbl.SetText("Дата обновления")
+			lbl.SetText("updated_at")
 		}
 	})
 

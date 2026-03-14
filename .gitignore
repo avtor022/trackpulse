@@ -1,5 +1,5 @@
 ```
-# Compiled and binary files
+# Compiled and build artifacts
 *.o
 *.obj
 *.out
@@ -10,19 +10,47 @@ vendor/
 # Logs and temp files
 *.log
 *.tmp
-*.swp
-
-# Editors
-.vscode/
-.idea/
-
-# Coverage reports
-coverage/
-htmlcov/
-.coverage
 
 # Environment
 .env
 .env.local
 *.env.*
+
+# Editors
+.vscode/
+.idea/
+
+# Coverage
+coverage/
+htmlcov/
+.coverage
+
+# Distribution
+dist/
+build/
+target/
+
+# Python specific
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Node.js specific
+node_modules/
+
+# Go specific
+*.exe
+*.dll
+*.so
+*.a
+
+# Gradle
+.gradle/
+
+# MyPy
+.mypy_cache/
+
+# Pytest
+.pytest_cache/
 ```
