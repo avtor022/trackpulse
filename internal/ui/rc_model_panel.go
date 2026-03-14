@@ -309,9 +309,6 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 		widget.NewFormItem("Drive Type", driveTypeEntry),
 	)
 
-	// Устанавливаем минимальную ширину для полей ввода
-	minWidth := float32(400)
-
 	// Создаем форму с полями
 	form = widget.NewForm(
 		widget.NewFormItem("Brand", brandEntry),
