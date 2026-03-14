@@ -90,7 +90,7 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 			if len(p.allRacers) == 0 {
 				return 0, 0
 			}
-			return len(p.allRacers), 8 // rows, columns
+			return len(p.allRacers), 9 // rows, columns
 		},
 		func() fyne.CanvasObject {
 			return widget.NewLabel("Template")
@@ -103,28 +103,30 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 			racer := p.allRacers[i.Row]
 			switch i.Col {
 			case 0:
-				o.(*widget.Label).SetText(strconv.Itoa(racer.RacerNumber))
+				o.(*widget.Label).SetText(racer.ID)
 			case 1:
-				o.(*widget.Label).SetText(racer.FullName)
+				o.(*widget.Label).SetText(strconv.Itoa(racer.RacerNumber))
 			case 2:
-				o.(*widget.Label).SetText(racer.Country)
+				o.(*widget.Label).SetText(racer.FullName)
 			case 3:
-				o.(*widget.Label).SetText(racer.City)
+				o.(*widget.Label).SetText(racer.Country)
 			case 4:
+				o.(*widget.Label).SetText(racer.City)
+			case 5:
 				if racer.Birthday != nil {
 					o.(*widget.Label).SetText(racer.Birthday.Format("02.01.2006"))
 				} else {
 					o.(*widget.Label).SetText("-")
 				}
-			case 5:
-				o.(*widget.Label).SetText(strconv.Itoa(racer.Rating))
 			case 6:
+				o.(*widget.Label).SetText(strconv.Itoa(racer.Rating))
+			case 7:
 				if !racer.CreatedAt.IsZero() {
 					o.(*widget.Label).SetText(racer.CreatedAt.Format("2006-01-02 15:04:05"))
 				} else {
 					o.(*widget.Label).SetText("-")
 				}
-			case 7:
+			case 8:
 				if !racer.UpdatedAt.IsZero() {
 					o.(*widget.Label).SetText(racer.UpdatedAt.Format("2006-01-02 15:04:05"))
 				} else {
@@ -134,15 +136,41 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 		},
 	)
 
+	// Set headers
+	table.SetHeaderContent(func(i widget.TableCellID, o fyne.CanvasObject) {
+		lbl := o.(*widget.Label)
+		switch i.Col {
+		case 0:
+			lbl.SetText("ID")
+		case 1:
+			lbl.SetText("Номер гонщика")
+		case 2:
+			lbl.SetText("ФИО")
+		case 3:
+			lbl.SetText("Страна")
+		case 4:
+			lbl.SetText("Город")
+		case 5:
+			lbl.SetText("Дата рождения")
+		case 6:
+			lbl.SetText("Рейтинг")
+		case 7:
+			lbl.SetText("Дата создания")
+		case 8:
+			lbl.SetText("Дата обновления")
+		}
+	})
+
 	// Set column widths for better visibility
-	table.SetColumnWidth(0, 80)  // Racer Number
-	table.SetColumnWidth(1, 250) // Full Name
-	table.SetColumnWidth(2, 120) // Country
-	table.SetColumnWidth(3, 120) // City
-	table.SetColumnWidth(4, 140) // Birthday
-	table.SetColumnWidth(5, 80)  // Rating
-	table.SetColumnWidth(6, 150) // Created At
-	table.SetColumnWidth(7, 150) // Updated At
+	table.SetColumnWidth(0, 250) // ID
+	table.SetColumnWidth(1, 80)  // Racer Number
+	table.SetColumnWidth(2, 250) // Full Name
+	table.SetColumnWidth(3, 120) // Country
+	table.SetColumnWidth(4, 120) // City
+	table.SetColumnWidth(5, 140) // Birthday
+	table.SetColumnWidth(6, 80)  // Rating
+	table.SetColumnWidth(7, 150) // Created At
+	table.SetColumnWidth(8, 150) // Updated At
 
 	table.OnSelected = func(id widget.TableCellID) {
 		if id.Row >= 0 && id.Row < len(p.allRacers) {
