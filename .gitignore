@@ -1,5 +1,5 @@
 ```
-# Compiled and binary files
+# Compiled and build artifacts
 *.o
 *.obj
 *.out
@@ -15,8 +15,12 @@ vendor/
 .vscode/
 .idea/
 
-# Environment
-.env
-.env.local
-*.env.*
+# Coverage reports
+coverage/
+htmlcov/
+.coverage
+
+# Distribution artifacts
+dist/
+build/
 ```

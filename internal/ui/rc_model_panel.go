@@ -295,7 +295,6 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 		// Используем Entry с автодополнением
 		brandEntry = widget.NewEntry()
 		brandEntry.SetPlaceHolder("Например: Traxxas")
-		brandEntry.SetMinSize(fyne.NewSize(350, 0))
 		
 		if model != nil && model.Brand != "" {
 			brandEntry.SetText(model.Brand)
@@ -307,12 +306,16 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 				brandEntry.SetText(selected)
 			})
 		})
-		dropdownBtn.SetMinSize(fyne.NewSize(40, 0))
 
 		brandWidget = container.NewHBox(
 			container.NewStack(brandEntry),
 			dropdownBtn,
 		)
+		
+		// Устанавливаем минимальный размер для контейнера, а не для виджетов
+		brandWrapper := container.NewHBox(brandWidget)
+		brandWrapper.MinSize = fyne.NewSize(390, 0) // 350 для поля + 40 для кнопки
+		brandWidget = brandWrapper
 
 		// Обработчик изменения текста для фильтрации
 		var popup *widget.PopUp
@@ -357,11 +360,13 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 		// Если брендов нет, используем обычное поле ввода
 		brandEntry = widget.NewEntry()
 		brandEntry.SetPlaceHolder("Например: Traxxas")
-		brandEntry.SetMinSize(fyne.NewSize(350, 0))
 		if model != nil && model.Brand != "" {
 			brandEntry.SetText(model.Brand)
 		}
-		brandWidget = brandEntry
+		// Устанавливаем минимальный размер через контейнер
+		brandWrapper := container.NewHBox(brandEntry)
+		brandWrapper.MinSize = fyne.NewSize(350, 0)
+		brandWidget = brandWrapper
 	}
 
 	// Создаем виджет для выбора названия модели с автодополнением
