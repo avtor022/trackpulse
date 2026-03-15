@@ -116,3 +116,27 @@ func (s *RCModelService) GetAllBrands() ([]models.RCModelBrand, error) {
 func (s *RCModelService) GetAllModelNames() ([]string, error) {
 	return s.modelRepo.GetAllModelNames()
 }
+
+// AddBrand adds a new brand to the database
+func (s *RCModelService) AddBrand(name string) error {
+	if name == "" {
+		return fmt.Errorf("brand name is required")
+	}
+	
+	// Проверяем, не существует ли уже такой бренд
+	existing, err := s.brandRepo.GetByName(name)
+	if err != nil {
+		return fmt.Errorf("failed to check existing brand: %w", err)
+	}
+	if existing != nil {
+		return fmt.Errorf("brand '%s' already exists", name)
+	}
+	
+	// Создаем новый бренд
+	_, err = s.brandRepo.Create(name)
+	if err != nil {
+		return fmt.Errorf("failed to create brand: %w", err)
+	}
+	
+	return nil
+}

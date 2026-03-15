@@ -287,119 +287,79 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 		// Продолжаем работу даже если не удалось получить названия моделей
 	}
 
-	// Создаем виджет для выбора бренда с автодополнением
-	var brandWidget fyne.CanvasObject
+	// Создаем виджет для выбора бренда - используем Select с опцией добавления нового
+	var brandSelect *widget.Select
 	var brandEntry *widget.Entry
-
-	if len(existingBrands) > 0 {
-		// Используем Entry с автодополнением
-		brandEntry = widget.NewEntry()
-		brandEntry.SetPlaceHolder("Например: Traxxas")
-		
-		if model != nil && model.Brand != "" {
-			brandEntry.SetText(model.Brand)
-		}
-
-		// Создаем контейнер с полем ввода и кнопкой dropdown
-		dropdownBtn := widget.NewButtonWithIcon("", theme.MenuDropDownIcon(), func() {
-			// Показываем простой Select в виде popup
-			selectWidget := widget.NewSelect(existingBrands, func(selected string) {
-				brandEntry.SetText(selected)
+	
+	// Добавляем опцию для создания нового бренда
+	newBrandOption := "+ Добавить новый бренд"
+	selectOptions := append(existingBrands, newBrandOption)
+	
+	brandSelect = widget.NewSelect(selectOptions, func(selected string) {
+		if selected == newBrandOption {
+			// Показываем диалог для добавления нового бренда
+			d.Hide() // Скрываем основной диалог
+			
+			newBrandEntry := widget.NewEntry()
+			newBrandEntry.SetPlaceHolder("Введите название нового бренда")
+			
+			newBrandForm := widget.NewForm(
+				widget.NewFormItem("Название бренда", newBrandEntry),
+			)
+			
+			newBrandDialog := dialog.NewCustomWithoutButtons("Добавить новый бренд", newBrandForm, p.window)
+			
+			cancelBtn := widget.NewButton("Отмена", func() {
+				newBrandDialog.Hide()
+				// Возвращаемся к основному диалогу
+				d.Show()
+				brandSelect.SetSelected("")
 			})
-			selectWidget.SetSelected("")
 			
-			popup := widget.NewPopUp(selectWidget, p.window.Canvas())
-			// Позиционируем popup под полем ввода
-			entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(brandEntry)
-			popupSize := selectWidget.MinSize()
-			popup.Resize(popupSize)
-			popup.Move(fyne.NewPos(entryPos.X, entryPos.Y+brandEntry.Size().Height))
-			popup.Show()
-		})
-
-		brandWidget = container.NewHBox(
-			container.NewStack(brandEntry),
-			dropdownBtn,
-		)
-		
-		// Устанавливаем минимальный размер для контейнера, а не для виджетов
-		brandWrapper := container.NewHBox(brandWidget)
-		brandWrapper = container.NewMax(brandWrapper)
-		brandWrapper.MinSize() // Ensure MinSize is calculated
-		// Создаем обертку с фиксированным минимальным размером
-		fixedWidthContainer := container.NewStack(brandWrapper)
-		fixedWidthContainer.Resize(fyne.NewSize(390, 30))
-		brandWidget = fixedWidthContainer
-
-		// Обработчик изменения текста для фильтрации
-		var popup *widget.PopUp
-		
-		brandEntry.OnChanged = func(text string) {
-			if popup != nil {
-				popup.Hide()
-			}
-			
-			if text == "" {
-				return
-			}
-
-			// Фильтруем опции
-			var filtered []string
-			textLower := strings.ToLower(text)
-			
-			for _, opt := range existingBrands {
-				if strings.Contains(strings.ToLower(opt), textLower) {
-					filtered = append(filtered, opt)
+			saveBtn := widget.NewButton("Сохранить", func() {
+				newBrandName := strings.TrimSpace(newBrandEntry.Text)
+				if newBrandName == "" {
+					dialog.ShowError(fmt.Errorf("введите название бренда"), p.window)
+					return
 				}
-			}
-
-			if len(filtered) > 0 {
-				// Создаем простой список с фильтрацией
-				list := widget.NewList(
-					func() int { return len(filtered) },
-					func() fyne.CanvasObject { return widget.NewLabel("Template") },
-					func(id widget.ListItemID, item fyne.CanvasObject) {
-						item.(*widget.Label).SetText(filtered[id])
-					},
-				)
-				list.OnSelected = func(id widget.ListItemID) {
-					brandEntry.SetText(filtered[id])
-					if popup != nil {
-						popup.Hide()
+				
+				// Проверяем, не существует ли уже такой бренд
+				for _, b := range existingBrands {
+					if strings.EqualFold(b, newBrandName) {
+						dialog.ShowError(fmt.Errorf("бренд '%s' уже существует", newBrandName), p.window)
+						return
 					}
 				}
 				
-				popup = widget.NewPopUp(list, p.window.Canvas())
-				// Позиционируем popup под полем ввода
-				entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(brandEntry)
-				popupSize := list.MinSize()
-				popup.Resize(popupSize)
-				popup.Move(fyne.NewPos(entryPos.X, entryPos.Y+brandEntry.Size().Height))
-				popup.Show()
-			}
+				// Добавляем новый бренд в таблицу справочника
+				if err := p.modelService.AddBrand(newBrandName); err != nil {
+					dialog.ShowError(err, p.window)
+					return
+				}
+				
+				// Обновляем список брендов
+				existingBrands = append(existingBrands, newBrandName)
+				selectOptions = append(existingBrands, newBrandOption)
+				brandSelect.Options = selectOptions
+				
+				newBrandDialog.Hide()
+				// Возвращаемся к основному диалогу с выбранным новым брендом
+				d.Show()
+				brandSelect.SetSelected(newBrandName)
+			})
+			
+			newBrandDialog.SetButtons([]fyne.CanvasObject{cancelBtn, saveBtn})
+			newBrandDialog.Show()
 		}
-
-		brandEntry.OnSubmitted = func(text string) {
-			if popup != nil {
-				popup.Hide()
-			}
-		}
-
-		_ = popup
-	} else {
-		// Если брендов нет, используем обычное поле ввода
-		brandEntry = widget.NewEntry()
-		brandEntry.SetPlaceHolder("Например: Traxxas")
-		if model != nil && model.Brand != "" {
-			brandEntry.SetText(model.Brand)
-		}
-		// Устанавливаем минимальный размер через контейнер
-		brandWrapper := container.NewHBox(brandEntry)
-		brandWrapper = container.NewMax(brandWrapper)
-		fixedWidthContainer := container.NewStack(brandWrapper)
-		fixedWidthContainer.Resize(fyne.NewSize(350, 30))
-		brandWidget = fixedWidthContainer
+	})
+	
+	brandSelect.SetPlaceHolder("Выберите бренд или добавьте новый")
+	
+	if model != nil && model.Brand != "" {
+		brandSelect.SetSelected(model.Brand)
 	}
+	
+	brandWidget = brandSelect
 
 	// Создаем виджет для выбора названия модели с автодополнением
 	var modelNameWidget fyne.CanvasObject
@@ -548,10 +508,10 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 
 	// Create save button with callback that has access to 'd'
 	saveBtn := widget.NewButton("Save", func() {
-		// Получаем значение бренда
+		// Получаем значение бренда из Select
 		var brand string
-		if brandEntry != nil {
-			brand = brandEntry.Text
+		if brandSelect != nil {
+			brand = brandSelect.Selected
 		}
 
 		// Получаем значение названия модели
