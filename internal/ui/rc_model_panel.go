@@ -357,17 +357,14 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			
 			newBrandDialog.SetButtons([]fyne.CanvasObject{cancelBtn, saveBtn})
 			
-			// Увеличиваем размер диалога для нового бренда
+			// Увеличиваем ширину диалога для нового бренда
 			parentSize := p.window.Canvas().Size()
 			dialogWidth := parentSize.Width * 0.6
 			if dialogWidth < 700 {
 				dialogWidth = 700
 			}
-			dialogHeight := parentSize.Height * 0.4
-			if dialogHeight < 250 {
-				dialogHeight = 250
-			}
-			newBrandDialog.Resize(fyne.NewSize(dialogWidth, dialogHeight))
+			// Используем стандартную высоту контента, не изменяем её
+			newBrandDialog.Resize(fyne.NewSize(dialogWidth, newBrandDialog.MinSize().Height))
 			
 			newBrandDialog.Show()
 		}

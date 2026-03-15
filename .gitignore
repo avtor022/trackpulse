@@ -1,5 +1,41 @@
 ```
+# Compiled and build artifacts
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.a
+*.out
+
+# Dependencies
+vendor/
+*.mod
+*.sum
+
 # Logs and temp files
 *.log
-build.log
+*.tmp
+*.swp
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build and distribution
+bin/
+target/
+dist/
+build/
+
+# Go specific
+*.test
+*.prof
 ```
