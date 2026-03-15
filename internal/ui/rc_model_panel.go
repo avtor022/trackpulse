@@ -309,8 +309,12 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			selectWidget.SetSelected("")
 			
 			popup := widget.NewPopUp(selectWidget, p.window.Canvas())
-			pos := fyne.NewPos(brandEntry.Position().X, brandEntry.Position().Y+brandEntry.Size().Height)
-			popup.ShowAt(pos)
+			// Позиционируем popup под полем ввода
+			entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(brandEntry)
+			popupSize := selectWidget.MinSize()
+			popup.Resize(popupSize)
+			popup.Move(fyne.NewPos(entryPos.X, entryPos.Y+brandEntry.Size().Height))
+			popup.Show()
 		})
 
 		brandWidget = container.NewHBox(
@@ -366,8 +370,12 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 				}
 				
 				popup = widget.NewPopUp(list, p.window.Canvas())
-				pos := fyne.NewPos(brandEntry.Position().X, brandEntry.Position().Y+brandEntry.Size().Height)
-				popup.ShowAt(pos)
+				// Позиционируем popup под полем ввода
+				entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(brandEntry)
+				popupSize := list.MinSize()
+				popup.Resize(popupSize)
+				popup.Move(fyne.NewPos(entryPos.X, entryPos.Y+brandEntry.Size().Height))
+				popup.Show()
 			}
 		}
 
@@ -416,8 +424,12 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			selectWidget.SetSelected("")
 			
 			popup := widget.NewPopUp(selectWidget, p.window.Canvas())
-			pos := fyne.NewPos(modelNameEntry.Position().X, modelNameEntry.Position().Y+modelNameEntry.Size().Height)
-			popup.ShowAt(pos)
+			// Позиционируем popup под полем ввода
+			entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(modelNameEntry)
+			popupSize := selectWidget.MinSize()
+			popup.Resize(popupSize)
+			popup.Move(fyne.NewPos(entryPos.X, entryPos.Y+modelNameEntry.Size().Height))
+			popup.Show()
 		})
 
 		modelNameWidget = container.NewHBox(
@@ -464,8 +476,12 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 				}
 				
 				popup = widget.NewPopUp(list, p.window.Canvas())
-				pos := fyne.NewPos(modelNameEntry.Position().X, modelNameEntry.Position().Y+modelNameEntry.Size().Height)
-				popup.ShowAt(pos)
+				// Позиционируем popup под полем ввода
+				entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(modelNameEntry)
+				popupSize := list.MinSize()
+				popup.Resize(popupSize)
+				popup.Move(fyne.NewPos(entryPos.X, entryPos.Y+modelNameEntry.Size().Height))
+				popup.Show()
 			}
 		}
 

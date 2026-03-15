@@ -29,12 +29,13 @@ func NewComboBoxWithEntry(options []string, placeHolder string, initialValue str
 	}
 
 	// Создаем выпадающий список
-	cbe.selectWidget = widget.NewSelectWithPlaceholder("Выбрать...", options, func(selected string) {
+	cbe.selectWidget = widget.NewSelect(options, func(selected string) {
 		cbe.entry.SetText(selected)
 		if cbe.onSelected != nil {
 			cbe.onSelected(selected)
 		}
 	})
+	cbe.selectWidget.SetSelected("") // Устанавливаем пустое значение как placeholder
 
 	// Контейнер с горизонтальной компоновкой
 	cbe.container = container.NewHBox(cbe.entry, cbe.selectWidget)
@@ -89,12 +90,13 @@ func CreateComboBox(options []string, placeHolder string, initialValue string, o
 	}
 
 	// Создаем выпадающий список
-	selectWidget := widget.NewSelectWithPlaceholder("▼", options, func(selected string) {
+	selectWidget := widget.NewSelect(options, func(selected string) {
 		entry.SetText(selected)
 		if onSelected != nil {
 			onSelected(selected)
 		}
 	})
+	selectWidget.SetSelected("") // Устанавливаем пустое значение как placeholder
 
 	// Контейнер с горизонтальной компоновкой
 	return container.NewHBox(entry, selectWidget)
@@ -126,12 +128,13 @@ func CreateComboBoxWithFilter(options []string, placeHolder string, initialValue
 		selectWidget.Refresh()
 	}
 
-	selectWidget = widget.NewSelectWithPlaceholder("▼", options, func(selected string) {
+	selectWidget = widget.NewSelect(options, func(selected string) {
 		entry.SetText(selected)
 		if onSelected != nil {
 			onSelected(selected)
 		}
 	})
+	selectWidget.SetSelected("") // Устанавливаем пустое значение как placeholder
 
 	// Обработчик изменения текста для фильтрации
 	entry.OnChanged = func(text string) {
