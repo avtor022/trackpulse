@@ -1,5 +1,5 @@
-go: downloading github.com/mattn/go-sqlite3 v1.14.34
 go: downloading github.com/google/uuid v1.6.0
+go: downloading github.com/mattn/go-sqlite3 v1.14.34
 go: downloading fyne.io/fyne/v2 v2.7.3
 go: downloading github.com/go-text/typesetting v0.3.3
 go: downloading github.com/yuin/goldmark v1.7.8
@@ -14,8 +14,8 @@ go: downloading github.com/fredbi/uri v1.1.1
 go: downloading github.com/fyne-io/oksvg v0.2.0
 go: downloading github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef
 go: downloading github.com/go-text/render v0.2.0
-go: downloading fyne.io/systray v1.12.0
 go: downloading github.com/fyne-io/image v0.1.1
+go: downloading fyne.io/systray v1.12.0
 go: downloading github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240506104042-037f3cc74f2a
 go: downloading github.com/BurntSushi/toml v1.5.0
 go: downloading github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
@@ -28,145 +28,3 @@ go: downloading github.com/stretchr/testify v1.11.1
 go: downloading github.com/davecgh/go-spew v1.1.1
 go: downloading github.com/pmezard/go-difflib v1.0.0
 go: downloading gopkg.in/yaml.v3 v3.0.1
-# golang.org/x/text/encoding/traditionalchinese
-fatal error: runtime: out of memory
-
-runtime stack:
-runtime.throw({0xd49cba?, 0x0?})
-	/usr/lib/go-1.19/src/runtime/panic.go:1047 +0x5d fp=0xc00005be00 sp=0xc00005bdd0 pc=0x43785d
-runtime.sysMapOS(0xc003c00000, 0x400000?)
-	/usr/lib/go-1.19/src/runtime/mem_linux.go:187 +0x11b fp=0xc00005be48 sp=0xc00005be00 pc=0x4188bb
-runtime.sysMap(0x42d5ba?, 0x13fb070?, 0x1?)
-	/usr/lib/go-1.19/src/runtime/mem.go:142 +0x35 fp=0xc00005be78 sp=0xc00005be48 pc=0x418295
-runtime.(*mheap).grow(0x13fb060, 0x2000?)
-	/usr/lib/go-1.19/src/runtime/mheap.go:1468 +0x23d fp=0xc00005bee8 sp=0xc00005be78 pc=0x428dfd
-runtime.(*mheap).allocSpan(0x13fb060, 0x1, 0x0, 0xe)
-	/usr/lib/go-1.19/src/runtime/mheap.go:1199 +0x1be fp=0xc00005bf80 sp=0xc00005bee8 pc=0x42853e
-runtime.(*mheap).alloc.func1()
-	/usr/lib/go-1.19/src/runtime/mheap.go:918 +0x65 fp=0xc00005bfc8 sp=0xc00005bf80 pc=0x427fc5
-runtime.systemstack()
-	/usr/lib/go-1.19/src/runtime/asm_amd64.s:492 +0x49 fp=0xc00005bfd0 sp=0xc00005bfc8 pc=0x468109
-
-goroutine 1 [running]:
-runtime.systemstack_switch()
-	/usr/lib/go-1.19/src/runtime/asm_amd64.s:459 fp=0xc000f0ebf0 sp=0xc000f0ebe8 pc=0x4680a0
-runtime.(*mheap).alloc(0xc000f0ed00?, 0xb54459?, 0xa0?)
-	/usr/lib/go-1.19/src/runtime/mheap.go:912 +0x65 fp=0xc000f0ec38 sp=0xc000f0ebf0 pc=0x427f05
-runtime.(*mcentral).grow(0x2000?)
-	/usr/lib/go-1.19/src/runtime/mcentral.go:244 +0x5b fp=0xc000f0ec80 sp=0xc000f0ec38 pc=0x417b7b
-runtime.(*mcentral).cacheSpan(0x140bd20)
-	/usr/lib/go-1.19/src/runtime/mcentral.go:164 +0x306 fp=0xc000f0ecd8 sp=0xc000f0ec80 pc=0x4179c6
-runtime.(*mcache).refill(0x7f405e1ef5b8, 0xe?)
-	/usr/lib/go-1.19/src/runtime/mcache.go:181 +0x152 fp=0xc000f0ed18 sp=0xc000f0ecd8 pc=0x417092
-runtime.(*mcache).nextFree(0x7f405e1ef5b8, 0xe)
-	/usr/lib/go-1.19/src/runtime/malloc.go:819 +0x85 fp=0xc000f0ed60 sp=0xc000f0ed18 pc=0x40cd65
-runtime.mallocgc(0x48, 0xcd9860, 0x1)
-	/usr/lib/go-1.19/src/runtime/malloc.go:1018 +0x4c8 fp=0xc000f0edd8 sp=0xc000f0ed60 pc=0x40d3c8
-runtime.newobject(0xa00000c000f0ee28?)
-	/usr/lib/go-1.19/src/runtime/malloc.go:1202 +0x27 fp=0xc000f0ee00 sp=0xc000f0edd8 pc=0x40d8e7
-cmd/compile/internal/ir.NewBasicLit({0xeaaba8?, 0x0?}, {0xeaaba8?, 0xc000f1e038})
-	/usr/lib/go-1.19/src/cmd/compile/internal/ir/expr.go:106 +0x3b fp=0xc000f0ee38 sp=0xc000f0ee00 pc=0x5a5ffb
-cmd/compile/internal/noder.FixValue(0xc00037e310, {0xeaaba8?, 0xc000f1e038?})
-	/usr/lib/go-1.19/src/cmd/compile/internal/noder/helpers.go:64 +0x27a fp=0xc000f0eea8 sp=0xc000f0ee38 pc=0xbe357a
-cmd/compile/internal/noder.(*irgen).expr(0xc0002ea240, {0xea9b30?, 0xc0008be4e0?})
-	/usr/lib/go-1.19/src/cmd/compile/internal/noder/expr.go:86 +0x912 fp=0xc000f0f0c0 sp=0xc000f0eea8 pc=0xbdf912
-cmd/compile/internal/noder.(*irgen).compLit(0xc0002ea240, {0xea8cb0, 0xc0000aa090}, 0xc00039bdb0)
-	/usr/lib/go-1.19/src/cmd/compile/internal/noder/expr.go:409 +0x590 fp=0xc000f0f1c0 sp=0xc000f0f0c0 pc=0xbe2350
-cmd/compile/internal/noder.(*irgen).expr0(0xc0002ea240, {0xea8cb0, 0xc0000aa090}, {0xea9c50?, 0xc00039bdb0?})
-	/usr/lib/go-1.19/src/cmd/compile/internal/noder/expr.go:116 +0x405 fp=0xc000f0f358 sp=0xc000f0f1c0 pc=0xbdfe85
-cmd/compile/internal/noder.(*irgen).expr(0xc0002ea240, {0xea9c50?, 0xc00039bdb0?})
-	/usr/lib/go-1.19/src/cmd/compile/internal/noder/expr.go:90 +0x6a5 fp=0xc000f0f570 sp=0xc000f0f358 pc=0xbdf6a5
-cmd/compile/internal/noder.(*irgen).exprs(0x1?, {0xc000f0f5d8, 0x1, 0x50?})
-	/usr/lib/go-1.19/src/cmd/compile/internal/noder/expr.go:385 +0x8e fp=0xc000f0f5b8 sp=0xc000f0f570 pc=0xbe1d2e
-cmd/compile/internal/noder.(*irgen).exprList(0xeaf198?, {0xea9c50?, 0xc00039bdb0?})
-	/usr/lib/go-1.19/src/cmd/compile/internal/noder/expr.go:368 +0x85 fp=0xc000f0f5f8 sp=0xc000f0f5b8 pc=0xbe1c65
-cmd/compile/internal/noder.(*irgen).varDecl.func1()
-	/usr/lib/go-1.19/src/cmd/compile/internal/noder/decl.go:294 +0x10c fp=0xc000f0f768 sp=0xc000f0f5f8 pc=0xbde2ec
-cmd/compile/internal/noder.(*irgen).generate(0xc0002ea240, {0xc0000a0b60, 0x2, 0x1412b60?})
-	/usr/lib/go-1.19/src/cmd/compile/internal/noder/irgen.go:293 +0x222 fp=0xc000f0f898 sp=0xc000f0f768 pc=0xbe7882
-cmd/compile/internal/noder.check2({0xc0000a0b60, 0x2, 0x2})
-	/usr/lib/go-1.19/src/cmd/compile/internal/noder/irgen.go:87 +0x14d fp=0xc000f0f9c0 sp=0xc000f0f898 pc=0xbe760d
-cmd/compile/internal/noder.LoadPackage({0xc0000b6120, 0x2, 0x2})
-	/usr/lib/go-1.19/src/cmd/compile/internal/noder/noder.go:82 +0x48f fp=0xc000f0fad8 sp=0xc000f0f9c0 pc=0xbeb74f
-cmd/compile/internal/gc.Main(0xd6c3c0)
-	/usr/lib/go-1.19/src/cmd/compile/internal/gc/main.go:189 +0xbbd fp=0xc000f0ff20 sp=0xc000f0fad8 pc=0xc4f51d
-main.main()
-	/usr/lib/go-1.19/src/cmd/compile/main.go:57 +0xdd fp=0xc000f0ff80 sp=0xc000f0ff20 pc=0xc777fd
-runtime.main()
-	/usr/lib/go-1.19/src/runtime/proc.go:250 +0x212 fp=0xc000f0ffe0 sp=0xc000f0ff80 pc=0x43a0b2
-runtime.goexit()
-	/usr/lib/go-1.19/src/runtime/asm_amd64.s:1594 +0x1 fp=0xc000f0ffe8 sp=0xc000f0ffe0 pc=0x46a181
-
-goroutine 2 [force gc (idle)]:
-runtime.gopark(0x0?, 0x0?, 0x0?, 0x0?, 0x0?)
-	/usr/lib/go-1.19/src/runtime/proc.go:363 +0xd6 fp=0xc00004cfb0 sp=0xc00004cf90 pc=0x43a476
-runtime.goparkunlock(...)
-	/usr/lib/go-1.19/src/runtime/proc.go:369
-runtime.forcegchelper()
-	/usr/lib/go-1.19/src/runtime/proc.go:302 +0xad fp=0xc00004cfe0 sp=0xc00004cfb0 pc=0x43a30d
-runtime.goexit()
-	/usr/lib/go-1.19/src/runtime/asm_amd64.s:1594 +0x1 fp=0xc00004cfe8 sp=0xc00004cfe0 pc=0x46a181
-created by runtime.init.6
-	/usr/lib/go-1.19/src/runtime/proc.go:290 +0x25
-
-goroutine 3 [GC sweep wait]:
-runtime.gopark(0x13cfd01?, 0x0?, 0x0?, 0x0?, 0x0?)
-	/usr/lib/go-1.19/src/runtime/proc.go:363 +0xd6 fp=0xc00004d790 sp=0xc00004d770 pc=0x43a476
-runtime.goparkunlock(...)
-	/usr/lib/go-1.19/src/runtime/proc.go:369
-runtime.bgsweep(0x0?)
-	/usr/lib/go-1.19/src/runtime/mgcsweep.go:297 +0xd7 fp=0xc00004d7c8 sp=0xc00004d790 pc=0x424fd7
-runtime.gcenable.func1()
-	/usr/lib/go-1.19/src/runtime/mgc.go:178 +0x26 fp=0xc00004d7e0 sp=0xc00004d7c8 pc=0x419c46
-runtime.goexit()
-	/usr/lib/go-1.19/src/runtime/asm_amd64.s:1594 +0x1 fp=0xc00004d7e8 sp=0xc00004d7e0 pc=0x46a181
-created by runtime.gcenable
-	/usr/lib/go-1.19/src/runtime/mgc.go:178 +0x6b
-
-goroutine 4 [GC scavenge wait]:
-runtime.gopark(0xc00006a000?, 0xea5440?, 0x0?, 0x0?, 0x0?)
-	/usr/lib/go-1.19/src/runtime/proc.go:363 +0xd6 fp=0xc00004df70 sp=0xc00004df50 pc=0x43a476
-runtime.goparkunlock(...)
-	/usr/lib/go-1.19/src/runtime/proc.go:369
-runtime.(*scavengerState).park(0x13d0340)
-	/usr/lib/go-1.19/src/runtime/mgcscavenge.go:389 +0x53 fp=0xc00004dfa0 sp=0xc00004df70 pc=0x423033
-runtime.bgscavenge(0x0?)
-	/usr/lib/go-1.19/src/runtime/mgcscavenge.go:622 +0x65 fp=0xc00004dfc8 sp=0xc00004dfa0 pc=0x423625
-runtime.gcenable.func2()
-	/usr/lib/go-1.19/src/runtime/mgc.go:179 +0x26 fp=0xc00004dfe0 sp=0xc00004dfc8 pc=0x419be6
-runtime.goexit()
-	/usr/lib/go-1.19/src/runtime/asm_amd64.s:1594 +0x1 fp=0xc00004dfe8 sp=0xc00004dfe0 pc=0x46a181
-created by runtime.gcenable
-	/usr/lib/go-1.19/src/runtime/mgc.go:179 +0xaa
-
-goroutine 17 [finalizer wait]:
-runtime.gopark(0x0?, 0xc00004c670?, 0xeb?, 0x70?, 0xc00004c770?)
-	/usr/lib/go-1.19/src/runtime/proc.go:363 +0xd6 fp=0xc00004c628 sp=0xc00004c608 pc=0x43a476
-runtime.goparkunlock(...)
-	/usr/lib/go-1.19/src/runtime/proc.go:369
-runtime.runfinq()
-	/usr/lib/go-1.19/src/runtime/mfinal.go:180 +0x10f fp=0xc00004c7e0 sp=0xc00004c628 pc=0x418d4f
-runtime.goexit()
-	/usr/lib/go-1.19/src/runtime/asm_amd64.s:1594 +0x1 fp=0xc00004c7e8 sp=0xc00004c7e0 pc=0x46a181
-created by runtime.createfing
-	/usr/lib/go-1.19/src/runtime/mfinal.go:157 +0x45
-
-goroutine 21 [GC worker (idle)]:
-runtime.gopark(0x1787b5ae2b?, 0x3?, 0xd2?, 0xb8?, 0xc0000487d0?)
-	/usr/lib/go-1.19/src/runtime/proc.go:363 +0xd6 fp=0xc000048750 sp=0xc000048730 pc=0x43a476
-runtime.gcBgMarkWorker()
-	/usr/lib/go-1.19/src/runtime/mgc.go:1235 +0xf1 fp=0xc0000487e0 sp=0xc000048750 pc=0x41bd91
-runtime.goexit()
-	/usr/lib/go-1.19/src/runtime/asm_amd64.s:1594 +0x1 fp=0xc0000487e8 sp=0xc0000487e0 pc=0x46a181
-created by runtime.gcBgMarkStartWorkers
-	/usr/lib/go-1.19/src/runtime/mgc.go:1159 +0x25
-
-goroutine 22 [GC worker (idle)]:
-runtime.gopark(0x17866c4441?, 0x2?, 0x70?, 0x84?, 0x0?)
-	/usr/lib/go-1.19/src/runtime/proc.go:363 +0xd6 fp=0xc000048f50 sp=0xc000048f30 pc=0x43a476
-runtime.gcBgMarkWorker()
-	/usr/lib/go-1.19/src/runtime/mgc.go:1235 +0xf1 fp=0xc000048fe0 sp=0xc000048f50 pc=0x41bd91
-runtime.goexit()
-	/usr/lib/go-1.19/src/runtime/asm_amd64.s:1594 +0x1 fp=0xc000048fe8 sp=0xc000048fe0 pc=0x46a181
-created by runtime.gcBgMarkStartWorkers
-	/usr/lib/go-1.19/src/runtime/mgc.go:1159 +0x25

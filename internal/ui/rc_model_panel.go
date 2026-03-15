@@ -306,16 +306,15 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			newBrandEntry := widget.NewEntry()
 			newBrandEntry.SetPlaceHolder("Введите название нового бренда")
 			
-			// Оборачиваем в контейнер с фиксированной минимальной шириной
-			wrappedEntry := container.NewHBox(newBrandEntry)
-			wrappedEntryObj := container.NewMax(wrappedEntry)
-			wrappedEntryObj.Resize(fyne.NewSize(600, 0))
+			// Создаем лейбл и поле в одной строке
+			label := widget.NewLabel("Название бренда:")
+			entryContainer := container.NewHBox(label, newBrandEntry)
 			
-			newBrandForm := widget.NewForm(
-				widget.NewFormItem("Название бренда", wrappedEntryObj),
-			)
+			// Оборачиваем в контейнер с фиксированной шириной
+			wrappedEntryObj := container.NewVBox(entryContainer)
+			wrappedEntryObj.Resize(fyne.NewSize(650, 100))
 			
-			newBrandDialog := dialog.NewCustomWithoutButtons("Добавить новый бренд", newBrandForm, p.window)
+			newBrandDialog := dialog.NewCustomWithoutButtons("Добавить новый бренд", wrappedEntryObj, p.window)
 			
 			cancelBtn := widget.NewButton("Отмена", func() {
 				newBrandDialog.Hide()
