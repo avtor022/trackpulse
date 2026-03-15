@@ -306,14 +306,12 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			newBrandEntry := widget.NewEntry()
 			newBrandEntry.SetPlaceHolder("Введите название нового бренда")
 			
-			// Устанавливаем минимальную ширину для entry через Resize
-			newBrandEntry.Resize(fyne.NewSize(500, newBrandEntry.MinSize().Height))
-			
-			// Оборачиваем в контейнер
+			// Оборачиваем в контейнер с фиксированной шириной
 			wrappedEntry := container.NewHBox(newBrandEntry)
+			wrappedEntryObj := container.NewMax(wrappedEntry)
 			
 			newBrandForm := widget.NewForm(
-				widget.NewFormItem("Название бренда", wrappedEntry),
+				widget.NewFormItem("Название бренда", wrappedEntryObj),
 			)
 			
 			newBrandDialog := dialog.NewCustomWithoutButtons("Добавить новый бренд", newBrandForm, p.window)
@@ -362,6 +360,19 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			})
 			
 			newBrandDialog.SetButtons([]fyne.CanvasObject{cancelBtn, saveBtn})
+			
+			// Увеличиваем размер диалога для нового бренда
+			parentSize := p.window.Canvas().Size()
+			dialogWidth := parentSize.Width * 0.6
+			if dialogWidth < 700 {
+				dialogWidth = 700
+			}
+			dialogHeight := parentSize.Height * 0.4
+			if dialogHeight < 250 {
+				dialogHeight = 250
+			}
+			newBrandDialog.Resize(fyne.NewSize(dialogWidth, dialogHeight))
+			
 			newBrandDialog.Show()
 		}
 	})
