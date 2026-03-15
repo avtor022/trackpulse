@@ -310,7 +310,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			entryContainer := container.NewHBox(
 				container.NewMax(newBrandEntry),
 			)
-			entryContainer.MinSize().Width = 500
+			entryContainer.MinSize = fyne.NewSize(500, 0)
 			
 			newBrandForm := widget.NewForm(
 				widget.NewFormItem("Название бренда", entryContainer),
