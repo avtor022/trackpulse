@@ -302,9 +302,15 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 
 		// Создаем контейнер с полем ввода и кнопкой dropdown
 		dropdownBtn := widget.NewButtonWithIcon("", theme.MenuDropDownIcon(), func() {
-			showFullDropdown(existingBrands, p.window, brandEntry, func(selected string) {
+			// Показываем простой Select в виде popup
+			selectWidget := widget.NewSelect(existingBrands, func(selected string) {
 				brandEntry.SetText(selected)
 			})
+			selectWidget.SetSelected("")
+			
+			popup := widget.NewPopUp(selectWidget, p.window.Canvas())
+			pos := fyne.NewPos(brandEntry.Position().X, brandEntry.Position().Y+brandEntry.Size().Height)
+			popup.ShowAt(pos)
 		})
 
 		brandWidget = container.NewHBox(
@@ -344,12 +350,24 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			}
 
 			if len(filtered) > 0 {
-				showFilterPopup(brandEntry, filtered, p.window, func(selected string) {
-					brandEntry.SetText(selected)
+				// Создаем простой список с фильтрацией
+				list := widget.NewList(
+					func() int { return len(filtered) },
+					func() fyne.CanvasObject { return widget.NewLabel("Template") },
+					func(id widget.ListItemID, item fyne.CanvasObject) {
+						item.(*widget.Label).SetText(filtered[id])
+					},
+				)
+				list.OnSelected = func(id widget.ListItemID) {
+					brandEntry.SetText(filtered[id])
 					if popup != nil {
 						popup.Hide()
 					}
-				})
+				}
+				
+				popup = widget.NewPopUp(list, p.window.Canvas())
+				pos := fyne.NewPos(brandEntry.Position().X, brandEntry.Position().Y+brandEntry.Size().Height)
+				popup.ShowAt(pos)
 			}
 		}
 
@@ -391,9 +409,15 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 
 		// Создаем контейнер с полем ввода и кнопкой dropdown
 		dropdownBtn := widget.NewButtonWithIcon("", theme.MenuDropDownIcon(), func() {
-			showFullDropdown(allModelNames, p.window, modelNameEntry, func(selected string) {
+			// Показываем простой Select в виде popup
+			selectWidget := widget.NewSelect(allModelNames, func(selected string) {
 				modelNameEntry.SetText(selected)
 			})
+			selectWidget.SetSelected("")
+			
+			popup := widget.NewPopUp(selectWidget, p.window.Canvas())
+			pos := fyne.NewPos(modelNameEntry.Position().X, modelNameEntry.Position().Y+modelNameEntry.Size().Height)
+			popup.ShowAt(pos)
 		})
 
 		modelNameWidget = container.NewHBox(
@@ -424,12 +448,24 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			}
 
 			if len(filtered) > 0 {
-				showFilterPopup(modelNameEntry, filtered, p.window, func(selected string) {
-					modelNameEntry.SetText(selected)
+				// Создаем простой список с фильтрацией
+				list := widget.NewList(
+					func() int { return len(filtered) },
+					func() fyne.CanvasObject { return widget.NewLabel("Template") },
+					func(id widget.ListItemID, item fyne.CanvasObject) {
+						item.(*widget.Label).SetText(filtered[id])
+					},
+				)
+				list.OnSelected = func(id widget.ListItemID) {
+					modelNameEntry.SetText(filtered[id])
 					if popup != nil {
 						popup.Hide()
 					}
-				})
+				}
+				
+				popup = widget.NewPopUp(list, p.window.Canvas())
+				pos := fyne.NewPos(modelNameEntry.Position().X, modelNameEntry.Position().Y+modelNameEntry.Size().Height)
+				popup.ShowAt(pos)
 			}
 		}
 
