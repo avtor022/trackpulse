@@ -305,7 +305,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			
 			newBrandEntry := widget.NewEntry()
 			newBrandEntry.SetPlaceHolder("Введите название нового бренда")
-			newBrandEntry.Resize(fyne.NewSize(400, 0))
+			newBrandEntry.Resize(fyne.NewSize(500, 0))
 			
 			// Wrap entry in a container with fixed width
 			entryContainer := container.NewMax(newBrandEntry)
