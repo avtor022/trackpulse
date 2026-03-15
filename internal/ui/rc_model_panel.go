@@ -289,16 +289,19 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 
 	// Создаем виджет для выбора бренда - используем Select с опцией добавления нового
 	var brandSelect *widget.Select
-	var brandEntry *widget.Entry
 	
 	// Добавляем опцию для создания нового бренда
 	newBrandOption := "+ Добавить новый бренд"
 	selectOptions := append(existingBrands, newBrandOption)
 	
+	var mainDialog dialog.Dialog
+	
 	brandSelect = widget.NewSelect(selectOptions, func(selected string) {
 		if selected == newBrandOption {
 			// Показываем диалог для добавления нового бренда
-			d.Hide() // Скрываем основной диалог
+			if mainDialog != nil {
+				mainDialog.Hide() // Скрываем основной диалог
+			}
 			
 			newBrandEntry := widget.NewEntry()
 			newBrandEntry.SetPlaceHolder("Введите название нового бренда")
@@ -312,7 +315,9 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			cancelBtn := widget.NewButton("Отмена", func() {
 				newBrandDialog.Hide()
 				// Возвращаемся к основному диалогу
-				d.Show()
+				if mainDialog != nil {
+					mainDialog.Show()
+				}
 				brandSelect.SetSelected("")
 			})
 			
@@ -344,7 +349,9 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 				
 				newBrandDialog.Hide()
 				// Возвращаемся к основному диалогу с выбранным новым брендом
-				d.Show()
+				if mainDialog != nil {
+					mainDialog.Show()
+				}
 				brandSelect.SetSelected(newBrandName)
 			})
 			
@@ -353,13 +360,11 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 		}
 	})
 	
-	brandSelect.SetPlaceHolder("Выберите бренд или добавьте новый")
-	
 	if model != nil && model.Brand != "" {
 		brandSelect.SetSelected(model.Brand)
 	}
 	
-	brandWidget = brandSelect
+	brandWidget := brandSelect
 
 	// Создаем виджет для выбора названия модели с автодополнением
 	var modelNameWidget fyne.CanvasObject
@@ -505,6 +510,9 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 
 	// Create dialog without buttons first so we can reference it in the callback
 	d := dialog.NewCustomWithoutButtons(title, form, p.window)
+	
+	// Assign dialog to mainDialog for use in brand selection callback
+	mainDialog = d
 
 	// Create save button with callback that has access to 'd'
 	saveBtn := widget.NewButton("Save", func() {
