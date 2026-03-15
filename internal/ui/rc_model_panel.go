@@ -305,6 +305,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			
 			newBrandEntry := widget.NewEntry()
 			newBrandEntry.SetPlaceHolder("Введите название нового бренда")
+			newBrandEntry.SetMinSize(fyne.NewSize(300, 0)) // Увеличиваем ширину поля ввода
 			
 			newBrandForm := widget.NewForm(
 				widget.NewFormItem("Название бренда", newBrandEntry),
