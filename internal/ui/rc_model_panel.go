@@ -308,7 +308,6 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			
 			// Создаем лейбл и поле в одной строке
 			label := widget.NewLabel("Название бренда:")
-			newBrandEntry.SetMinSize(fyne.NewSize(550, 0)) // Устанавливаем минимальную ширину для поля ввода
 			entryContainer := container.NewHBox(label, newBrandEntry)
 			
 			newBrandDialog := dialog.NewCustomWithoutButtons("Добавить новый бренд", entryContainer, p.window)
