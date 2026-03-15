@@ -307,8 +307,8 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			newBrandEntry.SetPlaceHolder("Введите название нового бренда")
 			
 			// Оборачиваем в контейнер для фиксации ширины
-			newBrandEntry.SetMinSize(fyne.NewSize(500, 0))
 			wrappedEntry := container.NewHBox(newBrandEntry)
+			wrappedEntry.MinSize = fyne.NewSize(500, 0)
 			
 			newBrandForm := widget.NewForm(
 				widget.NewFormItem("Название бренда", wrappedEntry),
