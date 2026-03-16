@@ -306,9 +306,9 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			newBrandEntry := widget.NewEntry()
 			newBrandEntry.SetPlaceHolder("Введите название нового бренда")
 			
-			// Создаем лейбл и поле в одной строке
+			// Создаем лейбл и поле ввода вертикально для лучшей ширины
 			label := widget.NewLabel("Название бренда:")
-			entryContainer := container.NewHBox(label, newBrandEntry)
+			entryContainer := container.NewVBox(label, newBrandEntry)
 			
 			newBrandDialog := dialog.NewCustomWithoutButtons("Добавить новый бренд", entryContainer, p.window)
 			
