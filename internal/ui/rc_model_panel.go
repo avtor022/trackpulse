@@ -19,9 +19,9 @@ type ModelPanel struct {
 	content         *fyne.Container
 	table           *widget.Table
 	statusLabel     *widget.Label
-	window          fyne.Window      // Ссылка на окно для диалогов
-	selectedModelID string           // ID выбранной модели
-	allModels       []models.RCModel // Кэш всех моделей
+	window          fyne.Window      // Reference to window for dialogs
+	selectedModelID string           // ID of selected model
+	allModels       []models.RCModel // Cache of all models
 }
 
 // NewModelPanel creates a new RC model management panel
@@ -80,7 +80,7 @@ func (p *ModelPanel) createToolbar() *widget.Toolbar {
 
 // createModelTable creates the data table for RC models
 func (p *ModelPanel) createModelTable() *widget.Table {
-	// Сначала загружаем данные
+	// First load data
 	p.allModels, _ = p.modelService.GetAllModels()
 
 	table := widget.NewTable(
@@ -142,7 +142,7 @@ func (p *ModelPanel) createModelTable() *widget.Table {
 		},
 	)
 
-	// Создаем заголовки
+	// Create headers
 	headers := []string{"ID", "Brand", "Model Name", "Scale", "Type", "Motor", "Drive", "Created At", "Updated At"}
 	table.CreateHeader = func() fyne.CanvasObject {
 		label := widget.NewLabel("Header")
@@ -156,7 +156,7 @@ func (p *ModelPanel) createModelTable() *widget.Table {
 		}
 	}
 
-	// Включаем отображение строки заголовков
+	// Enable header row display
 	table.ShowHeaderRow = true
 
 	// Set column widths for better visibility
@@ -183,7 +183,7 @@ func (p *ModelPanel) createModelTable() *widget.Table {
 // refreshData reloads the model data
 func (p *ModelPanel) refreshData() {
 	if p.table != nil {
-		// Обновляем кэш данных
+		// Update data cache
 		var err error
 		p.allModels, err = p.modelService.GetAllModels()
 		if err != nil {
@@ -213,7 +213,7 @@ func (p *ModelPanel) showEditDialog() {
 		return
 	}
 
-	// Ищем выбранную модель в кэше
+	// Look for selected model in cache
 	for _, model := range p.allModels {
 		if model.ID == p.selectedModelID {
 			p.showModelDialog("Edit RC Model", &model)
@@ -231,7 +231,7 @@ func (p *ModelPanel) deleteSelected() {
 		return
 	}
 
-	// Ищем выбранную модель в кэше
+	// Look for selected model in cache
 	var modelToDelete *models.RCModel
 	for i, model := range p.allModels {
 		if model.ID == p.selectedModelID {
@@ -245,7 +245,7 @@ func (p *ModelPanel) deleteSelected() {
 		return
 	}
 
-	// Показываем диалог подтверждения
+	// Show confirmation dialog
 	dialog.ShowConfirm(
 		"Confirm Delete",
 		"Are you sure you want to delete model "+modelToDelete.Brand+" "+modelToDelete.ModelName+"?",
@@ -267,88 +267,88 @@ func (p *ModelPanel) deleteSelected() {
 
 // showModelDialog shows a dialog for creating or editing a model
 func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
-	// Получаем список всех брендов из отдельной таблицы справочника
+	// Get all brands from the separate reference table
 	allBrands, err := p.modelService.GetAllBrands()
 	if err != nil {
 		fmt.Println("ERROR getting brands:", err)
-		// Продолжаем работу даже если не удалось получить бренды
+		// Continue working even if brands could not be retrieved
 	}
 
-	// Извлекаем имена брендов
+	// Extract brand names
 	var existingBrands []string
 	for _, brand := range allBrands {
 		existingBrands = append(existingBrands, brand.Name)
 	}
 
-	// Получаем список всех названий моделей
+	// Get all model names
 	allModelNames, err := p.modelService.GetAllModelNames()
 	if err != nil {
 		fmt.Println("ERROR getting model names:", err)
-		// Продолжаем работу даже если не удалось получить названия моделей
+		// Continue working even if model names could not be retrieved
 	}
 
-	// Создаем виджет для выбора бренда - используем Select с опцией добавления нового
+	// Create widget for brand selection - use Select with option to add new
 	var brandSelect *widget.Select
 	
-	// Добавляем опцию для создания нового бренда
-	newBrandOption := "+ Добавить новый бренд"
+	// Add option to create new brand
+	newBrandOption := "+ Add New Brand"
 	selectOptions := append(existingBrands, newBrandOption)
 	
 	var mainDialog dialog.Dialog
 	
 	brandSelect = widget.NewSelect(selectOptions, func(selected string) {
 		if selected == newBrandOption {
-			// Показываем диалог для добавления нового бренда
+			// Show dialog to add new brand
 			if mainDialog != nil {
-				mainDialog.Hide() // Скрываем основной диалог
+				mainDialog.Hide() // Hide main dialog
 			}
 			
 			newBrandEntry := widget.NewEntry()
-			newBrandEntry.SetPlaceHolder("Введите название нового бренда")
+			newBrandEntry.SetPlaceHolder("Enter new brand name")
 			
-			// Создаем лейбл и поле ввода вертикально для лучшей ширины
-			label := widget.NewLabel("Название бренда:")
+			// Create label and input field vertically for better width
+			label := widget.NewLabel("Brand Name:")
 			entryContainer := container.NewVBox(label, newBrandEntry)
 			
-			newBrandDialog := dialog.NewCustomWithoutButtons("Добавить новый бренд", entryContainer, p.window)
+			newBrandDialog := dialog.NewCustomWithoutButtons("Add New Brand", entryContainer, p.window)
 			
-			cancelBtn := widget.NewButton("Отмена", func() {
+			cancelBtn := widget.NewButton("Cancel", func() {
 				newBrandDialog.Hide()
-				// Возвращаемся к основному диалогу
+				// Return to main dialog
 				if mainDialog != nil {
 					mainDialog.Show()
 				}
 				brandSelect.SetSelected("")
 			})
 			
-			saveBtn := widget.NewButton("Сохранить", func() {
+			saveBtn := widget.NewButton("Save", func() {
 				newBrandName := strings.TrimSpace(newBrandEntry.Text)
 				if newBrandName == "" {
-					dialog.ShowError(fmt.Errorf("введите название бренда"), p.window)
+					dialog.ShowError(fmt.Errorf("enter brand name"), p.window)
 					return
 				}
 				
-				// Проверяем, не существует ли уже такой бренд
+				// Check if brand already exists
 				for _, b := range existingBrands {
 					if strings.EqualFold(b, newBrandName) {
-						dialog.ShowError(fmt.Errorf("бренд '%s' уже существует", newBrandName), p.window)
+						dialog.ShowError(fmt.Errorf("brand '%s' already exists", newBrandName), p.window)
 						return
 					}
 				}
 				
-				// Добавляем новый бренд в таблицу справочника
+				// Add new brand to reference table
 				if err := p.modelService.AddBrand(newBrandName); err != nil {
 					dialog.ShowError(err, p.window)
 					return
 				}
 				
-				// Обновляем список брендов
+				// Update brand list
 				existingBrands = append(existingBrands, newBrandName)
 				selectOptions = append(existingBrands, newBrandOption)
 				brandSelect.Options = selectOptions
 				
 				newBrandDialog.Hide()
-				// Возвращаемся к основному диалогу с выбранным новым брендом
+				// Return to main dialog with new brand selected
 				if mainDialog != nil {
 					mainDialog.Show()
 				}
@@ -357,13 +357,13 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			
 			newBrandDialog.SetButtons([]fyne.CanvasObject{cancelBtn, saveBtn})
 			
-			// Увеличиваем ширину диалога для нового бренда
+			// Increase dialog width for new brand
 			parentSize := p.window.Canvas().Size()
 			dialogWidth := parentSize.Width * 0.6
 			if dialogWidth < 700 {
 				dialogWidth = 700
 			}
-			// Используем стандартную высоту контента, не изменяем её
+			// Use standard content height, do not change it
 			newBrandDialog.Resize(fyne.NewSize(dialogWidth, newBrandDialog.MinSize().Height))
 			
 			newBrandDialog.Show()
@@ -376,30 +376,30 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 	
 	brandWidget := brandSelect
 
-	// Создаем виджет для выбора названия модели с автодополнением
+	// Create widget for model name selection with autocomplete
 	var modelNameWidget fyne.CanvasObject
 	var modelNameEntry *widget.Entry
 
 	if len(allModelNames) > 0 {
-		// Используем Entry с автодополнением
+		// Use Entry with autocomplete
 		modelNameEntry = widget.NewEntry()
-		modelNameEntry.SetPlaceHolder("Например: X-Maxx")
+		modelNameEntry.SetPlaceHolder("e.g., X-Maxx")
 		modelNameEntry.Resize(fyne.NewSize(250, modelNameEntry.MinSize().Height))
 		
 		if model != nil && model.ModelName != "" {
 			modelNameEntry.SetText(model.ModelName)
 		}
 
-		// Создаем контейнер с полем ввода и кнопкой dropdown
+		// Create container with input field and dropdown button
 		dropdownBtn := widget.NewButtonWithIcon("", theme.MenuDropDownIcon(), func() {
-			// Показываем простой Select в виде popup
+			// Show simple Select as popup
 			selectWidget := widget.NewSelect(allModelNames, func(selected string) {
 				modelNameEntry.SetText(selected)
 			})
 			selectWidget.SetSelected("")
 			
 			popup := widget.NewPopUp(selectWidget, p.window.Canvas())
-			// Позиционируем popup под полем ввода
+			// Position popup below input field
 			entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(modelNameEntry)
 			popupSize := selectWidget.MinSize()
 			popup.Resize(popupSize)
@@ -412,7 +412,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			dropdownBtn,
 		)
 
-		// Обработчик изменения текста для фильтрации
+		// Text change handler for filtering
 		var popup *widget.PopUp
 		
 		modelNameEntry.OnChanged = func(text string) {
@@ -424,7 +424,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 				return
 			}
 
-			// Фильтруем опции
+			// Filter options
 			var filtered []string
 			textLower := strings.ToLower(text)
 			
@@ -435,7 +435,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			}
 
 			if len(filtered) > 0 {
-				// Создаем простой список с фильтрацией
+				// Create simple list with filtering
 				list := widget.NewList(
 					func() int { return len(filtered) },
 					func() fyne.CanvasObject { return widget.NewLabel("Template") },
@@ -451,7 +451,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 				}
 				
 				popup = widget.NewPopUp(list, p.window.Canvas())
-				// Позиционируем popup под полем ввода
+				// Position popup below input field
 				entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(modelNameEntry)
 				popupSize := list.MinSize()
 				popup.Resize(popupSize)
@@ -468,9 +468,9 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 
 		_ = popup
 	} else {
-		// Если названий моделей нет, используем обычное поле ввода
+		// If no model names available, use regular input field
 		modelNameEntry = widget.NewEntry()
-		modelNameEntry.SetPlaceHolder("Например: X-Maxx")
+		modelNameEntry.SetPlaceHolder("e.g., X-Maxx")
 		modelNameEntry.Resize(fyne.NewSize(250, modelNameEntry.MinSize().Height))
 		if model != nil && model.ModelName != "" {
 			modelNameEntry.SetText(model.ModelName)
@@ -479,16 +479,16 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 	}
 
 	scaleEntry := widget.NewEntry()
-	scaleEntry.SetPlaceHolder("Например: 1:8")
+	scaleEntry.SetPlaceHolder("e.g., 1:8")
 
 	modelTypeEntry := widget.NewEntry()
-	modelTypeEntry.SetPlaceHolder("Например: Monster Truck")
+	modelTypeEntry.SetPlaceHolder("e.g., Monster Truck")
 
 	motorTypeEntry := widget.NewEntry()
-	motorTypeEntry.SetPlaceHolder("Например: Brushless")
+	motorTypeEntry.SetPlaceHolder("e.g., Brushless")
 
 	driveTypeEntry := widget.NewEntry()
-	driveTypeEntry.SetPlaceHolder("Например: 4WD")
+	driveTypeEntry.SetPlaceHolder("e.g., 4WD")
 
 	if model != nil {
 		// Edit mode - populate fields that are not select widgets
@@ -506,7 +506,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 		}
 	}
 
-	// Создаем форму с полями
+	// Create form with fields
 	formItems := []*widget.FormItem{
 		widget.NewFormItem("Brand", brandWidget),
 		widget.NewFormItem("Model Name", modelNameWidget),
@@ -526,13 +526,13 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 
 	// Create save button with callback that has access to 'd'
 	saveBtn := widget.NewButton("Save", func() {
-		// Получаем значение бренда из Select
+		// Get brand value from Select
 		var brand string
 		if brandSelect != nil {
 			brand = brandSelect.Selected
 		}
 
-		// Получаем значение названия модели
+		// Get model name value
 		var modelName string
 		if modelNameEntry != nil {
 			modelName = modelNameEntry.Text

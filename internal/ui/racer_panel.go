@@ -21,9 +21,9 @@ type RacerPanel struct {
 	content         *fyne.Container
 	table           *widget.Table
 	statusLabel     *widget.Label
-	window          fyne.Window    // Ссылка на окно для диалогов
-	selectedRacerID string         // ID выбранного гонщика
-	allRacers       []models.Racer // Кэш всех гонщиков
+	window          fyne.Window    // Reference to window for dialogs
+	selectedRacerID string         // ID of selected racer
+	allRacers       []models.Racer // Cache of all racers
 }
 
 // NewRacerPanel creates a new racer management panel
@@ -82,7 +82,7 @@ func (p *RacerPanel) createToolbar() *widget.Toolbar {
 
 // createRacerTable creates the data table for racers
 func (p *RacerPanel) createRacerTable() *widget.Table {
-	// Сначала загружаем данные
+	// First load data
 	p.allRacers, _ = p.racerService.GetAllRacers()
 
 	table := widget.NewTable(
@@ -140,7 +140,7 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 		},
 	)
 
-	// Создаем заголовки
+	// Create headers
 	headers := []string{"ID", "Number", "Name", "Country", "City", "Birthday", "Rating", "Created At", "Updated At"}
 	table.CreateHeader = func() fyne.CanvasObject {
 		label := widget.NewLabel("Header")
@@ -154,7 +154,7 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 		}
 	}
 
-	// Включаем отображение строки заголовков
+	// Enable header row display
 	table.ShowHeaderRow = true
 
 	// Set column widths for better visibility
@@ -181,7 +181,7 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 // refreshData reloads the racer data
 func (p *RacerPanel) refreshData() {
 	if p.table != nil {
-		// Обновляем кэш данных
+		// Update data cache
 		var err error
 		p.allRacers, err = p.racerService.GetAllRacers()
 		if err != nil {
@@ -215,7 +215,7 @@ func (p *RacerPanel) showEditDialog() {
 		return
 	}
 
-	// Ищем выбранного гонщика в кэше
+	// Look for selected racer in cache
 	for _, racer := range p.allRacers {
 		if racer.ID == p.selectedRacerID {
 			p.showRacerDialog("Edit Racer", &racer)
@@ -233,7 +233,7 @@ func (p *RacerPanel) deleteSelected() {
 		return
 	}
 
-	// Ищем выбранного гонщика в кэше
+	// Look for selected racer in cache
 	var racerToDelete *models.Racer
 	for i, racer := range p.allRacers {
 		if racer.ID == p.selectedRacerID {
@@ -247,7 +247,7 @@ func (p *RacerPanel) deleteSelected() {
 		return
 	}
 
-	// Показываем диалог подтверждения
+	// Show confirmation dialog
 	dialog.ShowConfirm(
 		"Confirm Delete",
 		"Are you sure you want to delete racer "+racerToDelete.FullName+"?",
@@ -271,19 +271,19 @@ func (p *RacerPanel) deleteSelected() {
 func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 	// Create form fields with placeholders and increased width
 	numberEntry := widget.NewEntry()
-	numberEntry.SetPlaceHolder("Например: 7")
+	numberEntry.SetPlaceHolder("e.g., 7")
 
 	nameEntry := widget.NewEntry()
-	nameEntry.SetPlaceHolder("Иванов Иван Иванович")
+	nameEntry.SetPlaceHolder("John Doe")
 
 	countryEntry := widget.NewEntry()
-	countryEntry.SetPlaceHolder("Россия")
+	countryEntry.SetPlaceHolder("USA")
 
 	cityEntry := widget.NewEntry()
-	cityEntry.SetPlaceHolder("Москва")
+	cityEntry.SetPlaceHolder("New York")
 
 	birthdayEntry := widget.NewEntry()
-	birthdayEntry.SetPlaceHolder("ДД.ММ.ГГГГ")
+	birthdayEntry.SetPlaceHolder("MM.DD.YYYY")
 
 	ratingEntry := widget.NewEntry()
 	ratingEntry.SetPlaceHolder("0")
@@ -300,17 +300,17 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 		ratingEntry.SetText(strconv.Itoa(racer.Rating))
 	}
 
-	// Создаем форму
+	// Create form
 	form := widget.NewForm(
 		widget.NewFormItem("Racer Number", numberEntry),
 		widget.NewFormItem("Full Name", nameEntry),
 		widget.NewFormItem("Country", countryEntry),
 		widget.NewFormItem("City", cityEntry),
-		widget.NewFormItem("Birthday (DD.MM.YYYY)", birthdayEntry),
+		widget.NewFormItem("Birthday (MM.DD.YYYY)", birthdayEntry),
 		widget.NewFormItem("Rating", ratingEntry),
 	)
 
-	// Устанавливаем минимальную ширину для полей ввода через обертку
+	// Set minimum width for input fields via wrapper
 	minWidth := float32(400)
 	numberEntry.SetPlaceHolder("")
 	nameEntry.SetPlaceHolder("")
@@ -319,7 +319,7 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 	birthdayEntry.SetPlaceHolder("")
 	ratingEntry.SetPlaceHolder("")
 
-	// Устанавливаем минимальную ширину для каждого поля
+	// Set minimum width for each field
 	numberEntry.Resize(fyne.NewSize(minWidth, numberEntry.MinSize().Height))
 	nameEntry.Resize(fyne.NewSize(minWidth, nameEntry.MinSize().Height))
 	countryEntry.Resize(fyne.NewSize(minWidth, countryEntry.MinSize().Height))
@@ -327,13 +327,13 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 	birthdayEntry.Resize(fyne.NewSize(minWidth, birthdayEntry.MinSize().Height))
 	ratingEntry.Resize(fyne.NewSize(minWidth, ratingEntry.MinSize().Height))
 
-	// Создаем форму с полями
+	// Create form with fields
 	form = widget.NewForm(
 		widget.NewFormItem("Number", numberEntry),
 		widget.NewFormItem("Name", nameEntry),
 		widget.NewFormItem("Country", countryEntry),
 		widget.NewFormItem("City", cityEntry),
-		widget.NewFormItem("Birthday (DD.MM.YYYY)", birthdayEntry),
+		widget.NewFormItem("Birthday (MM.DD.YYYY)", birthdayEntry),
 		widget.NewFormItem("Rating", ratingEntry),
 	)
 

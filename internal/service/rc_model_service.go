@@ -123,7 +123,7 @@ func (s *RCModelService) AddBrand(name string) error {
 		return fmt.Errorf("brand name is required")
 	}
 	
-	// Проверяем, не существует ли уже такой бренд
+	// Check if brand already exists
 	existing, err := s.brandRepo.GetByName(name)
 	if err != nil {
 		return fmt.Errorf("failed to check existing brand: %w", err)
@@ -132,7 +132,7 @@ func (s *RCModelService) AddBrand(name string) error {
 		return fmt.Errorf("brand '%s' already exists", name)
 	}
 	
-	// Создаем новый бренд
+	// Create new brand
 	_, err = s.brandRepo.Create(name)
 	if err != nil {
 		return fmt.Errorf("failed to create brand: %w", err)
