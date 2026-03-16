@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"trackpulse/internal/locale"
 	"trackpulse/internal/models"
 	"trackpulse/internal/service"
 )
@@ -36,7 +37,7 @@ func NewModelPanel(modelService *service.RCModelService, window fyne.Window) fyn
 // buildUI constructs the model panel UI
 func (p *ModelPanel) buildUI() *fyne.Container {
 	// Status label
-	p.statusLabel = widget.NewLabel("Ready")
+	p.statusLabel = widget.NewLabel(locale.T("status.ready"))
 
 	// Toolbar with actions
 	toolbar := p.createToolbar()
@@ -142,8 +143,18 @@ func (p *ModelPanel) createModelTable() *widget.Table {
 		},
 	)
 
-	// Create headers
-	headers := []string{"ID", "Brand", "Model Name", "Scale", "Type", "Motor", "Drive", "Created At", "Updated At"}
+	// Create headers - using localized strings
+	headers := []string{
+		locale.T("common.id"), 
+		locale.T("model.header.brand"), 
+		locale.T("model.header.name"), 
+		locale.T("model.header.scale"), 
+		locale.T("model.header.type"), 
+		locale.T("model.header.motor"), 
+		locale.T("model.header.drive"), 
+		locale.T("model.header.created"), 
+		locale.T("model.header.updated"),
+	}
 	table.CreateHeader = func() fyne.CanvasObject {
 		label := widget.NewLabel("Header")
 		label.Truncation = fyne.TextTruncateEllipsis
@@ -209,25 +220,25 @@ func (p *ModelPanel) showCreateDialog() {
 // showEditDialog shows the dialog for editing an existing model
 func (p *ModelPanel) showEditDialog() {
 	if p.selectedModelID == "" {
-		dialog.ShowInformation("Info", "Please select a model in the table first", p.window)
+		dialog.ShowInformation(locale.T("common.info"), locale.T("info.select_first"), p.window)
 		return
 	}
 
 	// Look for selected model in cache
 	for _, model := range p.allModels {
 		if model.ID == p.selectedModelID {
-			p.showModelDialog("Edit RC Model", &model)
+			p.showModelDialog(locale.T("dialog.edit.title"), &model)
 			return
 		}
 	}
 
-	dialog.ShowInformation("Info", "Selected model not found", p.window)
+	dialog.ShowInformation(locale.T("common.info"), locale.T("info.not_found"), p.window)
 }
 
 // deleteSelected deletes the selected model
 func (p *ModelPanel) deleteSelected() {
 	if p.selectedModelID == "" {
-		dialog.ShowInformation("Info", "Please select a model in the table first", p.window)
+		dialog.ShowInformation(locale.T("common.info"), locale.T("info.select_first"), p.window)
 		return
 	}
 
@@ -241,23 +252,23 @@ func (p *ModelPanel) deleteSelected() {
 	}
 
 	if modelToDelete == nil {
-		dialog.ShowInformation("Info", "Selected model not found", p.window)
+		dialog.ShowInformation(locale.T("common.info"), locale.T("info.not_found"), p.window)
 		return
 	}
 
 	// Show confirmation dialog
 	dialog.ShowConfirm(
-		"Confirm Delete",
-		"Are you sure you want to delete model "+modelToDelete.Brand+" "+modelToDelete.ModelName+"?",
+		locale.T("dialog.delete.title"),
+		fmt.Sprintf(locale.T("dialog.delete.message"), modelToDelete.Brand+" "+modelToDelete.ModelName),
 		func(confirmed bool) {
 			if confirmed {
 				if err := p.modelService.DeleteModel(modelToDelete.ID); err != nil {
 					dialog.ShowError(err, p.window)
-					p.statusLabel.SetText("Delete failed: " + err.Error())
+					p.statusLabel.SetText(locale.T("status.delete_failed") + ": " + err.Error())
 				} else {
 					p.refreshData()
 					p.selectedModelID = ""
-					p.statusLabel.SetText("Model deleted successfully")
+					p.statusLabel.SetText(locale.T("status.deleted_success"))
 				}
 			}
 		},
@@ -291,7 +302,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 	var brandSelect *widget.Select
 	
 	// Add option to create new brand
-	newBrandOption := "+ Add New Brand"
+	newBrandOption := "+ " + locale.T("common.add") + " " + strings.TrimSuffix(locale.T("form.model.brand"), ":")
 	selectOptions := append(existingBrands, newBrandOption)
 	
 	var mainDialog dialog.Dialog
@@ -304,15 +315,15 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			}
 			
 			newBrandEntry := widget.NewEntry()
-			newBrandEntry.SetPlaceHolder("Enter new brand name")
+			newBrandEntry.SetPlaceHolder(locale.T("dialog.add_brand.placeholder"))
 			
 			// Create label and input field vertically for better width
-			label := widget.NewLabel("Brand Name:")
+			label := widget.NewLabel(locale.T("dialog.add_brand.label"))
 			entryContainer := container.NewVBox(label, newBrandEntry)
 			
-			newBrandDialog := dialog.NewCustomWithoutButtons("Add New Brand", entryContainer, p.window)
+			newBrandDialog := dialog.NewCustomWithoutButtons(locale.T("dialog.add_brand.title"), entryContainer, p.window)
 			
-			cancelBtn := widget.NewButton("Cancel", func() {
+			cancelBtn := widget.NewButton(locale.T("common.cancel"), func() {
 				newBrandDialog.Hide()
 				// Return to main dialog
 				if mainDialog != nil {
@@ -321,17 +332,17 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 				brandSelect.SetSelected("")
 			})
 			
-			saveBtn := widget.NewButton("Save", func() {
+			saveBtn := widget.NewButton(locale.T("common.save"), func() {
 				newBrandName := strings.TrimSpace(newBrandEntry.Text)
 				if newBrandName == "" {
-					dialog.ShowError(fmt.Errorf("enter brand name"), p.window)
+					dialog.ShowError(fmt.Errorf(locale.T("info.enter_brand_name")), p.window)
 					return
 				}
 				
 				// Check if brand already exists
 				for _, b := range existingBrands {
 					if strings.EqualFold(b, newBrandName) {
-						dialog.ShowError(fmt.Errorf("brand '%s' already exists", newBrandName), p.window)
+						dialog.ShowError(fmt.Errorf(locale.T("dialog.new_brand.error_exists"), newBrandName), p.window)
 						return
 					}
 				}
@@ -383,7 +394,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 	if len(allModelNames) > 0 {
 		// Use Entry with autocomplete
 		modelNameEntry = widget.NewEntry()
-		modelNameEntry.SetPlaceHolder("e.g., X-Maxx")
+		modelNameEntry.SetPlaceHolder(locale.T("form.model.name_placeholder"))
 		modelNameEntry.Resize(fyne.NewSize(250, modelNameEntry.MinSize().Height))
 		
 		if model != nil && model.ModelName != "" {
@@ -470,7 +481,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 	} else {
 		// If no model names available, use regular input field
 		modelNameEntry = widget.NewEntry()
-		modelNameEntry.SetPlaceHolder("e.g., X-Maxx")
+		modelNameEntry.SetPlaceHolder(locale.T("form.model.name_placeholder"))
 		modelNameEntry.Resize(fyne.NewSize(250, modelNameEntry.MinSize().Height))
 		if model != nil && model.ModelName != "" {
 			modelNameEntry.SetText(model.ModelName)
@@ -479,16 +490,16 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 	}
 
 	scaleEntry := widget.NewEntry()
-	scaleEntry.SetPlaceHolder("e.g., 1:8")
+	scaleEntry.SetPlaceHolder(locale.T("form.model.scale_placeholder"))
 
 	modelTypeEntry := widget.NewEntry()
-	modelTypeEntry.SetPlaceHolder("e.g., Monster Truck")
+	modelTypeEntry.SetPlaceHolder(locale.T("form.model.type_placeholder"))
 
 	motorTypeEntry := widget.NewEntry()
-	motorTypeEntry.SetPlaceHolder("e.g., Brushless")
+	motorTypeEntry.SetPlaceHolder(locale.T("form.model.motor_placeholder"))
 
 	driveTypeEntry := widget.NewEntry()
-	driveTypeEntry.SetPlaceHolder("e.g., 4WD")
+	driveTypeEntry.SetPlaceHolder(locale.T("form.model.drive_placeholder"))
 
 	if model != nil {
 		// Edit mode - populate fields that are not select widgets
@@ -508,12 +519,12 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 
 	// Create form with fields
 	formItems := []*widget.FormItem{
-		widget.NewFormItem("Brand", brandWidget),
-		widget.NewFormItem("Model Name", modelNameWidget),
-		widget.NewFormItem("Scale", scaleEntry),
-		widget.NewFormItem("Model Type", modelTypeEntry),
-		widget.NewFormItem("Motor Type", motorTypeEntry),
-		widget.NewFormItem("Drive Type", driveTypeEntry),
+		widget.NewFormItem(locale.T("form.model.brand"), brandWidget),
+		widget.NewFormItem(locale.T("form.model.name"), modelNameWidget),
+		widget.NewFormItem(locale.T("form.model.scale"), scaleEntry),
+		widget.NewFormItem(locale.T("form.model.type"), modelTypeEntry),
+		widget.NewFormItem(locale.T("form.model.motor"), motorTypeEntry),
+		widget.NewFormItem(locale.T("form.model.drive"), driveTypeEntry),
 	}
 	
 	form := widget.NewForm(formItems...)
@@ -525,7 +536,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 	mainDialog = d
 
 	// Create save button with callback that has access to 'd'
-	saveBtn := widget.NewButton("Save", func() {
+	saveBtn := widget.NewButton(locale.T("common.save"), func() {
 		// Get brand value from Select
 		var brand string
 		if brandSelect != nil {
@@ -540,19 +551,19 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 
 		// Validate required fields
 		if brand == "" {
-			dialog.ShowError(fmt.Errorf("brand is required"), p.window)
+			dialog.ShowError(fmt.Errorf(locale.T("error.required.brand")), p.window)
 			return
 		}
 		if modelName == "" {
-			dialog.ShowError(fmt.Errorf("model name is required"), p.window)
+			dialog.ShowError(fmt.Errorf(locale.T("error.required.name")), p.window)
 			return
 		}
 		if scaleEntry.Text == "" {
-			dialog.ShowError(fmt.Errorf("scale is required"), p.window)
+			dialog.ShowError(fmt.Errorf(locale.T("error.required.scale")), p.window)
 			return
 		}
 		if modelTypeEntry.Text == "" {
-			dialog.ShowError(fmt.Errorf("model type is required"), p.window)
+			dialog.ShowError(fmt.Errorf(locale.T("error.required.type")), p.window)
 			return
 		}
 
@@ -571,7 +582,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 				dialog.ShowError(err, p.window)
 				return
 			}
-			p.statusLabel.SetText("Model updated successfully")
+			p.statusLabel.SetText(locale.T("status.updated_success"))
 
 			// Close dialog and refresh data in main thread
 			d.Hide()
@@ -593,7 +604,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 				dialog.ShowError(err, p.window)
 				return
 			}
-			p.statusLabel.SetText("Model created successfully")
+			p.statusLabel.SetText(locale.T("status.created_success"))
 
 			// Close dialog and refresh data in main thread
 			d.Hide()
@@ -604,8 +615,8 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 	})
 
 	// Create cancel button
-	cancelBtn := widget.NewButton("Cancel", func() {
-		p.statusLabel.SetText("Operation cancelled")
+	cancelBtn := widget.NewButton(locale.T("common.cancel"), func() {
+		p.statusLabel.SetText(locale.T("status.operation_cancelled"))
 		d.Hide()
 	})
 
