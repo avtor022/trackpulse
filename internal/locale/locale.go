@@ -16,6 +16,7 @@ var CurrentLocale *Locale
 // SupportedLocales defines all supported languages
 var SupportedLocales = map[string]string{
 	"en": "English",
+	"ru": "Русский",
 }
 
 // Init initializes the localization system with the default language (English)
@@ -34,7 +35,11 @@ func SetLocale(code string) {
 			code: code,
 			data: getEnglishStrings(),
 		}
-	// Add more cases here when adding new languages
+	case "ru":
+		CurrentLocale = &Locale{
+			code: code,
+			data: getRussianStrings(),
+		}
 	default:
 		CurrentLocale = &Locale{
 			code: "en",
@@ -256,6 +261,208 @@ func getEnglishStrings() map[string]string {
 		// Settings
 		"settings.language":            "Language",
 		"settings.language.en":         "English",
+		"settings.language.ru":         "Russian",
+	}
+}
+
+// getRussianStrings returns all Russian UI strings
+func getRussianStrings() map[string]string {
+	return map[string]string{
+		// Application
+		"app.title":                    "TrackPulse",
+		"app.welcome":                  "Добро пожаловать в TrackPulse",
+		"app.version":                  "Версия 1.0.0",
+		
+		// Main Menu
+		"menu.file":                    "Файл",
+		"menu.file.new_brand":          "Новый бренд",
+		"menu.file.new_model":          "Новая модель",
+		"menu.file.exit":               "Выход",
+		"menu.tools":                   "Инструменты",
+		"menu.tools.import":            "Импорт данных",
+		"menu.tools.export":            "Экспорт данных",
+		"menu.help":                    "Помощь",
+		"menu.help.about":              "О программе",
+		
+		// Tabs
+		"tab.monitoring":               "Мониторинг",
+		"tab.racers":                   "Гонщики",
+		"tab.models":                   "Модели",
+		"tab.transponders":             "Транспондеры",
+		"tab.races":                    "Гонки",
+		"tab.logs":                     "Логи",
+		"tab.settings":                 "Настройки",
+		
+		// Brand Panel
+		"brand.panel.title":            "Бренды",
+		"brand.panel.search":           "Поиск брендов...",
+		"brand.panel.add":              "Добавить бренд",
+		"brand.panel.edit":             "Редактировать",
+		"brand.panel.delete":           "Удалить",
+		"brand.panel.no_brands":        "Бренды не найдены",
+		
+		// Model Panel
+		"model.panel.title":            "Модели",
+		"model.panel.search":           "Поиск моделей...",
+		"model.panel.add":              "Добавить модель",
+		"model.panel.edit":             "Редактировать",
+		"model.panel.delete":           "Удалить",
+		"model.panel.no_models":        "Модели не найдены",
+		"model.panel.select_brand":     "Пожалуйста, выберите бренд",
+		
+		// Model Table Headers
+		"common.id":                    "ID",
+		"model.header.brand":           "Бренд",
+		"model.header.name":            "Название модели",
+		"model.header.scale":           "Масштаб",
+		"model.header.type":            "Тип",
+		"model.header.motor":           "Мотор",
+		"model.header.drive":           "Привод",
+		"model.header.created":         "Создано",
+		"model.header.updated":         "Обновлено",
+		
+		// Racer Table Headers
+		"racer.header.number":          "Номер",
+		"racer.header.name":            "Имя",
+		"racer.header.country":         "Страна",
+		"racer.header.city":            "Город",
+		"racer.header.birthday":        "Дата рождения",
+		"racer.header.rating":          "Рейтинг",
+		
+		// New Brand Dialog
+		"dialog.new_brand.title":       "Новый бренд",
+		"dialog.new_brand.label":       "Название бренда:",
+		"dialog.new_brand.placeholder": "Введите название бренда",
+		"dialog.new_brand.create":      "Создать",
+		"dialog.new_brand.cancel":      "Отмена",
+		"dialog.new_brand.success":     "Бренд успешно создан",
+		"dialog.new_brand.error_empty": "Название бренда не может быть пустым",
+		"dialog.new_brand.error_exists": "Бренд уже существует",
+		
+		// New Model Dialog
+		"dialog.new_model.title":       "Новая модель",
+		"dialog.new_model.brand_label": "Бренд:",
+		"dialog.new_model.name_label":  "Название модели:",
+		"dialog.new_model.placeholder": "Введите название модели",
+		"dialog.new_model.create":      "Создать",
+		"dialog.new_model.cancel":      "Отмена",
+		"dialog.new_model.success":     "Модель успешно создана",
+		"dialog.new_model.error_empty": "Название модели не может быть пустым",
+		"dialog.new_model.error_exists": "Модель уже существует",
+		"dialog.new_model.error_no_brand": "Пожалуйста, выберите бренд",
+		
+		// Add Brand Dialog (nested)
+		"dialog.add_brand.title":       "Добавить новый бренд",
+		"dialog.add_brand.label":       "Название бренда:",
+		"dialog.add_brand.placeholder": "Введите название нового бренда",
+		"dialog.add_brand.save":        "Сохранить",
+		
+		// Edit Dialog
+		"dialog.edit.title":            "Редактировать",
+		"dialog.edit.save":             "Сохранить",
+		"dialog.edit.cancel":           "Отмена",
+		"dialog.edit.success":          "Успешно обновлено",
+		
+		// Delete Confirmation
+		"dialog.delete.title":          "Подтверждение удаления",
+		"dialog.delete.message":        "Вы уверены, что хотите удалить \"%s\"?",
+		"dialog.delete.confirm":        "Удалить",
+		"dialog.delete.cancel":         "Отмена",
+		"dialog.delete.success":        "Успешно удалено",
+		
+		// Common
+		"common.ok":                    "OK",
+		"common.cancel":                "Отмена",
+		"common.yes":                   "Да",
+		"common.no":                    "Нет",
+		"common.error":                 "Ошибка",
+		"common.success":               "Успешно",
+		"common.loading":               "Загрузка...",
+		"common.search":                "Поиск",
+		"common.filter":                "Фильтр",
+		"common.refresh":               "Обновить",
+		"common.save":                  "Сохранить",
+		"common.create":                "Создать",
+		"common.delete":                "Удалить",
+		"common.edit":                  "Редактировать",
+		"common.add":                   "Добавить",
+		"common.close":                 "Закрыть",
+		"common.select":                "Выбрать",
+		"common.required":              "обязательно",
+		
+		// Form Labels - Models
+		"form.model.brand":             "Бренд",
+		"form.model.name":              "Название модели",
+		"form.model.scale":             "Масштаб",
+		"form.model.type":              "Тип модели",
+		"form.model.motor":             "Тип мотора",
+		"form.model.drive":             "Тип привода",
+		"form.model.scale_placeholder": "например, 1:8",
+		"form.model.type_placeholder":  "например, Monster Truck",
+		"form.model.motor_placeholder": "например, Brushless",
+		"form.model.drive_placeholder": "например, 4WD",
+		
+		// Form Labels - Racers
+		"form.racer.number":            "Номер гонщика",
+		"form.racer.name":              "Полное имя",
+		"form.racer.country":           "Страна",
+		"form.racer.city":              "Город",
+		"form.racer.birthday":          "Дата рождения (ММ.ДД.ГГГГ)",
+		"form.racer.rating":            "Рейтинг",
+		"form.racer.number_placeholder": "например, 7",
+		"form.racer.name_placeholder":  "Иван Иванов",
+		"form.racer.country_placeholder": "Россия",
+		"form.racer.city_placeholder":  "Москва",
+		"form.racer.birthday_placeholder": "ММ.ДД.ГГГГ",
+		"form.racer.rating_placeholder": "0",
+		
+		// Validation Errors
+		"error.required.brand":         "Бренд обязателен",
+		"error.required.name":          "Название модели обязательно",
+		"error.required.scale":         "Масштаб обязателен",
+		"error.required.type":          "Тип модели обязателен",
+		"error.required.number":        "Номер гонщика обязателен",
+		"error.required.racer_name":    "Полное имя обязательно",
+		"error.invalid.number":         "Неверный номер гонщика",
+		"error.invalid.date":           "Неверный формат даты (используйте ММ.ДД.ГГГГ)",
+		"error.invalid.rating":         "Неверный рейтинг",
+		
+		// Status Messages
+		"status.ready":                 "Готов",
+		"status.processing":            "Обработка...",
+		"status.completed":             "Завершено",
+		"status.failed":                "Ошибка",
+		"status.loaded_models":         "Загружено моделей: %d",
+		"status.loaded_racers":         "Загружено гонщиков: %d",
+		"status.no_models":             "Модели не найдены",
+		"status.no_racers":             "Гонщики не найдены",
+		"status.selected_model":        "Выбрано: %s %s",
+		"status.selected_racer":        "Выбран: %s",
+		"status.operation_cancelled":   "Операция отменена",
+		"status.created_success":       "Успешно создано",
+		"status.updated_success":       "Успешно обновлено",
+		"status.deleted_success":       "Успешно удалено",
+		"status.create_failed":         "Ошибка создания: %s",
+		"status.update_failed":         "Ошибка обновления: %s",
+		"status.delete_failed":         "Ошибка удаления: %s",
+		"status.refresh_error":         "Ошибка обновления данных",
+		
+		// Info Messages
+		"info.select_first":            "Пожалуйста, сначала выберите элемент в таблице",
+		"info.not_found":               "Выбранный элемент не найден",
+		"info.enter_brand_name":        "Введите название бренда",
+		
+		// Errors
+		"error.database":               "Ошибка базы данных: %s",
+		"error.network":                "Ошибка сети: %s",
+		"error.generic":                "Произошла ошибка: %s",
+		"error.permission":             "Доступ запрещен",
+		"error.not_found":              "Не найдено",
+		
+		// Settings
+		"settings.language":            "Язык",
+		"settings.language.en":         "Английский",
+		"settings.language.ru":         "Русский",
 	}
 }
 
