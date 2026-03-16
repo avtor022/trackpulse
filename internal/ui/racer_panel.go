@@ -11,6 +11,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"strconv"
+	"trackpulse/internal/locale"
 	"trackpulse/internal/models"
 	"trackpulse/internal/service"
 )
