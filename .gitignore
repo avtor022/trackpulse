@@ -1,7 +1,7 @@
 ```
-# Logs
+# Logs and temp files
 *.log
-
-# Build artifacts
-build/
+*.tmp
+*.swp
+nohup.out
 ```
