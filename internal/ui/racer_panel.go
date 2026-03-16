@@ -141,7 +141,17 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 	)
 
 	// Create headers
-	headers := []string{"ID", "Number", "Name", "Country", "City", "Birthday", "Rating", "Created At", "Updated At"}
+	headers := []string{
+		locale.T("common.id"),
+		locale.T("racer.header.number"),
+		locale.T("racer.header.name"),
+		locale.T("racer.header.country"),
+		locale.T("racer.header.city"),
+		locale.T("racer.header.birthday"),
+		locale.T("racer.header.rating"),
+		locale.T("model.header.created"),
+		locale.T("model.header.updated"),
+	}
 	table.CreateHeader = func() fyne.CanvasObject {
 		label := widget.NewLabel("Header")
 		label.Truncation = fyne.TextTruncateEllipsis
@@ -171,7 +181,7 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 	table.OnSelected = func(id widget.TableCellID) {
 		if id.Row >= 0 && id.Row < len(p.allRacers) {
 			p.selectedRacerID = p.allRacers[id.Row].ID
-			p.statusLabel.SetText(fmt.Sprintf("Selected: %s", p.allRacers[id.Row].FullName))
+			p.statusLabel.SetText(fmt.Sprintf(locale.T("status.selected_racer"), p.allRacers[id.Row].FullName))
 		}
 	}
 
@@ -186,15 +196,15 @@ func (p *RacerPanel) refreshData() {
 		p.allRacers, err = p.racerService.GetAllRacers()
 		if err != nil {
 			fmt.Println("ERROR refreshing data:", err)
-			p.statusLabel.SetText("Error refreshing data")
+			p.statusLabel.SetText(locale.T("status.refresh_error"))
 			return
 		}
 		// Force table to recalculate rows count and update cell contents
 		p.table.Refresh()
 		if len(p.allRacers) == 0 {
-			p.statusLabel.SetText("No racers found")
+			p.statusLabel.SetText(locale.T("status.no_racers"))
 		} else {
-			p.statusLabel.SetText(fmt.Sprintf("Loaded %d racers", len(p.allRacers)))
+			p.statusLabel.SetText(fmt.Sprintf(locale.T("status.loaded_racers"), len(p.allRacers)))
 		}
 		fmt.Printf("DEBUG: refreshData completed, total racers: %d\n", len(p.allRacers))
 		for i, r := range p.allRacers {
@@ -211,7 +221,7 @@ func (p *RacerPanel) showCreateDialog() {
 // showEditDialog shows the dialog for editing an existing racer
 func (p *RacerPanel) showEditDialog() {
 	if p.selectedRacerID == "" {
-		dialog.ShowInformation("Info", "Please select a racer in the table first", p.window)
+		dialog.ShowInformation(locale.T("common.info"), locale.T("info.select_first"), p.window)
 		return
 	}
 
@@ -223,13 +233,13 @@ func (p *RacerPanel) showEditDialog() {
 		}
 	}
 
-	dialog.ShowInformation("Info", "Selected racer not found", p.window)
+	dialog.ShowInformation(locale.T("common.info"), locale.T("info.not_found"), p.window)
 }
 
 // deleteSelected deletes the selected racer
 func (p *RacerPanel) deleteSelected() {
 	if p.selectedRacerID == "" {
-		dialog.ShowInformation("Info", "Please select a racer in the table first", p.window)
+		dialog.ShowInformation(locale.T("common.info"), locale.T("info.select_first"), p.window)
 		return
 	}
 
@@ -243,23 +253,23 @@ func (p *RacerPanel) deleteSelected() {
 	}
 
 	if racerToDelete == nil {
-		dialog.ShowInformation("Info", "Selected racer not found", p.window)
+		dialog.ShowInformation(locale.T("common.info"), locale.T("info.not_found"), p.window)
 		return
 	}
 
 	// Show confirmation dialog
 	dialog.ShowConfirm(
-		"Confirm Delete",
-		"Are you sure you want to delete racer "+racerToDelete.FullName+"?",
+		locale.T("dialog.delete.title"),
+		fmt.Sprintf(locale.T("dialog.delete.message"), racerToDelete.FullName),
 		func(confirmed bool) {
 			if confirmed {
 				if err := p.racerService.DeleteRacer(racerToDelete.ID); err != nil {
 					dialog.ShowError(err, p.window)
-					p.statusLabel.SetText("Delete failed: " + err.Error())
+					p.statusLabel.SetText(fmt.Sprintf(locale.T("status.delete_failed"), err.Error()))
 				} else {
 					p.refreshData()
 					p.selectedRacerID = ""
-					p.statusLabel.SetText("Racer deleted successfully")
+					p.statusLabel.SetText(locale.T("status.deleted_success"))
 				}
 			}
 		},
@@ -271,22 +281,22 @@ func (p *RacerPanel) deleteSelected() {
 func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 	// Create form fields with placeholders and increased width
 	numberEntry := widget.NewEntry()
-	numberEntry.SetPlaceHolder("e.g., 7")
+	numberEntry.SetPlaceHolder(locale.T("form.racer.number_placeholder"))
 
 	nameEntry := widget.NewEntry()
-	nameEntry.SetPlaceHolder("John Doe")
+	nameEntry.SetPlaceHolder(locale.T("form.racer.name_placeholder"))
 
 	countryEntry := widget.NewEntry()
-	countryEntry.SetPlaceHolder("USA")
+	countryEntry.SetPlaceHolder(locale.T("form.racer.country_placeholder"))
 
 	cityEntry := widget.NewEntry()
-	cityEntry.SetPlaceHolder("New York")
+	cityEntry.SetPlaceHolder(locale.T("form.racer.city_placeholder"))
 
 	birthdayEntry := widget.NewEntry()
-	birthdayEntry.SetPlaceHolder("MM.DD.YYYY")
+	birthdayEntry.SetPlaceHolder(locale.T("form.racer.birthday_placeholder"))
 
 	ratingEntry := widget.NewEntry()
-	ratingEntry.SetPlaceHolder("0")
+	ratingEntry.SetPlaceHolder(locale.T("form.racer.rating_placeholder"))
 
 	if racer != nil {
 		// Edit mode - populate fields
@@ -302,12 +312,12 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 
 	// Create form
 	form := widget.NewForm(
-		widget.NewFormItem("Racer Number", numberEntry),
-		widget.NewFormItem("Full Name", nameEntry),
-		widget.NewFormItem("Country", countryEntry),
-		widget.NewFormItem("City", cityEntry),
-		widget.NewFormItem("Birthday (MM.DD.YYYY)", birthdayEntry),
-		widget.NewFormItem("Rating", ratingEntry),
+		widget.NewFormItem(locale.T("form.racer.number"), numberEntry),
+		widget.NewFormItem(locale.T("form.racer.name"), nameEntry),
+		widget.NewFormItem(locale.T("form.racer.country"), countryEntry),
+		widget.NewFormItem(locale.T("form.racer.city"), cityEntry),
+		widget.NewFormItem(locale.T("form.racer.birthday"), birthdayEntry),
+		widget.NewFormItem(locale.T("form.racer.rating"), ratingEntry),
 	)
 
 	// Set minimum width for input fields via wrapper
@@ -329,19 +339,19 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 
 	// Create form with fields
 	form = widget.NewForm(
-		widget.NewFormItem("Number", numberEntry),
-		widget.NewFormItem("Name", nameEntry),
-		widget.NewFormItem("Country", countryEntry),
-		widget.NewFormItem("City", cityEntry),
-		widget.NewFormItem("Birthday (MM.DD.YYYY)", birthdayEntry),
-		widget.NewFormItem("Rating", ratingEntry),
+		widget.NewFormItem(locale.T("form.racer.number"), numberEntry),
+		widget.NewFormItem(locale.T("form.racer.name"), nameEntry),
+		widget.NewFormItem(locale.T("form.racer.country"), countryEntry),
+		widget.NewFormItem(locale.T("form.racer.city"), cityEntry),
+		widget.NewFormItem(locale.T("form.racer.birthday"), birthdayEntry),
+		widget.NewFormItem(locale.T("form.racer.rating"), ratingEntry),
 	)
 
 	// Create dialog without buttons first so we can reference it in the callback
 	d := dialog.NewCustomWithoutButtons(title, form, p.window)
 
 	// Create save button with callback that has access to 'd'
-	saveBtn := widget.NewButton("Save", func() {
+	saveBtn := widget.NewButton(locale.T("dialog.edit.save"), func() {
 		// Debug: print values
 		fmt.Printf("DEBUG: Number=%s, Name=%s, Country=%s, City=%s, Birthday=%s, Rating=%s\n",
 			numberEntry.Text, nameEntry.Text, countryEntry.Text, cityEntry.Text, birthdayEntry.Text, ratingEntry.Text)
@@ -392,7 +402,7 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 				dialog.ShowError(err, p.window)
 				return
 			}
-			p.statusLabel.SetText("Racer updated successfully")
+			p.statusLabel.SetText(locale.T("status.updated_success"))
 
 			// Close dialog and refresh data in main thread
 			d.Hide()
@@ -426,7 +436,7 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 				dialog.ShowError(err, p.window)
 				return
 			}
-			p.statusLabel.SetText("Racer created successfully")
+			p.statusLabel.SetText(locale.T("status.created_success"))
 
 			// Close dialog and refresh data in main thread
 			d.Hide()
@@ -437,8 +447,8 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 	})
 
 	// Create cancel button
-	cancelBtn := widget.NewButton("Cancel", func() {
-		p.statusLabel.SetText("Operation cancelled")
+	cancelBtn := widget.NewButton(locale.T("dialog.edit.cancel"), func() {
+		p.statusLabel.SetText(locale.T("status.operation_cancelled"))
 		d.Hide()
 	})
 

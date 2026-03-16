@@ -16,6 +16,7 @@ type App struct {
 	racerService *service.RacerService
 	modelService *service.RCModelService
 	config       *Config
+	currentTabs  *container.AppTabs
 }
 
 // Config holds UI configuration
@@ -43,21 +44,28 @@ func NewApp(racerService *service.RacerService, modelService *service.RCModelSer
 
 // Run starts the application UI
 func (a *App) Run() {
-	a.mainWindow.SetContent(a.createMainContent())
+	a.currentTabs = a.createMainContent()
+	a.mainWindow.SetContent(a.currentTabs)
 	a.mainWindow.Resize(fyne.NewSize(1200, 800))
 	a.mainWindow.ShowAndRun()
+}
+
+// RefreshUI refreshes the entire UI with current locale
+func (a *App) RefreshUI() {
+	a.currentTabs = a.createMainContent()
+	a.mainWindow.SetContent(a.currentTabs)
 }
 
 // createMainContent builds the main tabbed interface
 func (a *App) createMainContent() *container.AppTabs {
 	tabs := container.NewAppTabs(
-		container.NewTabItem("Monitoring", a.createMonitoringTab()),
-		container.NewTabItem("Racers", a.createRacersTab()),
-		container.NewTabItem("Models", a.createModelsTab()),
-		container.NewTabItem("Transponders", a.createTranspondersTab()),
-		container.NewTabItem("Races", a.createRacesTab()),
-		container.NewTabItem("Logs", a.createLogsTab()),
-		container.NewTabItem("Settings", a.createSettingsTab()),
+		container.NewTabItem(locale.T("tab.monitoring"), a.createMonitoringTab()),
+		container.NewTabItem(locale.T("tab.racers"), a.createRacersTab()),
+		container.NewTabItem(locale.T("tab.models"), a.createModelsTab()),
+		container.NewTabItem(locale.T("tab.transponders"), a.createTranspondersTab()),
+		container.NewTabItem(locale.T("tab.races"), a.createRacesTab()),
+		container.NewTabItem(locale.T("tab.logs"), a.createLogsTab()),
+		container.NewTabItem(locale.T("tab.settings"), a.createSettingsTab()),
 	)
 
 	tabs.SetTabLocation(container.TabLocationTop)
@@ -135,7 +143,8 @@ func (a *App) createSettingsTab() fyne.CanvasObject {
 		if selectedCode != "" {
 			locale.SetLocale(selectedCode)
 			a.config.Language = selectedCode
-			// TODO: Refresh UI with new language
+			// Refresh UI with new language
+			a.RefreshUI()
 		}
 	})
 	
