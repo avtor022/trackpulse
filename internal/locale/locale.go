@@ -251,6 +251,9 @@ func getEnglishStrings() map[string]string {
 		"info.not_found":               "Selected item not found",
 		"info.enter_brand_name":        "Enter brand name",
 		
+		// Common Info Dialog Title
+		"common.info":                  "Information",
+		
 		// Errors
 		"error.database":               "Database error: %s",
 		"error.network":                "Network error: %s",
@@ -451,6 +454,9 @@ func getRussianStrings() map[string]string {
 		"info.select_first":            "Пожалуйста, сначала выберите элемент в таблице",
 		"info.not_found":               "Выбранный элемент не найден",
 		"info.enter_brand_name":        "Введите название бренда",
+		
+		// Common Info Dialog Title
+		"common.info":                  "Информация",
 		
 		// Errors
 		"error.database":               "Ошибка базы данных: %s",
