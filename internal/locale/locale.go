@@ -13,6 +13,11 @@ type Locale struct {
 // CurrentLocale holds the active locale
 var CurrentLocale *Locale
 
+// SupportedLocales defines all supported languages
+var SupportedLocales = map[string]string{
+	"en": "English",
+}
+
 // Init initializes the localization system with the default language (English)
 func Init() {
 	CurrentLocale = &Locale{
@@ -247,6 +252,10 @@ func getEnglishStrings() map[string]string {
 		"error.generic":                "An error occurred: %s",
 		"error.permission":             "Permission denied",
 		"error.not_found":              "Not found",
+		
+		// Settings
+		"settings.language":            "Language",
+		"settings.language.en":         "English",
 	}
 }
 

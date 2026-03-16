@@ -5,6 +5,7 @@ import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
+	"trackpulse/internal/locale"
 	"trackpulse/internal/service"
 )
 
@@ -103,7 +104,50 @@ func (a *App) createLogsTab() fyne.CanvasObject {
 
 // createSettingsTab creates the Settings tab
 func (a *App) createSettingsTab() fyne.CanvasObject {
-	content := widget.NewLabel("System Settings - Coming Soon")
-	content.Alignment = fyne.TextAlignCenter
-	return container.NewCenter(content)
+	// Create language selector
+	languageLabel := widget.NewLabel(locale.T("settings.language"))
+	
+	// Build options for language select
+	options := make([]string, 0, len(locale.SupportedLocales))
+	for code, name := range locale.SupportedLocales {
+		options = append(options, name)
+	}
+	
+	// Find current language name
+	currentName := "English"
+	for code, name := range locale.SupportedLocales {
+		if code == a.config.Language {
+			currentName = name
+			break
+		}
+	}
+	
+	languageSelect := widget.NewSelect(options, func(selected string) {
+		// Find the code for the selected language
+		var selectedCode string
+		for code, name := range locale.SupportedLocales {
+			if name == selected {
+				selectedCode = code
+				break
+			}
+		}
+		
+		if selectedCode != "" {
+			locale.SetLocale(selectedCode)
+			a.config.Language = selectedCode
+			// TODO: Refresh UI with new language
+		}
+	})
+	
+	// Set default selection
+	languageSelect.SetSelected(currentName)
+	
+	// Create settings form
+	form := container.NewVBox(
+		widget.NewSeparator(),
+		container.NewHBox(languageLabel, languageSelect),
+		widget.NewSeparator(),
+	)
+	
+	return container.NewPadded(form)
 }

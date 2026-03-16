@@ -1,1 +1,7 @@
-Nothing should be ignored based on the provided file changes, as they only include source code files (.go files) without any build artifacts, dependencies, or temporary files.
+```
+# Logs
+*.log
+
+# Build artifacts
+build/
+```
