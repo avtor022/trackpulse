@@ -109,7 +109,7 @@ func (a *App) createSettingsTab() fyne.CanvasObject {
 	
 	// Build options for language select
 	options := make([]string, 0, len(locale.SupportedLocales))
-	for code, name := range locale.SupportedLocales {
+	for _, name := range locale.SupportedLocales {
 		options = append(options, name)
 	}
 	
