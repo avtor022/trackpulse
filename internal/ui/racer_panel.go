@@ -142,7 +142,7 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 	)
 
 	// Create headers
-	headers := []string{
+	headerLabels := []string{
 		locale.T("common.id"),
 		locale.T("racer.header.number"),
 		locale.T("racer.header.name"),
@@ -159,8 +159,8 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 		return label
 	}
 	table.UpdateHeader = func(id widget.TableCellID, o fyne.CanvasObject) {
-		if id.Col >= 0 && id.Col < len(headers) {
-			o.(*widget.Label).SetText(headers[id.Col])
+		if id.Col >= 0 && id.Col < len(headerLabels) {
+			o.(*widget.Label).SetText(headerLabels[id.Col])
 			o.(*widget.Label).Truncation = fyne.TextTruncateEllipsis
 		}
 	}
