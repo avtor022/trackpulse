@@ -57,12 +57,13 @@ func (p *ModelPanel) Refresh() {
 }
 
 // NewModelPanel creates a new RC model management panel
-func NewModelPanel(modelService *service.RCModelService, window fyne.Window) fyne.CanvasObject {
+func NewModelPanel(modelService *service.RCModelService, window fyne.Window) *ModelPanel {
 	panel := &ModelPanel{
 		modelService: modelService,
 		window:       window,
 	}
-	return panel.buildUI()
+	panel.buildUI()
+	return panel
 }
 
 // buildUI constructs the model panel UI

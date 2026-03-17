@@ -62,12 +62,13 @@ func (p *RacerPanel) Refresh() {
 }
 
 // NewRacerPanel creates a new racer management panel
-func NewRacerPanel(racerService *service.RacerService, window fyne.Window) fyne.CanvasObject {
+func NewRacerPanel(racerService *service.RacerService, window fyne.Window) *RacerPanel {
 	panel := &RacerPanel{
 		racerService: racerService,
 		window:       window,
 	}
-	return panel.buildUI()
+	panel.buildUI()
+	return panel
 }
 
 // buildUI constructs the racer panel UI
