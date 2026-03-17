@@ -55,7 +55,6 @@ func (p *ModelPanel) buildUI() *fyne.Container {
 	)
 
 	p.content = content
-	p.refreshData()
 
 	return content
 }
@@ -186,6 +185,13 @@ func (p *ModelPanel) createModelTable() *widget.Table {
 			p.selectedModelID = p.allModels[id.Row].ID
 			p.statusLabel.SetText(fmt.Sprintf("Selected: %s %s", p.allModels[id.Row].Brand, p.allModels[id.Row].ModelName))
 		}
+	}
+
+	// Initial status update
+	if len(p.allModels) == 0 {
+		p.statusLabel.SetText(locale.T("status.no_models"))
+	} else {
+		p.statusLabel.SetText(fmt.Sprintf(locale.T("status.loaded_models"), len(p.allModels)))
 	}
 
 	return table

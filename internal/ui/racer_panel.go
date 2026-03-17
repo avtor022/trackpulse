@@ -57,7 +57,6 @@ func (p *RacerPanel) buildUI() *fyne.Container {
 	)
 
 	p.content = content
-	p.refreshData()
 
 	return content
 }
@@ -184,6 +183,13 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 			p.selectedRacerID = p.allRacers[id.Row].ID
 			p.statusLabel.SetText(fmt.Sprintf(locale.T("status.selected_racer"), p.allRacers[id.Row].FullName))
 		}
+	}
+
+	// Initial status update
+	if len(p.allRacers) == 0 {
+		p.statusLabel.SetText(locale.T("status.no_racers"))
+	} else {
+		p.statusLabel.SetText(fmt.Sprintf(locale.T("status.loaded_racers"), len(p.allRacers)))
 	}
 
 	return table

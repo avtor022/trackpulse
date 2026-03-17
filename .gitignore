@@ -12,49 +12,12 @@ vendor/
 *.tmp
 *.swp
 
-# Environment
-.env
-.env.local
-*.env.*
-
 # Editors
 .vscode/
 .idea/
 
-# Coverage
-coverage/
-htmlcov/
-.coverage
-
-# Distribution / Build
-dist/
-build/
-target/
-
-# Python specific
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-*.so
-
-# Go specific
-*.exe
-*.dll
-*.so
-*.dylib
-*.test
-*.prof
-cover.out
-
-# Temporary files
-*.tmp
-*.temp
-*.bak
-*.backup
-
-# OS generated files
-.DS_Store
-Thumbs.db
+# Environment
+.env
+.env.local
+.env.*
 ```
