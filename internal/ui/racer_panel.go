@@ -207,10 +207,6 @@ func (p *RacerPanel) refreshData() {
 		} else {
 			p.statusLabel.SetText(fmt.Sprintf(locale.T("status.loaded_racers"), len(p.allRacers)))
 		}
-		fmt.Printf("DEBUG: refreshData completed, total racers: %d\n", len(p.allRacers))
-		for i, r := range p.allRacers {
-			fmt.Printf("DEBUG: Racer[%d]: ID=%s, Number=%d, Name=%s\n", i, r.ID, r.RacerNumber, r.FullName)
-		}
 	}
 }
 

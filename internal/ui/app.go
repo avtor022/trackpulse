@@ -143,8 +143,10 @@ func (a *App) createSettingsTab() fyne.CanvasObject {
 		if selectedCode != "" {
 			locale.SetLocale(selectedCode)
 			a.config.Language = selectedCode
-			// Refresh UI with new language
-			a.RefreshUI()
+			// Refresh UI with new language in main thread
+			fyne.Do(func() {
+				a.RefreshUI()
+			})
 		}
 	})
 	
