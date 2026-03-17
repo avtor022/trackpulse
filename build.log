@@ -28,3 +28,32 @@ go: downloading github.com/stretchr/testify v1.11.1
 go: downloading github.com/davecgh/go-spew v1.1.1
 go: downloading github.com/pmezard/go-difflib v1.0.0
 go: downloading gopkg.in/yaml.v3 v3.0.1
+fyne.io/fyne/v2/internal/color
+golang.org/x/image/colornames
+trackpulse/internal/config
+github.com/mattn/go-sqlite3
+github.com/google/uuid
+trackpulse/internal/models
+trackpulse/internal/repository
+trackpulse/internal/service
+fyne.io/fyne/v2
+fyne.io/fyne/v2/internal/build
+fyne.io/fyne/v2/internal/async
+fyne.io/fyne/v2/internal/cache
+fyne.io/fyne/v2/internal/driver
+fyne.io/fyne/v2/internal/app
+fyne.io/fyne/v2/internal/scale
+golang.org/x/image/math/fixed
+golang.org/x/image/vector
+github.com/srwiley/rasterx
+golang.org/x/net/html/atom
+golang.org/x/net/html
+golang.org/x/text/encoding/internal/identifier
+golang.org/x/text/transform
+golang.org/x/text/encoding
+golang.org/x/text/encoding/internal
+golang.org/x/text/encoding/charmap
+golang.org/x/text/encoding/japanese
+golang.org/x/text/encoding/korean
+golang.org/x/text/encoding/simplifiedchinese
+golang.org/x/text/encoding/traditionalchinese

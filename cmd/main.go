@@ -73,5 +73,14 @@ func main() {
 	fmt.Printf("Language: %s\n", cfg.UILanguage)
 
 	uiApp := ui.NewApp(racerService, modelService, cfg.UILanguage)
+	
+	// Add error handling for UI startup
+	defer func() {
+		if r := recover(); r != nil {
+			log.Error("UI panic: %v", r)
+			fmt.Printf("UI Error: %v\n", r)
+		}
+	}()
+	
 	uiApp.Run()
 }
