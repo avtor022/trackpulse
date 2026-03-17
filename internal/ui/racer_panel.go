@@ -11,6 +11,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"strconv"
+	"trackpulse/internal/locale"
 	"trackpulse/internal/models"
 	"trackpulse/internal/service"
 )
@@ -24,6 +25,35 @@ type RacerPanel struct {
 	window          fyne.Window    // Reference to window for dialogs
 	selectedRacerID string         // ID of selected racer
 	allRacers       []models.Racer // Cache of all racers
+	// UI components that need to be updated on language change
+	toolbar        *widget.Toolbar
+	headers        []string
+	formItems      []*widget.FormItem
+}
+
+// updateLocale updates all localized text in the panel
+func (p *RacerPanel) updateLocale() {
+	if p.statusLabel != nil {
+		p.statusLabel.SetText(locale.T("status.ready"))
+	}
+	
+	// Update headers
+	headers := []string{
+		locale.T("common.id"),
+		locale.T("racer.header.number"),
+		locale.T("racer.header.name"),
+		locale.T("racer.header.country"),
+		locale.T("racer.header.city"),
+		locale.T("racer.header.birthday"),
+		locale.T("racer.header.rating"),
+		locale.T("model.header.created"),
+		locale.T("model.header.updated"),
+	}
+	p.headers = headers
+	
+	if p.table != nil {
+		p.table.Refresh()
+	}
 }
 
 // NewRacerPanel creates a new racer management panel
@@ -38,17 +68,20 @@ func NewRacerPanel(racerService *service.RacerService, window fyne.Window) fyne.
 // buildUI constructs the racer panel UI
 func (p *RacerPanel) buildUI() *fyne.Container {
 	// Status label
-	p.statusLabel = widget.NewLabel("Ready")
+	p.statusLabel = widget.NewLabel(locale.T("status.ready"))
 
 	// Toolbar with actions
-	toolbar := p.createToolbar()
+	p.toolbar = p.createToolbar()
 
 	// Table for displaying racers
 	p.table = p.createRacerTable()
+	
+	// Initialize headers
+	p.updateLocale()
 
 	// Layout
 	content := container.NewBorder(
-		container.NewHBox(toolbar, p.statusLabel), // Top
+		container.NewHBox(p.toolbar, p.statusLabel), // Top
 		nil,     // Bottom
 		nil,     // Left
 		nil,     // Right
@@ -140,16 +173,15 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 		},
 	)
 
-	// Create headers
-	headers := []string{"ID", "Number", "Name", "Country", "City", "Birthday", "Rating", "Created At", "Updated At"}
+	// Create headers using localized strings from p.headers
 	table.CreateHeader = func() fyne.CanvasObject {
 		label := widget.NewLabel("Header")
 		label.Truncation = fyne.TextTruncateEllipsis
 		return label
 	}
 	table.UpdateHeader = func(id widget.TableCellID, o fyne.CanvasObject) {
-		if id.Col >= 0 && id.Col < len(headers) {
-			o.(*widget.Label).SetText(headers[id.Col])
+		if id.Col >= 0 && id.Col < len(p.headers) {
+			o.(*widget.Label).SetText(p.headers[id.Col])
 			o.(*widget.Label).Truncation = fyne.TextTruncateEllipsis
 		}
 	}
@@ -205,31 +237,31 @@ func (p *RacerPanel) refreshData() {
 
 // showCreateDialog shows the dialog for creating a new racer
 func (p *RacerPanel) showCreateDialog() {
-	p.showRacerDialog("Create New Racer", nil)
+	p.showRacerDialog(locale.T("dialog.new_racer.title"), nil)
 }
 
 // showEditDialog shows the dialog for editing an existing racer
 func (p *RacerPanel) showEditDialog() {
 	if p.selectedRacerID == "" {
-		dialog.ShowInformation("Info", "Please select a racer in the table first", p.window)
+		dialog.ShowInformation(locale.T("common.info"), locale.T("info.select_first"), p.window)
 		return
 	}
 
 	// Look for selected racer in cache
 	for _, racer := range p.allRacers {
 		if racer.ID == p.selectedRacerID {
-			p.showRacerDialog("Edit Racer", &racer)
+			p.showRacerDialog(locale.T("dialog.edit.title"), &racer)
 			return
 		}
 	}
 
-	dialog.ShowInformation("Info", "Selected racer not found", p.window)
+	dialog.ShowInformation(locale.T("common.info"), locale.T("info.not_found"), p.window)
 }
 
 // deleteSelected deletes the selected racer
 func (p *RacerPanel) deleteSelected() {
 	if p.selectedRacerID == "" {
-		dialog.ShowInformation("Info", "Please select a racer in the table first", p.window)
+		dialog.ShowInformation(locale.T("common.info"), locale.T("info.select_first"), p.window)
 		return
 	}
 
@@ -243,23 +275,23 @@ func (p *RacerPanel) deleteSelected() {
 	}
 
 	if racerToDelete == nil {
-		dialog.ShowInformation("Info", "Selected racer not found", p.window)
+		dialog.ShowInformation(locale.T("common.info"), locale.T("info.not_found"), p.window)
 		return
 	}
 
 	// Show confirmation dialog
 	dialog.ShowConfirm(
-		"Confirm Delete",
-		"Are you sure you want to delete racer "+racerToDelete.FullName+"?",
+		locale.T("dialog.delete.title"),
+		fmt.Sprintf(locale.T("dialog.delete.message"), racerToDelete.FullName),
 		func(confirmed bool) {
 			if confirmed {
 				if err := p.racerService.DeleteRacer(racerToDelete.ID); err != nil {
 					dialog.ShowError(err, p.window)
-					p.statusLabel.SetText("Delete failed: " + err.Error())
+					p.statusLabel.SetText(locale.T("status.delete_failed") + ": " + err.Error())
 				} else {
 					p.refreshData()
 					p.selectedRacerID = ""
-					p.statusLabel.SetText("Racer deleted successfully")
+					p.statusLabel.SetText(locale.T("status.deleted_success"))
 				}
 			}
 		},
@@ -271,22 +303,22 @@ func (p *RacerPanel) deleteSelected() {
 func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 	// Create form fields with placeholders and increased width
 	numberEntry := widget.NewEntry()
-	numberEntry.SetPlaceHolder("e.g., 7")
+	numberEntry.SetPlaceHolder(locale.T("form.racer.number_placeholder"))
 
 	nameEntry := widget.NewEntry()
-	nameEntry.SetPlaceHolder("John Doe")
+	nameEntry.SetPlaceHolder(locale.T("form.racer.name_placeholder"))
 
 	countryEntry := widget.NewEntry()
-	countryEntry.SetPlaceHolder("USA")
+	countryEntry.SetPlaceHolder(locale.T("form.racer.country_placeholder"))
 
 	cityEntry := widget.NewEntry()
-	cityEntry.SetPlaceHolder("New York")
+	cityEntry.SetPlaceHolder(locale.T("form.racer.city_placeholder"))
 
 	birthdayEntry := widget.NewEntry()
-	birthdayEntry.SetPlaceHolder("MM.DD.YYYY")
+	birthdayEntry.SetPlaceHolder(locale.T("form.racer.birthday_placeholder"))
 
 	ratingEntry := widget.NewEntry()
-	ratingEntry.SetPlaceHolder("0")
+	ratingEntry.SetPlaceHolder(locale.T("form.racer.rating_placeholder"))
 
 	if racer != nil {
 		// Edit mode - populate fields
@@ -300,14 +332,14 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 		ratingEntry.SetText(strconv.Itoa(racer.Rating))
 	}
 
-	// Create form
+	// Create form with localized labels
 	form := widget.NewForm(
-		widget.NewFormItem("Racer Number", numberEntry),
-		widget.NewFormItem("Full Name", nameEntry),
-		widget.NewFormItem("Country", countryEntry),
-		widget.NewFormItem("City", cityEntry),
-		widget.NewFormItem("Birthday (MM.DD.YYYY)", birthdayEntry),
-		widget.NewFormItem("Rating", ratingEntry),
+		widget.NewFormItem(locale.T("form.racer.number"), numberEntry),
+		widget.NewFormItem(locale.T("form.racer.name"), nameEntry),
+		widget.NewFormItem(locale.T("form.racer.country"), countryEntry),
+		widget.NewFormItem(locale.T("form.racer.city"), cityEntry),
+		widget.NewFormItem(locale.T("form.racer.birthday"), birthdayEntry),
+		widget.NewFormItem(locale.T("form.racer.rating"), ratingEntry),
 	)
 
 	// Set minimum width for input fields via wrapper
@@ -327,21 +359,21 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 	birthdayEntry.Resize(fyne.NewSize(minWidth, birthdayEntry.MinSize().Height))
 	ratingEntry.Resize(fyne.NewSize(minWidth, ratingEntry.MinSize().Height))
 
-	// Create form with fields
+	// Re-create form with fields (Fyne quirk)
 	form = widget.NewForm(
-		widget.NewFormItem("Number", numberEntry),
-		widget.NewFormItem("Name", nameEntry),
-		widget.NewFormItem("Country", countryEntry),
-		widget.NewFormItem("City", cityEntry),
-		widget.NewFormItem("Birthday (MM.DD.YYYY)", birthdayEntry),
-		widget.NewFormItem("Rating", ratingEntry),
+		widget.NewFormItem(locale.T("form.racer.number"), numberEntry),
+		widget.NewFormItem(locale.T("form.racer.name"), nameEntry),
+		widget.NewFormItem(locale.T("form.racer.country"), countryEntry),
+		widget.NewFormItem(locale.T("form.racer.city"), cityEntry),
+		widget.NewFormItem(locale.T("form.racer.birthday"), birthdayEntry),
+		widget.NewFormItem(locale.T("form.racer.rating"), ratingEntry),
 	)
 
 	// Create dialog without buttons first so we can reference it in the callback
 	d := dialog.NewCustomWithoutButtons(title, form, p.window)
 
 	// Create save button with callback that has access to 'd'
-	saveBtn := widget.NewButton("Save", func() {
+	saveBtn := widget.NewButton(locale.T("common.save"), func() {
 		// Debug: print values
 		fmt.Printf("DEBUG: Number=%s, Name=%s, Country=%s, City=%s, Birthday=%s, Rating=%s\n",
 			numberEntry.Text, nameEntry.Text, countryEntry.Text, cityEntry.Text, birthdayEntry.Text, ratingEntry.Text)
@@ -437,8 +469,8 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 	})
 
 	// Create cancel button
-	cancelBtn := widget.NewButton("Cancel", func() {
-		p.statusLabel.SetText("Operation cancelled")
+	cancelBtn := widget.NewButton(locale.T("common.cancel"), func() {
+		p.statusLabel.SetText(locale.T("status.operation_cancelled"))
 		d.Hide()
 	})
 

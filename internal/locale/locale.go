@@ -138,6 +138,9 @@ func getEnglishStrings() map[string]string {
 		"dialog.new_brand.error_empty": "Brand name cannot be empty",
 		"dialog.new_brand.error_exists": "Brand already exists",
 		
+		// New Racer Dialog
+		"dialog.new_racer.title":       "New Racer",
+		
 		// New Model Dialog
 		"dialog.new_model.title":       "New Model",
 		"dialog.new_model.brand_label": "Brand:",
@@ -188,6 +191,7 @@ func getEnglishStrings() map[string]string {
 		"common.close":                 "Close",
 		"common.select":                "Select",
 		"common.required":              "is required",
+		"common.info":                  "Info",
 		
 		// Form Labels - Models
 		"form.model.brand":             "Brand",
