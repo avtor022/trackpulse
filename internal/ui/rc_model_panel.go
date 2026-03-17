@@ -31,7 +31,7 @@ func NewModelPanel(modelService *service.RCModelService, window fyne.Window) fyn
 		modelService: modelService,
 		window:       window,
 	}
-	return panel.buildUI()
+	return panel.buildUIWithStatus()
 }
 
 // buildUI constructs the model panel UI
@@ -142,26 +142,26 @@ func (p *ModelPanel) createModelTable() *widget.Table {
 		},
 	)
 
-	// Create headers - using localized strings
-	headers := []string{
-		locale.T("common.id"), 
-		locale.T("model.header.brand"), 
-		locale.T("model.header.name"), 
-		locale.T("model.header.scale"), 
-		locale.T("model.header.type"), 
-		locale.T("model.header.motor"), 
-		locale.T("model.header.drive"), 
-		locale.T("model.header.created"), 
-		locale.T("model.header.updated"),
-	}
+	// Create headers - using localized strings dynamically
 	table.CreateHeader = func() fyne.CanvasObject {
 		label := widget.NewLabel("Header")
 		label.Truncation = fyne.TextTruncateEllipsis
 		return label
 	}
 	table.UpdateHeader = func(id widget.TableCellID, o fyne.CanvasObject) {
-		if id.Col >= 0 && id.Col < len(headers) {
-			o.(*widget.Label).SetText(headers[id.Col])
+		headerLabels := []string{
+			locale.T("common.id"),
+			locale.T("model.header.brand"),
+			locale.T("model.header.name"),
+			locale.T("model.header.scale"),
+			locale.T("model.header.type"),
+			locale.T("model.header.motor"),
+			locale.T("model.header.drive"),
+			locale.T("model.header.created"),
+			locale.T("model.header.updated"),
+		}
+		if id.Col >= 0 && id.Col < len(headerLabels) {
+			o.(*widget.Label).SetText(headerLabels[id.Col])
 			o.(*widget.Label).Truncation = fyne.TextTruncateEllipsis
 		}
 	}
@@ -187,13 +187,6 @@ func (p *ModelPanel) createModelTable() *widget.Table {
 		}
 	}
 
-	// Initial status update
-	if len(p.allModels) == 0 {
-		p.statusLabel.SetText(locale.T("status.no_models"))
-	} else {
-		p.statusLabel.SetText(fmt.Sprintf(locale.T("status.loaded_models"), len(p.allModels)))
-	}
-
 	return table
 }
 
@@ -205,17 +198,49 @@ func (p *ModelPanel) refreshData() {
 		p.allModels, err = p.modelService.GetAllModels()
 		if err != nil {
 			fmt.Println("ERROR refreshing data:", err)
-			p.statusLabel.SetText("Error refreshing data")
+			p.statusLabel.SetText(locale.T("status.refresh_error"))
 			return
 		}
 		// Force table to recalculate rows count and update cell contents
 		p.table.Refresh()
 		if len(p.allModels) == 0 {
-			p.statusLabel.SetText("No models found")
+			p.statusLabel.SetText(locale.T("status.no_models"))
 		} else {
-			p.statusLabel.SetText(fmt.Sprintf("Loaded %d models", len(p.allModels)))
+			p.statusLabel.SetText(fmt.Sprintf(locale.T("status.loaded_models"), len(p.allModels)))
 		}
 	}
+}
+
+// buildUIWithStatus constructs the model panel UI with initial status
+func (p *ModelPanel) buildUIWithStatus() *fyne.Container {
+	// Status label
+	p.statusLabel = widget.NewLabel(locale.T("status.ready"))
+
+	// Toolbar with actions
+	toolbar := p.createToolbar()
+
+	// Table for displaying models
+	p.table = p.createModelTable()
+
+	// Set initial status after table is created
+	if len(p.allModels) == 0 {
+		p.statusLabel.SetText(locale.T("status.no_models"))
+	} else {
+		p.statusLabel.SetText(fmt.Sprintf(locale.T("status.loaded_models"), len(p.allModels)))
+	}
+
+	// Layout
+	content := container.NewBorder(
+		container.NewHBox(toolbar, p.statusLabel), // Top
+		nil,     // Bottom
+		nil,     // Left
+		nil,     // Right
+		p.table, // Content
+	)
+
+	p.content = content
+
+	return content
 }
 
 // showCreateDialog shows the dialog for creating a new model

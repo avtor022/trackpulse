@@ -33,7 +33,7 @@ func NewRacerPanel(racerService *service.RacerService, window fyne.Window) fyne.
 		racerService: racerService,
 		window:       window,
 	}
-	return panel.buildUI()
+	return panel.buildUIWithStatus()
 }
 
 // buildUI constructs the racer panel UI
@@ -140,24 +140,24 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 		},
 	)
 
-	// Create headers
-	headerLabels := []string{
-		locale.T("common.id"),
-		locale.T("racer.header.number"),
-		locale.T("racer.header.name"),
-		locale.T("racer.header.country"),
-		locale.T("racer.header.city"),
-		locale.T("racer.header.birthday"),
-		locale.T("racer.header.rating"),
-		locale.T("model.header.created"),
-		locale.T("model.header.updated"),
-	}
+	// Create headers - using localized strings dynamically
 	table.CreateHeader = func() fyne.CanvasObject {
 		label := widget.NewLabel("Header")
 		label.Truncation = fyne.TextTruncateEllipsis
 		return label
 	}
 	table.UpdateHeader = func(id widget.TableCellID, o fyne.CanvasObject) {
+		headerLabels := []string{
+			locale.T("common.id"),
+			locale.T("racer.header.number"),
+			locale.T("racer.header.name"),
+			locale.T("racer.header.country"),
+			locale.T("racer.header.city"),
+			locale.T("racer.header.birthday"),
+			locale.T("racer.header.rating"),
+			locale.T("model.header.created"),
+			locale.T("model.header.updated"),
+		}
 		if id.Col >= 0 && id.Col < len(headerLabels) {
 			o.(*widget.Label).SetText(headerLabels[id.Col])
 			o.(*widget.Label).Truncation = fyne.TextTruncateEllipsis
@@ -185,13 +185,6 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 		}
 	}
 
-	// Initial status update
-	if len(p.allRacers) == 0 {
-		p.statusLabel.SetText(locale.T("status.no_racers"))
-	} else {
-		p.statusLabel.SetText(fmt.Sprintf(locale.T("status.loaded_racers"), len(p.allRacers)))
-	}
-
 	return table
 }
 
@@ -214,6 +207,38 @@ func (p *RacerPanel) refreshData() {
 			p.statusLabel.SetText(fmt.Sprintf(locale.T("status.loaded_racers"), len(p.allRacers)))
 		}
 	}
+}
+
+// buildUIWithStatus constructs the racer panel UI with initial status
+func (p *RacerPanel) buildUIWithStatus() *fyne.Container {
+	// Status label
+	p.statusLabel = widget.NewLabel(locale.T("status.ready"))
+
+	// Toolbar with actions
+	toolbar := p.createToolbar()
+
+	// Table for displaying racers
+	p.table = p.createRacerTable()
+
+	// Set initial status after table is created
+	if len(p.allRacers) == 0 {
+		p.statusLabel.SetText(locale.T("status.no_racers"))
+	} else {
+		p.statusLabel.SetText(fmt.Sprintf(locale.T("status.loaded_racers"), len(p.allRacers)))
+	}
+
+	// Layout
+	content := container.NewBorder(
+		container.NewHBox(toolbar, p.statusLabel), // Top
+		nil,     // Bottom
+		nil,     // Left
+		nil,     // Right
+		p.table, // Content
+	)
+
+	p.content = content
+
+	return content
 }
 
 // showCreateDialog shows the dialog for creating a new racer
