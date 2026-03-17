@@ -23,6 +23,37 @@ type ModelPanel struct {
 	window          fyne.Window      // Reference to window for dialogs
 	selectedModelID string           // ID of selected model
 	allModels       []models.RCModel // Cache of all models
+	headers         []string         // Localized table headers
+}
+
+// updateLocale updates all localized text in the panel
+func (p *ModelPanel) updateLocale() {
+	if p.statusLabel != nil {
+		p.statusLabel.SetText(locale.T("status.ready"))
+	}
+
+	// Update headers
+	headers := []string{
+		locale.T("common.id"),
+		locale.T("model.header.brand"),
+		locale.T("model.header.name"),
+		locale.T("model.header.scale"),
+		locale.T("model.header.type"),
+		locale.T("model.header.motor"),
+		locale.T("model.header.drive"),
+		locale.T("model.header.created"),
+		locale.T("model.header.updated"),
+	}
+	p.headers = headers
+
+	if p.table != nil {
+		p.table.Refresh()
+	}
+}
+
+// Refresh refreshes the panel UI with current locale
+func (p *ModelPanel) Refresh() {
+	p.updateLocale()
 }
 
 // NewModelPanel creates a new RC model management panel
@@ -143,26 +174,17 @@ func (p *ModelPanel) createModelTable() *widget.Table {
 		},
 	)
 
-	// Create headers - using localized strings
-	headers := []string{
-		locale.T("common.id"), 
-		locale.T("model.header.brand"), 
-		locale.T("model.header.name"), 
-		locale.T("model.header.scale"), 
-		locale.T("model.header.type"), 
-		locale.T("model.header.motor"), 
-		locale.T("model.header.drive"), 
-		locale.T("model.header.created"), 
-		locale.T("model.header.updated"),
-	}
+	// Initialize headers
+	p.updateLocale()
+
 	table.CreateHeader = func() fyne.CanvasObject {
 		label := widget.NewLabel("Header")
 		label.Truncation = fyne.TextTruncateEllipsis
 		return label
 	}
 	table.UpdateHeader = func(id widget.TableCellID, o fyne.CanvasObject) {
-		if id.Col >= 0 && id.Col < len(headers) {
-			o.(*widget.Label).SetText(headers[id.Col])
+		if id.Col >= 0 && id.Col < len(p.headers) {
+			o.(*widget.Label).SetText(p.headers[id.Col])
 			o.(*widget.Label).Truncation = fyne.TextTruncateEllipsis
 		}
 	}
@@ -300,29 +322,29 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 
 	// Create widget for brand selection - use Select with option to add new
 	var brandSelect *widget.Select
-	
+
 	// Add option to create new brand
 	newBrandOption := "+ " + locale.T("common.add") + " " + strings.TrimSuffix(locale.T("form.model.brand"), ":")
 	selectOptions := append(existingBrands, newBrandOption)
-	
+
 	var mainDialog dialog.Dialog
-	
+
 	brandSelect = widget.NewSelect(selectOptions, func(selected string) {
 		if selected == newBrandOption {
 			// Show dialog to add new brand
 			if mainDialog != nil {
 				mainDialog.Hide() // Hide main dialog
 			}
-			
+
 			newBrandEntry := widget.NewEntry()
 			newBrandEntry.SetPlaceHolder(locale.T("dialog.add_brand.placeholder"))
-			
+
 			// Create label and input field vertically for better width
 			label := widget.NewLabel(locale.T("dialog.add_brand.label"))
 			entryContainer := container.NewVBox(label, newBrandEntry)
-			
+
 			newBrandDialog := dialog.NewCustomWithoutButtons(locale.T("dialog.add_brand.title"), entryContainer, p.window)
-			
+
 			cancelBtn := widget.NewButton(locale.T("common.cancel"), func() {
 				newBrandDialog.Hide()
 				// Return to main dialog
@@ -331,14 +353,14 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 				}
 				brandSelect.SetSelected("")
 			})
-			
+
 			saveBtn := widget.NewButton(locale.T("common.save"), func() {
 				newBrandName := strings.TrimSpace(newBrandEntry.Text)
 				if newBrandName == "" {
 					dialog.ShowError(fmt.Errorf(locale.T("info.enter_brand_name")), p.window)
 					return
 				}
-				
+
 				// Check if brand already exists
 				for _, b := range existingBrands {
 					if strings.EqualFold(b, newBrandName) {
@@ -346,18 +368,18 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 						return
 					}
 				}
-				
+
 				// Add new brand to reference table
 				if err := p.modelService.AddBrand(newBrandName); err != nil {
 					dialog.ShowError(err, p.window)
 					return
 				}
-				
+
 				// Update brand list
 				existingBrands = append(existingBrands, newBrandName)
 				selectOptions = append(existingBrands, newBrandOption)
 				brandSelect.Options = selectOptions
-				
+
 				newBrandDialog.Hide()
 				// Return to main dialog with new brand selected
 				if mainDialog != nil {
@@ -365,9 +387,9 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 				}
 				brandSelect.SetSelected(newBrandName)
 			})
-			
+
 			newBrandDialog.SetButtons([]fyne.CanvasObject{cancelBtn, saveBtn})
-			
+
 			// Increase dialog width for new brand
 			parentSize := p.window.Canvas().Size()
 			dialogWidth := parentSize.Width * 0.6
@@ -376,15 +398,15 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			}
 			// Use standard content height, do not change it
 			newBrandDialog.Resize(fyne.NewSize(dialogWidth, newBrandDialog.MinSize().Height))
-			
+
 			newBrandDialog.Show()
 		}
 	})
-	
+
 	if model != nil && model.Brand != "" {
 		brandSelect.SetSelected(model.Brand)
 	}
-	
+
 	brandWidget := brandSelect
 
 	// Create widget for model name selection with autocomplete
@@ -396,7 +418,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 		modelNameEntry = widget.NewEntry()
 		modelNameEntry.SetPlaceHolder(locale.T("form.model.name_placeholder"))
 		modelNameEntry.Resize(fyne.NewSize(250, modelNameEntry.MinSize().Height))
-		
+
 		if model != nil && model.ModelName != "" {
 			modelNameEntry.SetText(model.ModelName)
 		}
@@ -408,7 +430,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 				modelNameEntry.SetText(selected)
 			})
 			selectWidget.SetSelected("")
-			
+
 			popup := widget.NewPopUp(selectWidget, p.window.Canvas())
 			// Position popup below input field
 			entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(modelNameEntry)
@@ -425,12 +447,12 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 
 		// Text change handler for filtering
 		var popup *widget.PopUp
-		
+
 		modelNameEntry.OnChanged = func(text string) {
 			if popup != nil {
 				popup.Hide()
 			}
-			
+
 			if text == "" {
 				return
 			}
@@ -438,7 +460,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			// Filter options
 			var filtered []string
 			textLower := strings.ToLower(text)
-			
+
 			for _, opt := range allModelNames {
 				if strings.Contains(strings.ToLower(opt), textLower) {
 					filtered = append(filtered, opt)
@@ -460,7 +482,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 						popup.Hide()
 					}
 				}
-				
+
 				popup = widget.NewPopUp(list, p.window.Canvas())
 				// Position popup below input field
 				entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(modelNameEntry)
@@ -526,12 +548,12 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 		widget.NewFormItem(locale.T("form.model.motor"), motorTypeEntry),
 		widget.NewFormItem(locale.T("form.model.drive"), driveTypeEntry),
 	}
-	
+
 	form := widget.NewForm(formItems...)
 
 	// Create dialog without buttons first so we can reference it in the callback
 	d := dialog.NewCustomWithoutButtons(title, form, p.window)
-	
+
 	// Assign dialog to mainDialog for use in brand selection callback
 	mainDialog = d
 

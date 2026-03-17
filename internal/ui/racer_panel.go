@@ -26,9 +26,9 @@ type RacerPanel struct {
 	selectedRacerID string         // ID of selected racer
 	allRacers       []models.Racer // Cache of all racers
 	// UI components that need to be updated on language change
-	toolbar        *widget.Toolbar
-	headers        []string
-	formItems      []*widget.FormItem
+	toolbar   *widget.Toolbar
+	headers   []string
+	formItems []*widget.FormItem
 }
 
 // updateLocale updates all localized text in the panel
@@ -36,7 +36,7 @@ func (p *RacerPanel) updateLocale() {
 	if p.statusLabel != nil {
 		p.statusLabel.SetText(locale.T("status.ready"))
 	}
-	
+
 	// Update headers
 	headers := []string{
 		locale.T("common.id"),
@@ -50,10 +50,15 @@ func (p *RacerPanel) updateLocale() {
 		locale.T("model.header.updated"),
 	}
 	p.headers = headers
-	
+
 	if p.table != nil {
 		p.table.Refresh()
 	}
+}
+
+// Refresh refreshes the panel UI with current locale
+func (p *RacerPanel) Refresh() {
+	p.updateLocale()
 }
 
 // NewRacerPanel creates a new racer management panel
@@ -75,7 +80,7 @@ func (p *RacerPanel) buildUI() *fyne.Container {
 
 	// Table for displaying racers
 	p.table = p.createRacerTable()
-	
+
 	// Initialize headers
 	p.updateLocale()
 

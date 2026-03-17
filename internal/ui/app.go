@@ -16,6 +16,7 @@ type App struct {
 	racerService *service.RacerService
 	modelService *service.RCModelService
 	config       *Config
+	tabs         *container.AppTabs
 }
 
 // Config holds UI configuration
@@ -50,23 +51,23 @@ func (a *App) Run() {
 
 // createMainContent builds the main tabbed interface
 func (a *App) createMainContent() *container.AppTabs {
-	tabs := container.NewAppTabs(
-		container.NewTabItem("Monitoring", a.createMonitoringTab()),
-		container.NewTabItem("Racers", a.createRacersTab()),
-		container.NewTabItem("Models", a.createModelsTab()),
-		container.NewTabItem("Transponders", a.createTranspondersTab()),
-		container.NewTabItem("Races", a.createRacesTab()),
-		container.NewTabItem("Logs", a.createLogsTab()),
-		container.NewTabItem("Settings", a.createSettingsTab()),
+	a.tabs = container.NewAppTabs(
+		container.NewTabItem(locale.T("tab.monitoring"), a.createMonitoringTab()),
+		container.NewTabItem(locale.T("tab.racers"), a.createRacersTab()),
+		container.NewTabItem(locale.T("tab.models"), a.createModelsTab()),
+		container.NewTabItem(locale.T("tab.transponders"), a.createTranspondersTab()),
+		container.NewTabItem(locale.T("tab.races"), a.createRacesTab()),
+		container.NewTabItem(locale.T("tab.logs"), a.createLogsTab()),
+		container.NewTabItem(locale.T("tab.settings"), a.createSettingsTab()),
 	)
 
-	tabs.SetTabLocation(container.TabLocationTop)
-	return tabs
+	a.tabs.SetTabLocation(container.TabLocationTop)
+	return a.tabs
 }
 
 // createMonitoringTab creates the Live Monitoring tab
 func (a *App) createMonitoringTab() fyne.CanvasObject {
-	content := widget.NewLabel("Live Race Monitoring - Coming Soon")
+	content := widget.NewLabel(locale.T("app.welcome"))
 	content.Alignment = fyne.TextAlignCenter
 	return container.NewCenter(content)
 }
@@ -83,21 +84,21 @@ func (a *App) createModelsTab() fyne.CanvasObject {
 
 // createTranspondersTab creates the Transponders management tab
 func (a *App) createTranspondersTab() fyne.CanvasObject {
-	content := widget.NewLabel("Transponder Assignment - Coming Soon")
+	content := widget.NewLabel(locale.T("tab.transponders"))
 	content.Alignment = fyne.TextAlignCenter
 	return container.NewCenter(content)
 }
 
 // createRacesTab creates the Races management tab
 func (a *App) createRacesTab() fyne.CanvasObject {
-	content := widget.NewLabel("Race Management - Coming Soon")
+	content := widget.NewLabel(locale.T("tab.races"))
 	content.Alignment = fyne.TextAlignCenter
 	return container.NewCenter(content)
 }
 
 // createLogsTab creates the Logs viewing tab
 func (a *App) createLogsTab() fyne.CanvasObject {
-	content := widget.NewLabel("System Logs - Coming Soon")
+	content := widget.NewLabel(locale.T("tab.logs"))
 	content.Alignment = fyne.TextAlignCenter
 	return container.NewCenter(content)
 }
@@ -106,13 +107,13 @@ func (a *App) createLogsTab() fyne.CanvasObject {
 func (a *App) createSettingsTab() fyne.CanvasObject {
 	// Create language selector
 	languageLabel := widget.NewLabel(locale.T("settings.language"))
-	
+
 	// Build options for language select
 	options := make([]string, 0, len(locale.SupportedLocales))
 	for _, name := range locale.SupportedLocales {
 		options = append(options, name)
 	}
-	
+
 	// Find current language name
 	currentName := "English"
 	for code, name := range locale.SupportedLocales {
@@ -121,7 +122,7 @@ func (a *App) createSettingsTab() fyne.CanvasObject {
 			break
 		}
 	}
-	
+
 	languageSelect := widget.NewSelect(options, func(selected string) {
 		// Find the code for the selected language
 		var selectedCode string
@@ -131,23 +132,56 @@ func (a *App) createSettingsTab() fyne.CanvasObject {
 				break
 			}
 		}
-		
+
 		if selectedCode != "" {
 			locale.SetLocale(selectedCode)
 			a.config.Language = selectedCode
-			// TODO: Refresh UI with new language
+			a.refreshUI()
 		}
 	})
-	
+
 	// Set default selection
 	languageSelect.SetSelected(currentName)
-	
+
 	// Create settings form
 	form := container.NewVBox(
 		widget.NewSeparator(),
 		container.NewHBox(languageLabel, languageSelect),
 		widget.NewSeparator(),
 	)
-	
+
 	return container.NewPadded(form)
+}
+
+// refreshUI updates all UI elements with new locale strings
+func (a *App) refreshUI() {
+	// Refresh tab titles
+	for i, tab := range a.tabs.Items {
+		switch i {
+		case 0:
+			tab.Text = locale.T("tab.monitoring")
+		case 1:
+			tab.Text = locale.T("tab.racers")
+		case 2:
+			tab.Text = locale.T("tab.models")
+		case 3:
+			tab.Text = locale.T("tab.transponders")
+		case 4:
+			tab.Text = locale.T("tab.races")
+		case 5:
+			tab.Text = locale.T("tab.logs")
+		case 6:
+			tab.Text = locale.T("tab.settings")
+		}
+	}
+
+	a.tabs.Refresh()
+
+	// Refresh panels if they have refresh methods
+	if racerPanel, ok := a.tabs.Items[1].Content.(*RacerPanel); ok {
+		racerPanel.Refresh()
+	}
+	if modelPanel, ok := a.tabs.Items[2].Content.(*ModelPanel); ok {
+		modelPanel.Refresh()
+	}
 }
