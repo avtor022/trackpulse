@@ -17,6 +17,8 @@ type App struct {
 	modelService *service.RCModelService
 	config       *Config
 	tabs         *container.AppTabs
+	racerPanel   *RacerPanel
+	modelPanel   *ModelPanel
 }
 
 // Config holds UI configuration
@@ -74,11 +76,13 @@ func (a *App) createMonitoringTab() fyne.CanvasObject {
 
 // createRacersTab creates the Racers management tab
 func (a *App) createRacersTab() fyne.CanvasObject {
+	a.racerPanel = &RacerPanel{}
 	return NewRacerPanel(a.racerService, a.mainWindow)
 }
 
 // createModelsTab creates the Models management tab
 func (a *App) createModelsTab() fyne.CanvasObject {
+	a.modelPanel = &ModelPanel{}
 	return NewModelPanel(a.modelService, a.mainWindow)
 }
 
@@ -177,11 +181,11 @@ func (a *App) refreshUI() {
 
 	a.tabs.Refresh()
 
-	// Refresh panels if they have refresh methods
-	if racerPanel, ok := a.tabs.Items[1].Content.(*RacerPanel); ok {
-		racerPanel.Refresh()
+	// Refresh panels using stored references
+	if a.racerPanel != nil {
+		a.racerPanel.Refresh()
 	}
-	if modelPanel, ok := a.tabs.Items[2].Content.(*ModelPanel); ok {
-		modelPanel.Refresh()
+	if a.modelPanel != nil {
+		a.modelPanel.Refresh()
 	}
 }
