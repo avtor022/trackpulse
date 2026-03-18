@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"trackpulse/internal/locale"
@@ -396,10 +397,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 		}
 
 		// Add "Add new brand" option
-		addNewRow := container.NewHBox(
-			widget.NewLabel(newBrandOption),
-		)
-		addNewRow.Tap = func() {
+		addNewBtn := widget.NewButton(newBrandOption, func() {
 			// Show dialog to add new brand
 			if mainDialog != nil {
 				mainDialog.Hide()
@@ -472,7 +470,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			currentDialog = newBrandDialog
 			newBrandDialog.Show()
 		}
-		brandContainer.Add(addNewRow)
+		brandContainer.Add(addNewBtn)
 
 		// Create popup dialog
 		popup := dialog.NewCustomWithoutButtons(locale.T("common.select_one"), brandContainer, p.window)
