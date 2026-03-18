@@ -181,7 +181,7 @@ func (a *App) refreshUI() {
 
 	a.tabs.Refresh()
 
-	// Refresh panels using stored references
+	// Refresh panels using stored references if they exist
 	if a.racerPanel != nil {
 		a.racerPanel.Refresh()
 	}

@@ -1,34 +1,49 @@
-```
-# Compiled and build artifacts
+# Compiled and binary files
+*.pyc
+__pycache__/
 *.o
 *.obj
+*.exe
+*.dll
+*.so
+*.a
 *.out
 
 # Dependencies
-vendor/
-
-# Logs and temp files
-*.log
-*.tmp
-*.swp
-
-# Environment
+node_modules/
+venv/
+.venv/
 .env
 .env.local
-*.env.*
+.env.*
 
-# Editors
+# Build artifacts
+dist/
+build/
+target/
+
+# Editor/IDE files
 .vscode/
 .idea/
+*.swp
+*.swo
+*.tmp
+
+# Logs
+*.log
 
 # Coverage
 coverage/
 htmlcov/
 .coverage
 
-# Go-specific
-*.exe
-*.dll
-*.so
-*.a
-```
+# System files
+.DS_Store
+Thumbs.db
+
+# Caches
+.mypy_cache/
+.pytest_cache/
+.gradle/
+.julia/
+zig*/
