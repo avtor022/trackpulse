@@ -100,6 +100,7 @@
     "common.info": "Инфо",
     "form.model.brand": "Бренд",
     "form.model.name": "Название модели",
+    "form.model.name_placeholder": "Введите название модели",
     "form.model.scale": "Масштаб",
     "form.model.type": "Тип модели",
     "form.model.motor": "Тип мотора",

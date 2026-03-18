@@ -100,6 +100,7 @@
     "common.info": "Info",
     "form.model.brand": "Brand",
     "form.model.name": "Model Name",
+    "form.model.name_placeholder": "Enter model name",
     "form.model.scale": "Scale",
     "form.model.type": "Model Type",
     "form.model.motor": "Motor Type",
