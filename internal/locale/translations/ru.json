@@ -78,6 +78,7 @@
     "dialog.delete.confirm": "Удалить",
     "dialog.delete.cancel": "Отмена",
     "dialog.delete.success": "Успешно удалено",
+    "dialog.delete_brand.message": "Вы уверены, что хотите удалить бренд \"%s\"? Это действие нельзя отменить.",
     "common.ok": "OK",
     "common.cancel": "Отмена",
     "common.yes": "Да",

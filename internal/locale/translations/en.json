@@ -78,6 +78,7 @@
     "dialog.delete.confirm": "Delete",
     "dialog.delete.cancel": "Cancel",
     "dialog.delete.success": "Deleted successfully",
+    "dialog.delete_brand.message": "Are you sure you want to delete brand \"%s\"? This cannot be undone.",
     "common.ok": "OK",
     "common.cancel": "Cancel",
     "common.yes": "Yes",

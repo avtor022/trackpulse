@@ -134,3 +134,12 @@ func (r *RCModelBrandRepository) GetOrCreate(name string) (*models.RCModelBrand,
 	// Create new brand
 	return r.Create(name)
 }
+
+// Delete deletes a brand by name
+func (r *RCModelBrandRepository) Delete(name string) error {
+	_, err := r.db.Exec(`DELETE FROM rc_model_brands WHERE name = ?`, name)
+	if err != nil {
+		return fmt.Errorf("failed to delete brand: %w", err)
+	}
+	return nil
+}

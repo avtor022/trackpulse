@@ -1,12 +1,38 @@
-```json
-{
-  "en": {
-    "welcome": "Welcome",
-    "goodbye": "Goodbye"
-  },
-  "ru": {
-    "welcome": "Добро пожаловать",
-    "goodbye": "До свидания"
-  }
-}
+```
+# Compiled and build artifacts
+*.o
+*.obj
+*.out
+
+# Dependencies
+vendor/
+
+# Logs and temp files
+*.log
+*.tmp
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# Coverage
+coverage/
+htmlcov/
+.coverage
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+dist/
+build/
+target/
 ```

@@ -122,7 +122,7 @@ func (s *RCModelService) AddBrand(name string) error {
 	if name == "" {
 		return fmt.Errorf("brand name is required")
 	}
-	
+
 	// Check if brand already exists
 	existing, err := s.brandRepo.GetByName(name)
 	if err != nil {
@@ -131,12 +131,39 @@ func (s *RCModelService) AddBrand(name string) error {
 	if existing != nil {
 		return fmt.Errorf("brand '%s' already exists", name)
 	}
-	
+
 	// Create new brand
 	_, err = s.brandRepo.Create(name)
 	if err != nil {
 		return fmt.Errorf("failed to create brand: %w", err)
 	}
-	
+
+	return nil
+}
+
+// DeleteBrand deletes a brand from the database
+func (s *RCModelService) DeleteBrand(name string) error {
+	if name == "" {
+		return fmt.Errorf("brand name is required")
+	}
+
+	// Check if brand is used by any models
+	models, err := s.modelRepo.GetAll()
+	if err != nil {
+		return fmt.Errorf("failed to check models: %w", err)
+	}
+
+	for _, model := range models {
+		if model.Brand == name {
+			return fmt.Errorf("cannot delete brand '%s': it is used by model '%s'", name, model.ModelName)
+		}
+	}
+
+	// Delete brand
+	err = s.brandRepo.Delete(name)
+	if err != nil {
+		return fmt.Errorf("failed to delete brand: %w", err)
+	}
+
 	return nil
 }
