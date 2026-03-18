@@ -95,6 +95,3 @@ func T(key string) string {
 func BindText(key string) string {
 	return T(key)
 }
-
-// Ensure fyne import is used
-var _ fyne.App
