@@ -95,6 +95,7 @@
     "common.add": "Add",
     "common.close": "Close",
     "common.select": "Select",
+    "common.select_one": "Select one",
     "common.required": "is required",
     "common.info": "Info",
     "form.model.brand": "Brand",

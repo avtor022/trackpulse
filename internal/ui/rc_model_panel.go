@@ -24,6 +24,7 @@ type ModelPanel struct {
 	selectedModelID string           // ID of selected model
 	allModels       []models.RCModel // Cache of all models
 	headers         []string         // Localized table headers
+	brandSelect     *widget.Select   // Reference to brand select widget for locale updates
 }
 
 // updateLocale updates all localized text in the panel
@@ -45,6 +46,11 @@ func (p *ModelPanel) updateLocale() {
 		locale.T("model.header.updated"),
 	}
 	p.headers = headers
+
+	// Update brand select placeholder if it exists
+	if p.brandSelect != nil {
+		p.brandSelect.PlaceHolder = locale.T("common.select_one")
+	}
 
 	if p.table != nil {
 		p.table.Refresh()
@@ -403,6 +409,12 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			newBrandDialog.Show()
 		}
 	})
+
+	// Set placeholder text for the select widget (localized)
+	brandSelect.PlaceHolder = locale.T("common.select_one")
+
+	// Store reference to brandSelect for locale updates
+	p.brandSelect = brandSelect
 
 	if model != nil && model.Brand != "" {
 		brandSelect.SetSelected(model.Brand)

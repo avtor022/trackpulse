@@ -95,6 +95,7 @@
     "common.add": "Добавить",
     "common.close": "Закрыть",
     "common.select": "Выбрать",
+    "common.select_one": "Выберите один",
     "common.required": "обязательно",
     "common.info": "Инфо",
     "form.model.brand": "Бренд",
