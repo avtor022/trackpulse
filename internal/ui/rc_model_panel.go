@@ -338,7 +338,8 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 	var mainDialog dialog.Dialog
 
 	// Function to show brand selection popup with delete buttons
-	showBrandPopup := func() {
+	var showBrandPopup func()
+	showBrandPopup = func() {
 		if currentDialog != nil {
 			currentDialog.Hide()
 		}
