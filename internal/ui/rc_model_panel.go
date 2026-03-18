@@ -25,6 +25,7 @@ type ModelPanel struct {
 	allModels       []models.RCModel // Cache of all models
 	headers         []string         // Localized table headers
 	brandSelect     *widget.Select   // Reference to brand select widget for locale updates
+	modelNameEntry  *widget.Entry    // Reference to model name entry widget for locale updates
 }
 
 // updateLocale updates all localized text in the panel
@@ -50,6 +51,11 @@ func (p *ModelPanel) updateLocale() {
 	// Update brand select placeholder if it exists
 	if p.brandSelect != nil {
 		p.brandSelect.PlaceHolder = locale.T("common.select_one")
+	}
+
+	// Update model name entry placeholder if it exists
+	if p.modelNameEntry != nil {
+		p.modelNameEntry.SetPlaceHolder(locale.T("form.model.name_placeholder"))
 	}
 
 	if p.table != nil {
@@ -416,15 +422,15 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 	brandWidget := brandSelect
 
 	// Create widget for model name - simple text entry
-	modelNameEntry := widget.NewEntry()
-	modelNameEntry.SetPlaceHolder(locale.T("form.model.name_placeholder"))
-	modelNameEntry.Resize(fyne.NewSize(250, modelNameEntry.MinSize().Height))
+	p.modelNameEntry = widget.NewEntry()
+	p.modelNameEntry.SetPlaceHolder(locale.T("form.model.name_placeholder"))
+	p.modelNameEntry.Resize(fyne.NewSize(250, p.modelNameEntry.MinSize().Height))
 
 	if model != nil && model.ModelName != "" {
-		modelNameEntry.SetText(model.ModelName)
+		p.modelNameEntry.SetText(model.ModelName)
 	}
 
-	modelNameWidget := modelNameEntry
+	modelNameWidget := p.modelNameEntry
 
 	scaleEntry := widget.NewEntry()
 	scaleEntry.SetPlaceHolder(locale.T("form.model.scale_placeholder"))
@@ -482,8 +488,8 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 
 		// Get model name value
 		var modelName string
-		if modelNameEntry != nil {
-			modelName = modelNameEntry.Text
+		if p.modelNameEntry != nil {
+			modelName = p.modelNameEntry.Text
 		}
 
 		// Validate required fields
