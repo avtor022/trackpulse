@@ -127,7 +127,14 @@ func (a *App) createSettingsTab() fyne.CanvasObject {
 		}
 	}
 
-	languageSelect := widget.NewSelect(options, func(selected string) {
+	// Create select without callback first
+	languageSelect := widget.NewSelect(options, nil)
+	
+	// Set initial value without triggering callback
+	languageSelect.SetSelected(currentName)
+	
+	// Now set the callback for future changes
+	languageSelect.OnChanged = func(selected string) {
 		// Find the code for the selected language
 		var selectedCode string
 		for code, name := range locale.SupportedLocales {
@@ -142,10 +149,7 @@ func (a *App) createSettingsTab() fyne.CanvasObject {
 			a.config.Language = selectedCode
 			a.refreshUI()
 		}
-	})
-
-	// Set default selection
-	languageSelect.SetSelected(currentName)
+	}
 
 	// Create settings form
 	form := container.NewVBox(
@@ -181,11 +185,14 @@ func (a *App) refreshUI() {
 
 	a.tabs.Refresh()
 
-	// Refresh panels using stored references if they exist
+	// Refresh panels only if they have been created
 	if a.racerPanel != nil {
 		a.racerPanel.Refresh()
 	}
 	if a.modelPanel != nil {
 		a.modelPanel.Refresh()
 	}
+	
+	// Also update settings tab content
+	a.tabs.Refresh()
 }
