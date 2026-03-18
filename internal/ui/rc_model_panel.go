@@ -320,13 +320,6 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 		existingBrands = append(existingBrands, brand.Name)
 	}
 
-	// Get all model names
-	allModelNames, err := p.modelService.GetAllModelNames()
-	if err != nil {
-		fmt.Println("ERROR getting model names:", err)
-		// Continue working even if model names could not be retrieved
-	}
-
 	// Create widget for brand selection - use Select with option to add new
 	var brandSelect *widget.Select
 
@@ -422,107 +415,16 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 
 	brandWidget := brandSelect
 
-	// Create widget for model name selection with autocomplete
-	var modelNameWidget fyne.CanvasObject
-	var modelNameEntry *widget.Entry
+	// Create widget for model name - simple text entry
+	modelNameEntry := widget.NewEntry()
+	modelNameEntry.SetPlaceHolder(locale.T("form.model.name_placeholder"))
+	modelNameEntry.Resize(fyne.NewSize(250, modelNameEntry.MinSize().Height))
 
-	if len(allModelNames) > 0 {
-		// Use Entry with autocomplete
-		modelNameEntry = widget.NewEntry()
-		modelNameEntry.SetPlaceHolder(locale.T("form.model.name_placeholder"))
-		modelNameEntry.Resize(fyne.NewSize(250, modelNameEntry.MinSize().Height))
-
-		if model != nil && model.ModelName != "" {
-			modelNameEntry.SetText(model.ModelName)
-		}
-
-		// Create container with input field and dropdown button
-		dropdownBtn := widget.NewButtonWithIcon("", theme.MenuDropDownIcon(), func() {
-			// Show simple Select as popup
-			selectWidget := widget.NewSelect(allModelNames, func(selected string) {
-				modelNameEntry.SetText(selected)
-			})
-			selectWidget.SetSelected("")
-
-			popup := widget.NewPopUp(selectWidget, p.window.Canvas())
-			// Position popup below input field
-			entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(modelNameEntry)
-			popupSize := selectWidget.MinSize()
-			popup.Resize(popupSize)
-			popup.Move(fyne.NewPos(entryPos.X, entryPos.Y+modelNameEntry.Size().Height))
-			popup.Show()
-		})
-
-		modelNameWidget = container.NewHBox(
-			container.NewStack(modelNameEntry),
-			dropdownBtn,
-		)
-
-		// Text change handler for filtering
-		var popup *widget.PopUp
-
-		modelNameEntry.OnChanged = func(text string) {
-			if popup != nil {
-				popup.Hide()
-			}
-
-			if text == "" {
-				return
-			}
-
-			// Filter options
-			var filtered []string
-			textLower := strings.ToLower(text)
-
-			for _, opt := range allModelNames {
-				if strings.Contains(strings.ToLower(opt), textLower) {
-					filtered = append(filtered, opt)
-				}
-			}
-
-			if len(filtered) > 0 {
-				// Create simple list with filtering
-				list := widget.NewList(
-					func() int { return len(filtered) },
-					func() fyne.CanvasObject { return widget.NewLabel("Template") },
-					func(id widget.ListItemID, item fyne.CanvasObject) {
-						item.(*widget.Label).SetText(filtered[id])
-					},
-				)
-				list.OnSelected = func(id widget.ListItemID) {
-					modelNameEntry.SetText(filtered[id])
-					if popup != nil {
-						popup.Hide()
-					}
-				}
-
-				popup = widget.NewPopUp(list, p.window.Canvas())
-				// Position popup below input field
-				entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(modelNameEntry)
-				popupSize := list.MinSize()
-				popup.Resize(popupSize)
-				popup.Move(fyne.NewPos(entryPos.X, entryPos.Y+modelNameEntry.Size().Height))
-				popup.Show()
-			}
-		}
-
-		modelNameEntry.OnSubmitted = func(text string) {
-			if popup != nil {
-				popup.Hide()
-			}
-		}
-
-		_ = popup
-	} else {
-		// If no model names available, use regular input field
-		modelNameEntry = widget.NewEntry()
-		modelNameEntry.SetPlaceHolder(locale.T("form.model.name_placeholder"))
-		modelNameEntry.Resize(fyne.NewSize(250, modelNameEntry.MinSize().Height))
-		if model != nil && model.ModelName != "" {
-			modelNameEntry.SetText(model.ModelName)
-		}
-		modelNameWidget = modelNameEntry
+	if model != nil && model.ModelName != "" {
+		modelNameEntry.SetText(model.ModelName)
 	}
+
+	modelNameWidget := modelNameEntry
 
 	scaleEntry := widget.NewEntry()
 	scaleEntry.SetPlaceHolder(locale.T("form.model.scale_placeholder"))
