@@ -71,7 +71,7 @@ func main() {
 	// Load locale from settings
 	savedLocale, err := settingsService.GetLocale()
 	if err != nil {
-		log.Warn("Failed to load locale from settings: %v", err)
+		log.Error("Failed to load locale from settings: %v", err)
 		savedLocale = "en"
 	}
 	
