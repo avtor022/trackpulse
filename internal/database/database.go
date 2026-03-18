@@ -220,6 +220,7 @@ func (db *DB) Initialize() error {
 		valueType   string
 		description string
 	}{
+		{"locale", "en", "string", "locale of app"},
 		{"web_interface_enabled", "false", "bool", "Enable web interface for spectators"},
 		{"ui_language", "en", "string", "UI language (ru, en)"},
 		{"db_path", "", "string", "Path to database file"},

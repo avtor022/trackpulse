@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"fmt"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
@@ -11,14 +13,15 @@ import (
 
 // App represents the main application UI
 type App struct {
-	fyneApp      fyne.App
-	mainWindow   fyne.Window
-	racerService *service.RacerService
-	modelService *service.RCModelService
-	config       *Config
-	tabs         *container.AppTabs
-	racerPanel   *RacerPanel
-	modelPanel   *ModelPanel
+	fyneApp        fyne.App
+	mainWindow     fyne.Window
+	racerService   *service.RacerService
+	modelService   *service.RCModelService
+	settingsService *service.SettingsService
+	config         *Config
+	tabs           *container.AppTabs
+	racerPanel     *RacerPanel
+	modelPanel     *ModelPanel
 }
 
 // Config holds UI configuration
@@ -28,15 +31,16 @@ type Config struct {
 }
 
 // NewApp creates a new TrackPulse application
-func NewApp(racerService *service.RacerService, modelService *service.RCModelService, language string) *App {
+func NewApp(racerService *service.RacerService, modelService *service.RCModelService, settingsService *service.SettingsService, language string) *App {
 	fyneApp := app.New()
 	mainWindow := fyneApp.NewWindow("TrackPulse")
 
 	return &App{
-		fyneApp:      fyneApp,
-		mainWindow:   mainWindow,
-		racerService: racerService,
-		modelService: modelService,
+		fyneApp:         fyneApp,
+		mainWindow:      mainWindow,
+		racerService:    racerService,
+		modelService:    modelService,
+		settingsService: settingsService,
 		config: &Config{
 			Language: language,
 			Title:    "TrackPulse",
@@ -147,6 +151,16 @@ func (a *App) createSettingsTab() fyne.CanvasObject {
 		if selectedCode != "" {
 			locale.SetLocale(selectedCode)
 			a.config.Language = selectedCode
+			
+			// Save to database
+			if a.settingsService != nil {
+				err := a.settingsService.SetLocale(selectedCode)
+				if err != nil {
+					// Log error but continue with UI update
+					fmt.Printf("Failed to save locale: %v\n", err)
+				}
+			}
+			
 			a.refreshUI()
 		}
 	}
