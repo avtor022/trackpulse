@@ -469,7 +469,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 
 			currentDialog = newBrandDialog
 			newBrandDialog.Show()
-		}
+		})
 		brandContainer.Add(addNewBtn)
 
 		// Create popup dialog
