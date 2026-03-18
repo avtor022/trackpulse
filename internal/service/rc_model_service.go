@@ -12,11 +12,12 @@ import (
 type RCModelService struct {
 	modelRepo *repository.RCModelRepository
 	brandRepo *repository.RCModelBrandRepository
+	scaleRepo *repository.RCModelScaleRepository
 }
 
 // NewRCModelService creates a new RC model service
-func NewRCModelService(modelRepo *repository.RCModelRepository, brandRepo *repository.RCModelBrandRepository) *RCModelService {
-	return &RCModelService{modelRepo: modelRepo, brandRepo: brandRepo}
+func NewRCModelService(modelRepo *repository.RCModelRepository, brandRepo *repository.RCModelBrandRepository, scaleRepo *repository.RCModelScaleRepository) *RCModelService {
+	return &RCModelService{modelRepo: modelRepo, brandRepo: brandRepo, scaleRepo: scaleRepo}
 }
 
 // GetAllModels returns all RC models
@@ -49,6 +50,12 @@ func (s *RCModelService) CreateModel(model *models.RCModel) error {
 	_, err := s.brandRepo.GetOrCreate(model.Brand)
 	if err != nil {
 		return fmt.Errorf("failed to ensure brand exists: %w", err)
+	}
+
+	// Ensure scale exists in the scales table
+	_, err = s.scaleRepo.GetOrCreate(model.Scale)
+	if err != nil {
+		return fmt.Errorf("failed to ensure scale exists: %w", err)
 	}
 
 	// Generate UUID
@@ -89,6 +96,12 @@ func (s *RCModelService) UpdateModel(model *models.RCModel) error {
 	_, err = s.brandRepo.GetOrCreate(model.Brand)
 	if err != nil {
 		return fmt.Errorf("failed to ensure brand exists: %w", err)
+	}
+
+	// Ensure scale exists in the scales table
+	_, err = s.scaleRepo.GetOrCreate(model.Scale)
+	if err != nil {
+		return fmt.Errorf("failed to ensure scale exists: %w", err)
 	}
 
 	return s.modelRepo.Update(model)
@@ -163,6 +176,62 @@ func (s *RCModelService) DeleteBrand(name string) error {
 	err = s.brandRepo.Delete(name)
 	if err != nil {
 		return fmt.Errorf("failed to delete brand: %w", err)
+	}
+
+	return nil
+}
+
+// GetAllScales returns all RC model scales
+func (s *RCModelService) GetAllScales() ([]models.RCModelScale, error) {
+	return s.scaleRepo.GetAll()
+}
+
+// AddScale adds a new scale to the database
+func (s *RCModelService) AddScale(name string) error {
+	if name == "" {
+		return fmt.Errorf("scale name is required")
+	}
+
+	// Check if scale already exists
+	existing, err := s.scaleRepo.GetByName(name)
+	if err != nil {
+		return fmt.Errorf("failed to check existing scale: %w", err)
+	}
+	if existing != nil {
+		return fmt.Errorf("scale '%s' already exists", name)
+	}
+
+	// Create new scale
+	_, err = s.scaleRepo.Create(name)
+	if err != nil {
+		return fmt.Errorf("failed to create scale: %w", err)
+	}
+
+	return nil
+}
+
+// DeleteScale deletes a scale from the database
+func (s *RCModelService) DeleteScale(name string) error {
+	if name == "" {
+		return fmt.Errorf("scale name is required")
+	}
+
+	// Check if scale is used by any models
+	models, err := s.modelRepo.GetAll()
+	if err != nil {
+		return fmt.Errorf("failed to check models: %w", err)
+	}
+
+	for _, model := range models {
+		if model.Scale == name {
+			return fmt.Errorf("cannot delete scale '%s': it is used by model '%s'", name, model.ModelName)
+		}
+	}
+
+	// Delete scale
+	err = s.scaleRepo.Delete(name)
+	if err != nil {
+		return fmt.Errorf("failed to delete scale: %w", err)
 	}
 
 	return nil

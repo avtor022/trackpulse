@@ -27,6 +27,7 @@ type ModelPanel struct {
 	headers         []string         // Localized table headers
 	brandSelect     *widget.Select   // Reference to brand select widget for locale updates
 	modelNameEntry  *widget.Entry    // Reference to model name entry widget for locale updates
+	scaleSelect     *widget.Select   // Reference to scale select widget for locale updates
 }
 
 // updateLocale updates all localized text in the panel
@@ -57,6 +58,11 @@ func (p *ModelPanel) updateLocale() {
 	// Update model name entry placeholder if it exists
 	if p.modelNameEntry != nil {
 		p.modelNameEntry.SetPlaceHolder(locale.T("form.model.name_placeholder"))
+	}
+
+	// Update scale select placeholder if it exists
+	if p.scaleSelect != nil {
+		p.scaleSelect.PlaceHolder = locale.T("common.select_one")
 	}
 
 	if p.table != nil {
@@ -321,10 +327,23 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 		// Continue working even if brands could not be retrieved
 	}
 
+	// Get all scales from the separate reference table
+	allScales, err := p.modelService.GetAllScales()
+	if err != nil {
+		fmt.Println("ERROR getting scales:", err)
+		// Continue working even if scales could not be retrieved
+	}
+
 	// Extract brand names
 	var existingBrands []string
 	for _, brand := range allBrands {
 		existingBrands = append(existingBrands, brand.Name)
+	}
+
+	// Extract scale names
+	var existingScales []string
+	for _, scale := range allScales {
+		existingScales = append(existingScales, scale.Name)
 	}
 
 	// Create widget for brand selection with delete buttons
@@ -334,6 +353,13 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 	// Add option to create new brand
 	newBrandOption := "+ " + locale.T("common.add") + " " + strings.TrimSuffix(locale.T("form.model.brand"), ":")
 	selectOptions := append(existingBrands, newBrandOption)
+
+	// Create widget for scale selection with delete buttons
+	var scaleSelect *widget.Select
+
+	// Add option to create new scale
+	newScaleOption := "+ " + locale.T("common.add") + " " + strings.TrimSuffix(locale.T("form.model.scale"), ":")
+	scaleSelectOptions := append(existingScales, newScaleOption)
 
 	var mainDialog dialog.Dialog
 
@@ -549,8 +575,217 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 
 	modelNameWidget := p.modelNameEntry
 
-	scaleEntry := widget.NewEntry()
-	scaleEntry.SetPlaceHolder(locale.T("form.model.scale_placeholder"))
+	// Function to show scale selection popup with delete buttons (similar to brand)
+	var showScalePopup func()
+	showScalePopup = func() {
+		if currentDialog != nil {
+			currentDialog.Hide()
+		}
+
+		// Create container for scale options
+		scaleContainer := container.NewVBox()
+
+		// Add existing scales with delete buttons
+		for _, scale := range existingScales {
+			scaleName := scale
+			// Create horizontal layout for scale name and delete button
+			scaleRow := container.NewHBox(
+				widget.NewLabel(scale),
+				layout.NewSpacer(),
+			)
+
+			// Create delete button
+			deleteBtn := widget.NewButtonWithIcon("", theme.DeleteIcon(), func() {
+				// Show confirmation dialog
+				dialog.ShowConfirm(
+					locale.T("dialog.delete.title"),
+					fmt.Sprintf(locale.T("dialog.delete_scale.message"), scaleName),
+					func(confirmed bool) {
+						if confirmed {
+							// Delete scale from database
+							if err := p.modelService.DeleteScale(scaleName); err != nil {
+								dialog.ShowError(err, p.window)
+								return
+							}
+
+							// Remove from existingScales slice
+							newExistingScales := []string{}
+							for _, s := range existingScales {
+								if s != scaleName {
+									newExistingScales = append(newExistingScales, s)
+								}
+							}
+							existingScales = newExistingScales
+
+							// Refresh the popup
+							showScalePopup()
+
+							// Update main dialog scale select if needed
+							if scaleSelect.Selected == scaleName {
+								scaleSelect.SetSelected("")
+							}
+						}
+					},
+					p.window,
+				)
+			})
+			deleteBtn.Importance = widget.DangerImportance
+
+			scaleRow.Add(deleteBtn)
+			scaleContainer.Add(scaleRow)
+		}
+
+		// Add "Add new scale" option
+		addNewScaleBtn := widget.NewButton(newScaleOption, func() {
+			// Show dialog to add new scale
+			if mainDialog != nil {
+				mainDialog.Hide()
+			}
+			if currentDialog != nil {
+				currentDialog.Hide()
+			}
+
+			newScaleEntry := widget.NewEntry()
+			newScaleEntry.SetPlaceHolder(locale.T("dialog.add_scale.placeholder"))
+
+			// Create label and input field vertically for better width
+			label := widget.NewLabel(locale.T("dialog.add_scale.label"))
+			entryContainer := container.NewVBox(label, newScaleEntry)
+
+			newScaleDialog := dialog.NewCustomWithoutButtons(locale.T("dialog.add_scale.title"), entryContainer, p.window)
+
+			cancelBtn := widget.NewButton(locale.T("common.cancel"), func() {
+				newScaleDialog.Hide()
+				// Return to main dialog
+				if mainDialog != nil {
+					mainDialog.Show()
+				}
+			})
+
+			saveBtn := widget.NewButton(locale.T("common.save"), func() {
+				newScaleName := strings.TrimSpace(newScaleEntry.Text)
+				if newScaleName == "" {
+					dialog.ShowError(fmt.Errorf(locale.T("info.enter_scale_name")), p.window)
+					return
+				}
+
+				// Check if scale already exists
+				for _, s := range existingScales {
+					if strings.EqualFold(s, newScaleName) {
+						dialog.ShowError(fmt.Errorf(locale.T("dialog.new_scale.error_exists"), newScaleName), p.window)
+						return
+					}
+				}
+
+				// Add new scale to reference table
+				if err := p.modelService.AddScale(newScaleName); err != nil {
+					dialog.ShowError(err, p.window)
+					return
+				}
+
+				// Update scale list
+				existingScales = append(existingScales, newScaleName)
+				scaleSelectOptions = append(existingScales, newScaleOption)
+				scaleSelect.Options = scaleSelectOptions
+
+				newScaleDialog.Hide()
+				// Return to main dialog with new scale selected
+				if mainDialog != nil {
+					mainDialog.Show()
+				}
+				scaleSelect.SetSelected(newScaleName)
+			})
+
+			newScaleDialog.SetButtons([]fyne.CanvasObject{cancelBtn, saveBtn})
+
+			// Increase dialog width for new scale
+			parentSize := p.window.Canvas().Size()
+			dialogWidth := parentSize.Width * 0.6
+			if dialogWidth < 700 {
+				dialogWidth = 700
+			}
+			newScaleDialog.Resize(fyne.NewSize(dialogWidth, newScaleDialog.MinSize().Height))
+
+			currentDialog = newScaleDialog
+			newScaleDialog.Show()
+		})
+		scaleContainer.Add(addNewScaleBtn)
+
+		// Create popup dialog
+		popup := dialog.NewCustomWithoutButtons(locale.T("common.select_one"), scaleContainer, p.window)
+
+		// Add close button
+		closeBtn := widget.NewButton(locale.T("common.close"), func() {
+			popup.Hide()
+			currentDialog = nil
+			// Return to main dialog
+			if mainDialog != nil {
+				mainDialog.Show()
+			}
+		})
+
+		popup.SetButtons([]fyne.CanvasObject{closeBtn})
+
+		// Resize popup
+		parentSize := p.window.Canvas().Size()
+		popupWidth := parentSize.Width * 0.4
+		if popupWidth < 400 {
+			popupWidth = 400
+		}
+		popup.Resize(fyne.NewSize(popupWidth, popup.MinSize().Height))
+
+		currentDialog = popup
+		popup.Show()
+	}
+
+	// Create a button that shows the scale popup when clicked
+	scaleButton := widget.NewButton(locale.T("common.select_one"), func() {
+		if mainDialog != nil {
+			mainDialog.Hide()
+		}
+		showScalePopup()
+	})
+
+	// Store reference for locale updates
+	p.scaleSelect = &widget.Select{PlaceHolder: locale.T("common.select_one")}
+
+	// Helper function to update scale button text
+	updateScaleButton := func(selected string) {
+		if selected == "" {
+			scaleButton.SetText(locale.T("common.select_one"))
+		} else {
+			scaleButton.SetText(selected)
+		}
+	}
+
+	// Create the hidden Select widget to maintain compatibility
+	scaleSelect = widget.NewSelect(scaleSelectOptions, func(selected string) {
+		updateScaleButton(selected)
+		if selected == newScaleOption {
+			// This case is now handled in the popup
+			scaleSelect.SetSelected("")
+		}
+	})
+
+	// Set initial value if editing
+	if model != nil && model.Scale != "" {
+		scaleSelect.SetSelected(model.Scale)
+		updateScaleButton(model.Scale)
+	}
+
+	// Use the button as the scale widget
+	scaleWidget := scaleButton
+
+	// Create widget for model name - simple text entry
+	p.modelNameEntry = widget.NewEntry()
+	p.modelNameEntry.SetPlaceHolder(locale.T("form.model.name_placeholder"))
+	p.modelNameEntry.Resize(fyne.NewSize(250, p.modelNameEntry.MinSize().Height))
+
+	if model != nil && model.ModelName != "" {
+		p.modelNameEntry.SetText(model.ModelName)
+	}
+
+	modelNameWidget := p.modelNameEntry
 
 	modelTypeEntry := widget.NewEntry()
 	modelTypeEntry.SetPlaceHolder(locale.T("form.model.type_placeholder"))
@@ -563,9 +798,6 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 
 	if model != nil {
 		// Edit mode - populate fields that are not select widgets
-		if scaleEntry != nil {
-			scaleEntry.SetText(model.Scale)
-		}
 		if modelTypeEntry != nil {
 			modelTypeEntry.SetText(model.ModelType)
 		}
@@ -581,7 +813,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 	formItems := []*widget.FormItem{
 		widget.NewFormItem(locale.T("form.model.brand"), brandWidget),
 		widget.NewFormItem(locale.T("form.model.name"), modelNameWidget),
-		widget.NewFormItem(locale.T("form.model.scale"), scaleEntry),
+		widget.NewFormItem(locale.T("form.model.scale"), scaleWidget),
 		widget.NewFormItem(locale.T("form.model.type"), modelTypeEntry),
 		widget.NewFormItem(locale.T("form.model.motor"), motorTypeEntry),
 		widget.NewFormItem(locale.T("form.model.drive"), driveTypeEntry),
@@ -603,6 +835,12 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			brand = brandSelect.Selected
 		}
 
+		// Get scale value from Select
+		var scale string
+		if scaleSelect != nil {
+			scale = scaleSelect.Selected
+		}
+
 		// Get model name value
 		var modelName string
 		if p.modelNameEntry != nil {
@@ -618,7 +856,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			dialog.ShowError(fmt.Errorf(locale.T("error.required.name")), p.window)
 			return
 		}
-		if scaleEntry.Text == "" {
+		if scale == "" {
 			dialog.ShowError(fmt.Errorf(locale.T("error.required.scale")), p.window)
 			return
 		}
@@ -633,7 +871,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			m = model
 			m.Brand = brand
 			m.ModelName = modelName
-			m.Scale = scaleEntry.Text
+			m.Scale = scale
 			m.ModelType = modelTypeEntry.Text
 			m.MotorType = motorTypeEntry.Text
 			m.DriveType = driveTypeEntry.Text
@@ -654,7 +892,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			m = &models.RCModel{
 				Brand:     brand,
 				ModelName: modelName,
-				Scale:     scaleEntry.Text,
+				Scale:     scale,
 				ModelType: modelTypeEntry.Text,
 				MotorType: motorTypeEntry.Text,
 				DriveType: driveTypeEntry.Text,
