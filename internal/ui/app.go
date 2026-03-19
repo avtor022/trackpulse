@@ -15,15 +15,15 @@ import (
 type App struct {
 	fyneApp         fyne.App
 	mainWindow      fyne.Window
-	racerService    *service.RacerService
+	athleteService    *service.AthleteService
 	modelService    *service.RCModelService
 	settingsService *service.SettingsService
-	racerModelService *service.RacerModelService
+	athleteModelService *service.AthleteModelService
 	config          *Config
 	tabs            *container.AppTabs
-	racerPanel      *RacerPanel
+	athletePanel      *AthletePanel
 	modelPanel      *ModelPanel
-	racerModelPanel *RacerModelPanel
+	athleteModelPanel *AthleteModelPanel
 }
 
 // Config holds UI configuration
@@ -33,17 +33,17 @@ type Config struct {
 }
 
 // NewApp creates a new TrackPulse application
-func NewApp(racerService *service.RacerService, modelService *service.RCModelService, settingsService *service.SettingsService, racerModelService *service.RacerModelService, language string) *App {
+func NewApp(athleteService *service.AthleteService, modelService *service.RCModelService, settingsService *service.SettingsService, athleteModelService *service.AthleteModelService, language string) *App {
 	fyneApp := app.New()
 	mainWindow := fyneApp.NewWindow("TrackPulse")
 
 	return &App{
 		fyneApp:           fyneApp,
 		mainWindow:        mainWindow,
-		racerService:      racerService,
+		athleteService:      athleteService,
 		modelService:      modelService,
 		settingsService:   settingsService,
-		racerModelService: racerModelService,
+		athleteModelService: athleteModelService,
 		config: &Config{
 			Language: language,
 			Title:    "TrackPulse",
@@ -83,8 +83,8 @@ func (a *App) createMonitoringTab() fyne.CanvasObject {
 
 // createAthletesTab creates the Athletes management tab
 func (a *App) createAthletesTab() fyne.CanvasObject {
-	a.racerPanel = NewRacerPanel(a.racerService, a.mainWindow)
-	return a.racerPanel.content
+	a.athletePanel = NewAthletePanel(a.athleteService, a.mainWindow)
+	return a.athletePanel.content
 }
 
 // createModelsTab creates the Models management tab
@@ -95,8 +95,8 @@ func (a *App) createModelsTab() fyne.CanvasObject {
 
 // createTranspondersTab creates the Transponders management tab
 func (a *App) createTranspondersTab() fyne.CanvasObject {
-	a.racerModelPanel = NewRacerModelPanel(a.racerModelService, a.racerService, a.modelService, a.mainWindow)
-	return a.racerModelPanel.content
+	a.athleteModelPanel = NewAthleteModelPanel(a.athleteModelService, a.athleteService, a.modelService, a.mainWindow)
+	return a.athleteModelPanel.content
 }
 
 // createRacesTab creates the Races management tab
@@ -202,14 +202,14 @@ func (a *App) refreshUI() {
 	a.tabs.Refresh()
 
 	// Refresh panels only if they have been created
-	if a.racerPanel != nil {
-		a.racerPanel.Refresh()
+	if a.athletePanel != nil {
+		a.athletePanel.Refresh()
 	}
 	if a.modelPanel != nil {
 		a.modelPanel.Refresh()
 	}
-	if a.racerModelPanel != nil {
-		a.racerModelPanel.Refresh()
+	if a.athleteModelPanel != nil {
+		a.athleteModelPanel.Refresh()
 	}
 	
 	// Also update settings tab content

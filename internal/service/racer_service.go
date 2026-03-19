@@ -8,96 +8,96 @@ import (
 	"trackpulse/internal/repository"
 )
 
-// RacerService handles business logic for racers
-type RacerService struct {
-	repo *repository.RacerRepository
+// AthleteService handles business logic for athletes
+type AthleteService struct {
+	repo *repository.AthleteRepository
 }
 
-// NewRacerService creates a new racer service
-func NewRacerService(repo *repository.RacerRepository) *RacerService {
-	return &RacerService{repo: repo}
+// NewAthleteService creates a new athlete service
+func NewAthleteService(repo *repository.AthleteRepository) *AthleteService {
+	return &AthleteService{repo: repo}
 }
 
-// GetAllRacers returns all racers
-func (s *RacerService) GetAllRacers() ([]models.Racer, error) {
+// GetAllAthletes returns all athletes
+func (s *AthleteService) GetAllAthletes() ([]models.Athlete, error) {
 	return s.repo.GetAll()
 }
 
-// GetRacerByID returns a racer by ID
-func (s *RacerService) GetRacerByID(id string) (*models.Racer, error) {
+// GetAthleteByID returns an athlete by ID
+func (s *AthleteService) GetAthleteByID(id string) (*models.Athlete, error) {
 	return s.repo.GetByID(id)
 }
 
-// CreateRacer creates a new racer with validation
-func (s *RacerService) CreateRacer(racer *models.Racer) error {
+// CreateAthlete creates a new athlete with validation
+func (s *AthleteService) CreateAthlete(athlete *models.Athlete) error {
 	// Validate required fields
-	if racer.FullName == "" {
+	if athlete.FullName == "" {
 		return fmt.Errorf("full name is required")
 	}
-	if racer.RacerNumber <= 0 {
+	if athlete.RacerNumber <= 0 {
 		return fmt.Errorf("racer number must be positive")
 	}
 
 	// Check if racer number already exists
-	existing, err := s.repo.GetByNumber(racer.RacerNumber)
+	existing, err := s.repo.GetByNumber(athlete.RacerNumber)
 	if err != nil {
-		return fmt.Errorf("failed to check existing racer: %w", err)
+		return fmt.Errorf("failed to check existing athlete: %w", err)
 	}
 	if existing != nil {
-		return fmt.Errorf("racer number %d already exists", racer.RacerNumber)
+		return fmt.Errorf("racer number %d already exists", athlete.RacerNumber)
 	}
 
 	// Generate UUID
-	racer.ID = uuid.New().String()
+	athlete.ID = uuid.New().String()
 
-	return s.repo.Create(racer)
+	return s.repo.Create(athlete)
 }
 
-// UpdateRacer updates an existing racer with validation
-func (s *RacerService) UpdateRacer(racer *models.Racer) error {
+// UpdateAthlete updates an existing athlete with validation
+func (s *AthleteService) UpdateAthlete(athlete *models.Athlete) error {
 	// Validate required fields
-	if racer.ID == "" {
-		return fmt.Errorf("racer ID is required")
+	if athlete.ID == "" {
+		return fmt.Errorf("athlete ID is required")
 	}
-	if racer.FullName == "" {
+	if athlete.FullName == "" {
 		return fmt.Errorf("full name is required")
 	}
-	if racer.RacerNumber <= 0 {
+	if athlete.RacerNumber <= 0 {
 		return fmt.Errorf("racer number must be positive")
 	}
 
-	// Check if racer exists
-	existing, err := s.repo.GetByID(racer.ID)
+	// Check if athlete exists
+	existing, err := s.repo.GetByID(athlete.ID)
 	if err != nil {
-		return fmt.Errorf("failed to get existing racer: %w", err)
+		return fmt.Errorf("failed to get existing athlete: %w", err)
 	}
 	if existing == nil {
-		return fmt.Errorf("racer not found")
+		return fmt.Errorf("athlete not found")
 	}
 
-	// Check if racer number is taken by another racer
-	if existing.RacerNumber != racer.RacerNumber {
-		numberExists, err := s.repo.GetByNumber(racer.RacerNumber)
+	// Check if racer number is taken by another athlete
+	if existing.RacerNumber != athlete.RacerNumber {
+		numberExists, err := s.repo.GetByNumber(athlete.RacerNumber)
 		if err != nil {
 			return fmt.Errorf("failed to check racer number: %w", err)
 		}
-		if numberExists != nil && numberExists.ID != racer.ID {
-			return fmt.Errorf("racer number %d already exists", racer.RacerNumber)
+		if numberExists != nil && numberExists.ID != athlete.ID {
+			return fmt.Errorf("racer number %d already exists", athlete.RacerNumber)
 		}
 	}
 
-	return s.repo.Update(racer)
+	return s.repo.Update(athlete)
 }
 
-// DeleteRacer deletes a racer by ID
-func (s *RacerService) DeleteRacer(id string) error {
+// DeleteAthlete deletes an athlete by ID
+func (s *AthleteService) DeleteAthlete(id string) error {
 	if id == "" {
-		return fmt.Errorf("racer ID is required")
+		return fmt.Errorf("athlete ID is required")
 	}
 	return s.repo.Delete(id)
 }
 
-// GetRacerCount returns total number of racers
-func (s *RacerService) GetRacerCount() (int, error) {
+// GetAthleteCount returns total number of athletes
+func (s *AthleteService) GetAthleteCount() (int, error) {
 	return s.repo.Count()
 }

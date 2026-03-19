@@ -2,8 +2,8 @@ package models
 
 import "time"
 
-// Racer represents a pilot/participant in competitions
-type Racer struct {
+// Athlete represents a pilot/participant in competitions
+type Athlete struct {
 	ID           string     `json:"id" db:"id"`
 	RacerNumber  int        `json:"racer_number" db:"racer_number"`
 	FullName     string     `json:"full_name" db:"full_name"`
@@ -28,10 +28,10 @@ type RCModel struct {
 	UpdatedAt  time.Time `json:"updated_at" db:"updated_at"`
 }
 
-// RacerModel links racer with model and transponder
-type RacerModel struct {
+// AthleteModel links athlete with model and transponder
+type AthleteModel struct {
 	ID               string    `json:"id" db:"id"`
-	RacerID          string    `json:"racer_id" db:"racer_id"`
+	AthleteID        string    `json:"athlete_id" db:"athlete_id"`
 	RCModelID        string    `json:"rc_model_id" db:"rc_model_id"`
 	TransponderNumber string   `json:"transponder_number" db:"transponder_number"`
 	TransponderType  string    `json:"transponder_type" db:"transponder_type"`
@@ -57,11 +57,11 @@ type Race struct {
 	UpdatedAt         time.Time  `json:"updated_at" db:"updated_at"`
 }
 
-// RaceParticipant links race with racer-model
+// RaceParticipant links race with athlete-model
 type RaceParticipant struct {
 	ID              string    `json:"id" db:"id"`
 	RaceID          string    `json:"race_id" db:"race_id"`
-	RacerModelID    string    `json:"racer_model_id" db:"racer_model_id"`
+	AthleteModelID  string    `json:"athlete_model_id" db:"athlete_model_id"`
 	GridPosition    *int      `json:"grid_position,omitempty" db:"grid_position"`
 	IsFinished      bool      `json:"is_finished" db:"is_finished"`
 	Disqualified    bool      `json:"disqualified" db:"disqualified"`
@@ -108,7 +108,7 @@ type RawScan struct {
 	COMPort            string    `json:"com_port" db:"com_port"`
 	SignalStrength     *int      `json:"signal_strength,omitempty" db:"signal_strength"`
 	IsProcessed        bool      `json:"is_processed" db:"is_processed"`
-	LinkedRacerModelID *string   `json:"linked_racer_model_id,omitempty" db:"linked_racer_model_id"`
+	LinkedAthleteModelID *string   `json:"linked_athlete_model_id,omitempty" db:"linked_athlete_model_id"`
 	CreatedAt          time.Time `json:"created_at" db:"created_at"`
 }
 

@@ -8,87 +8,87 @@ import (
 	"trackpulse/internal/models"
 )
 
-// RacerRepository handles data access for racers
-type RacerRepository struct {
+// AthleteRepository handles data access for athletes
+type AthleteRepository struct {
 	db *sql.DB
 }
 
-// NewRacerRepository creates a new racer repository
-func NewRacerRepository(db *sql.DB) *RacerRepository {
-	return &RacerRepository{db: db}
+// NewAthleteRepository creates a new athlete repository
+func NewAthleteRepository(db *sql.DB) *AthleteRepository {
+	return &AthleteRepository{db: db}
 }
 
-// GetAll returns all racers
-func (r *RacerRepository) GetAll() ([]models.Racer, error) {
+// GetAll returns all athletes
+func (r *AthleteRepository) GetAll() ([]models.Athlete, error) {
 	rows, err := r.db.Query(`
 		SELECT id, racer_number, full_name, birthday, country, city, rating, created_at, updated_at
-		FROM racers
+		FROM athletes
 		ORDER BY racer_number ASC
 	`)
 	if err != nil {
-		return nil, fmt.Errorf("failed to query racers: %w", err)
+		return nil, fmt.Errorf("failed to query athletes: %w", err)
 	}
 	defer rows.Close()
 
-	var racers []models.Racer
+	var athletes []models.Athlete
 	for rows.Next() {
-		var racer models.Racer
+		var athlete models.Athlete
 		var birthday sql.NullString
 		var createdAtStr, updatedAtStr string
 		err := rows.Scan(
-			&racer.ID,
-			&racer.RacerNumber,
-			&racer.FullName,
+			&athlete.ID,
+			&athlete.RacerNumber,
+			&athlete.FullName,
 			&birthday,
-			&racer.Country,
-			&racer.City,
-			&racer.Rating,
+			&athlete.Country,
+			&athlete.City,
+			&athlete.Rating,
 			&createdAtStr,
 			&updatedAtStr,
 		)
 		if err != nil {
-			return nil, fmt.Errorf("failed to scan racer: %w", err)
+			return nil, fmt.Errorf("failed to scan athlete: %w", err)
 		}
 
 		if birthday.Valid {
 			t, err := time.Parse(time.RFC3339, birthday.String)
 			if err == nil {
-				racer.Birthday = &t
+				athlete.Birthday = &t
 			}
 		}
 
 		if t, err := time.Parse(time.RFC3339, createdAtStr); err == nil {
-			racer.CreatedAt = t
+			athlete.CreatedAt = t
 		}
 		if t, err := time.Parse(time.RFC3339, updatedAtStr); err == nil {
-			racer.UpdatedAt = t
+			athlete.UpdatedAt = t
 		}
 
-		racers = append(racers, racer)
+		athletes = append(athletes, athlete)
 	}
 
-	return racers, rows.Err()
+	return athletes, rows.Err()
 }
 
-// GetByID returns a racer by ID
-func (r *RacerRepository) GetByID(id string) (*models.Racer, error) {
+// GetByID returns an athlete by ID
+func (r *AthleteRepository) GetByID(id string) (*models.Athlete, error) {
 	row := r.db.QueryRow(`
 		SELECT id, racer_number, full_name, birthday, country, city, rating, created_at, updated_at
-		FROM racers
+		FROM athletes
 		WHERE id = ?
 	`, id)
 
-	var racer models.Racer
+	var athlete models.Athlete
 	var birthday sql.NullString
 	var createdAtStr, updatedAtStr string
 	err := row.Scan(
-		&racer.ID,
-		&racer.RacerNumber,
-		&racer.FullName,
+		&athlete.ID,
+		&athlete.RacerNumber,
+		&athlete.FullName,
 		&birthday,
-		&racer.Country,
-		&racer.City,
-		&racer.Rating,
+		&athlete.Country,
+		&athlete.City,
+		&athlete.Rating,
 		&createdAtStr,
 		&updatedAtStr,
 	)
@@ -96,45 +96,45 @@ func (r *RacerRepository) GetByID(id string) (*models.Racer, error) {
 		return nil, nil
 	}
 	if err != nil {
-		return nil, fmt.Errorf("failed to get racer: %w", err)
+		return nil, fmt.Errorf("failed to get athlete: %w", err)
 	}
 
 	if birthday.Valid {
 		t, err := time.Parse(time.RFC3339, birthday.String)
 		if err == nil {
-			racer.Birthday = &t
+			athlete.Birthday = &t
 		}
 	}
 
 	if t, err := time.Parse(time.RFC3339, createdAtStr); err == nil {
-		racer.CreatedAt = t
+		athlete.CreatedAt = t
 	}
 	if t, err := time.Parse(time.RFC3339, updatedAtStr); err == nil {
-		racer.UpdatedAt = t
+		athlete.UpdatedAt = t
 	}
 
-	return &racer, nil
+	return &athlete, nil
 }
 
-// GetByNumber returns a racer by racer number
-func (r *RacerRepository) GetByNumber(number int) (*models.Racer, error) {
+// GetByNumber returns an athlete by racer number
+func (r *AthleteRepository) GetByNumber(number int) (*models.Athlete, error) {
 	row := r.db.QueryRow(`
 		SELECT id, racer_number, full_name, birthday, country, city, rating, created_at, updated_at
-		FROM racers
+		FROM athletes
 		WHERE racer_number = ?
 	`, number)
 
-	var racer models.Racer
+	var athlete models.Athlete
 	var birthday sql.NullString
 	var createdAtStr, updatedAtStr string
 	err := row.Scan(
-		&racer.ID,
-		&racer.RacerNumber,
-		&racer.FullName,
+		&athlete.ID,
+		&athlete.RacerNumber,
+		&athlete.FullName,
 		&birthday,
-		&racer.Country,
-		&racer.City,
-		&racer.Rating,
+		&athlete.Country,
+		&athlete.City,
+		&athlete.Rating,
 		&createdAtStr,
 		&updatedAtStr,
 	)
@@ -142,51 +142,51 @@ func (r *RacerRepository) GetByNumber(number int) (*models.Racer, error) {
 		return nil, nil
 	}
 	if err != nil {
-		return nil, fmt.Errorf("failed to get racer by number: %w", err)
+		return nil, fmt.Errorf("failed to get athlete by number: %w", err)
 	}
 
 	if birthday.Valid {
 		t, err := time.Parse(time.RFC3339, birthday.String)
 		if err == nil {
-			racer.Birthday = &t
+			athlete.Birthday = &t
 		}
 	}
 
 	if t, err := time.Parse(time.RFC3339, createdAtStr); err == nil {
-		racer.CreatedAt = t
+		athlete.CreatedAt = t
 	}
 	if t, err := time.Parse(time.RFC3339, updatedAtStr); err == nil {
-		racer.UpdatedAt = t
+		athlete.UpdatedAt = t
 	}
 
-	return &racer, nil
+	return &athlete, nil
 }
 
-// Create inserts a new racer
-func (r *RacerRepository) Create(racer *models.Racer) error {
+// Create inserts a new athlete
+func (r *AthleteRepository) Create(athlete *models.Athlete) error {
 	now := time.Now().Format(time.RFC3339)
 	var birthdayStr sql.NullString
-	if racer.Birthday != nil {
-		birthdayStr = sql.NullString{String: racer.Birthday.Format(time.RFC3339), Valid: true}
+	if athlete.Birthday != nil {
+		birthdayStr = sql.NullString{String: athlete.Birthday.Format(time.RFC3339), Valid: true}
 	}
 
 	result, err := r.db.Exec(`
-		INSERT INTO racers (id, racer_number, full_name, birthday, country, city, rating, created_at, updated_at)
+		INSERT INTO athletes (id, racer_number, full_name, birthday, country, city, rating, created_at, updated_at)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`,
-		racer.ID,
-		racer.RacerNumber,
-		racer.FullName,
+		athlete.ID,
+		athlete.RacerNumber,
+		athlete.FullName,
 		birthdayStr,
-		racer.Country,
-		racer.City,
-		racer.Rating,
+		athlete.Country,
+		athlete.City,
+		athlete.Rating,
 		now,
 		now,
 	)
 
 	if err != nil {
-		return fmt.Errorf("failed to create racer: %w", err)
+		return fmt.Errorf("failed to create athlete: %w", err)
 	}
 
 	// Verify the row was inserted
@@ -195,37 +195,37 @@ func (r *RacerRepository) Create(racer *models.Racer) error {
 		return fmt.Errorf("failed to get rows affected: %w", err)
 	}
 	if rowsAffected == 0 {
-		return fmt.Errorf("no rows affected when creating racer")
+		return fmt.Errorf("no rows affected when creating athlete")
 	}
 
 	return nil
 }
 
-// Update updates an existing racer
-func (r *RacerRepository) Update(racer *models.Racer) error {
+// Update updates an existing athlete
+func (r *AthleteRepository) Update(athlete *models.Athlete) error {
 	now := time.Now().Format(time.RFC3339)
 	var birthdayStr sql.NullString
-	if racer.Birthday != nil {
-		birthdayStr = sql.NullString{String: racer.Birthday.Format(time.RFC3339), Valid: true}
+	if athlete.Birthday != nil {
+		birthdayStr = sql.NullString{String: athlete.Birthday.Format(time.RFC3339), Valid: true}
 	}
 
 	result, err := r.db.Exec(`
-		UPDATE racers
+		UPDATE athletes
 		SET racer_number = ?, full_name = ?, birthday = ?, country = ?, city = ?, rating = ?, updated_at = ?
 		WHERE id = ?
 	`,
-		racer.RacerNumber,
-		racer.FullName,
+		athlete.RacerNumber,
+		athlete.FullName,
 		birthdayStr,
-		racer.Country,
-		racer.City,
-		racer.Rating,
+		athlete.Country,
+		athlete.City,
+		athlete.Rating,
 		now,
-		racer.ID,
+		athlete.ID,
 	)
 
 	if err != nil {
-		return fmt.Errorf("failed to update racer: %w", err)
+		return fmt.Errorf("failed to update athlete: %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
@@ -233,17 +233,17 @@ func (r *RacerRepository) Update(racer *models.Racer) error {
 		return fmt.Errorf("failed to get rows affected: %w", err)
 	}
 	if rowsAffected == 0 {
-		return fmt.Errorf("racer not found")
+		return fmt.Errorf("athlete not found")
 	}
 
 	return nil
 }
 
-// Delete removes a racer by ID
-func (r *RacerRepository) Delete(id string) error {
-	result, err := r.db.Exec(`DELETE FROM racers WHERE id = ?`, id)
+// Delete removes an athlete by ID
+func (r *AthleteRepository) Delete(id string) error {
+	result, err := r.db.Exec(`DELETE FROM athletes WHERE id = ?`, id)
 	if err != nil {
-		return fmt.Errorf("failed to delete racer: %w", err)
+		return fmt.Errorf("failed to delete athlete: %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
@@ -251,18 +251,18 @@ func (r *RacerRepository) Delete(id string) error {
 		return fmt.Errorf("failed to get rows affected: %w", err)
 	}
 	if rowsAffected == 0 {
-		return fmt.Errorf("racer not found")
+		return fmt.Errorf("athlete not found")
 	}
 
 	return nil
 }
 
-// Count returns total number of racers
-func (r *RacerRepository) Count() (int, error) {
+// Count returns total number of athletes
+func (r *AthleteRepository) Count() (int, error) {
 	var count int
-	err := r.db.QueryRow(`SELECT COUNT(*) FROM racers`).Scan(&count)
+	err := r.db.QueryRow(`SELECT COUNT(*) FROM athletes`).Scan(&count)
 	if err != nil {
-		return 0, fmt.Errorf("failed to count racers: %w", err)
+		return 0, fmt.Errorf("failed to count athletes: %w", err)
 	}
 	return count, nil
 }

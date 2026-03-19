@@ -8,52 +8,52 @@ import (
 	"trackpulse/internal/repository"
 )
 
-// RacerModelService handles business logic for racer models (transponders)
-type RacerModelService struct {
-	repo       *repository.RacerModelRepository
-	racerRepo  *repository.RacerRepository
+// AthleteModelService handles business logic for athlete models (transponders)
+type AthleteModelService struct {
+	repo       *repository.AthleteModelRepository
+	athleteRepo  *repository.AthleteRepository
 	modelRepo  *repository.RCModelRepository
 }
 
-// NewRacerModelService creates a new racer model service
-func NewRacerModelService(repo *repository.RacerModelRepository, racerRepo *repository.RacerRepository, modelRepo *repository.RCModelRepository) *RacerModelService {
-	return &RacerModelService{repo: repo, racerRepo: racerRepo, modelRepo: modelRepo}
+// NewAthleteModelService creates a new athlete model service
+func NewAthleteModelService(repo *repository.AthleteModelRepository, athleteRepo *repository.AthleteRepository, modelRepo *repository.RCModelRepository) *AthleteModelService {
+	return &AthleteModelService{repo: repo, athleteRepo: athleteRepo, modelRepo: modelRepo}
 }
 
-// GetAllRacerModels returns all racer models
-func (s *RacerModelService) GetAllRacerModels() ([]models.RacerModel, error) {
+// GetAllAthleteModels returns all athlete models
+func (s *AthleteModelService) GetAllAthleteModels() ([]models.AthleteModel, error) {
 	return s.repo.GetAll()
 }
 
-// GetRacerModelByID returns a racer model by ID
-func (s *RacerModelService) GetRacerModelByID(id string) (*models.RacerModel, error) {
+// GetAthleteModelByID returns an athlete model by ID
+func (s *AthleteModelService) GetAthleteModelByID(id string) (*models.AthleteModel, error) {
 	return s.repo.GetByID(id)
 }
 
-// CreateRacerModel creates a new racer model with validation
-func (s *RacerModelService) CreateRacerModel(rm *models.RacerModel) error {
+// CreateAthleteModel creates a new athlete model with validation
+func (s *AthleteModelService) CreateAthleteModel(am *models.AthleteModel) error {
 	// Validate required fields
-	if rm.RacerID == "" {
-		return fmt.Errorf("racer is required")
+	if am.AthleteID == "" {
+		return fmt.Errorf("athlete is required")
 	}
-	if rm.RCModelID == "" {
+	if am.RCModelID == "" {
 		return fmt.Errorf("RC model is required")
 	}
-	if rm.TransponderNumber == "" {
+	if am.TransponderNumber == "" {
 		return fmt.Errorf("transponder number is required")
 	}
 
-	// Check if racer exists
-	racer, err := s.racerRepo.GetByID(rm.RacerID)
+	// Check if athlete exists
+	athlete, err := s.athleteRepo.GetByID(am.AthleteID)
 	if err != nil {
-		return fmt.Errorf("failed to get racer: %w", err)
+		return fmt.Errorf("failed to get athlete: %w", err)
 	}
-	if racer == nil {
-		return fmt.Errorf("racer not found")
+	if athlete == nil {
+		return fmt.Errorf("athlete not found")
 	}
 
 	// Check if RC model exists
-	rcModel, err := s.modelRepo.GetByID(rm.RCModelID)
+	rcModel, err := s.modelRepo.GetByID(am.RCModelID)
 	if err != nil {
 		return fmt.Errorf("failed to get RC model: %w", err)
 	}
@@ -62,62 +62,62 @@ func (s *RacerModelService) CreateRacerModel(rm *models.RacerModel) error {
 	}
 
 	// Check if transponder number already exists
-	existing, err := s.repo.GetByTransponderNumber(rm.TransponderNumber)
+	existing, err := s.repo.GetByTransponderNumber(am.TransponderNumber)
 	if err != nil {
 		return fmt.Errorf("failed to check existing transponder: %w", err)
 	}
 	if existing != nil {
-		return fmt.Errorf("transponder number '%s' already exists", rm.TransponderNumber)
+		return fmt.Errorf("transponder number '%s' already exists", am.TransponderNumber)
 	}
 
 	// Set default values
-	if rm.TransponderType == "" {
-		rm.TransponderType = "RFID"
+	if am.TransponderType == "" {
+		am.TransponderType = "RFID"
 	}
-	rm.IsActive = true
+	am.IsActive = true
 
 	// Generate UUID
-	rm.ID = uuid.New().String()
+	am.ID = uuid.New().String()
 
-	return s.repo.Create(rm)
+	return s.repo.Create(am)
 }
 
-// UpdateRacerModel updates an existing racer model with validation
-func (s *RacerModelService) UpdateRacerModel(rm *models.RacerModel) error {
+// UpdateAthleteModel updates an existing athlete model with validation
+func (s *AthleteModelService) UpdateAthleteModel(am *models.AthleteModel) error {
 	// Validate required fields
-	if rm.ID == "" {
-		return fmt.Errorf("racer model ID is required")
+	if am.ID == "" {
+		return fmt.Errorf("athlete model ID is required")
 	}
-	if rm.RacerID == "" {
-		return fmt.Errorf("racer is required")
+	if am.AthleteID == "" {
+		return fmt.Errorf("athlete is required")
 	}
-	if rm.RCModelID == "" {
+	if am.RCModelID == "" {
 		return fmt.Errorf("RC model is required")
 	}
-	if rm.TransponderNumber == "" {
+	if am.TransponderNumber == "" {
 		return fmt.Errorf("transponder number is required")
 	}
 
-	// Check if racer model exists
-	existing, err := s.repo.GetByID(rm.ID)
+	// Check if athlete model exists
+	existing, err := s.repo.GetByID(am.ID)
 	if err != nil {
-		return fmt.Errorf("failed to get existing racer model: %w", err)
+		return fmt.Errorf("failed to get existing athlete model: %w", err)
 	}
 	if existing == nil {
-		return fmt.Errorf("racer model not found")
+		return fmt.Errorf("athlete model not found")
 	}
 
-	// Check if racer exists
-	racer, err := s.racerRepo.GetByID(rm.RacerID)
+	// Check if athlete exists
+	athlete, err := s.athleteRepo.GetByID(am.AthleteID)
 	if err != nil {
-		return fmt.Errorf("failed to get racer: %w", err)
+		return fmt.Errorf("failed to get athlete: %w", err)
 	}
-	if racer == nil {
-		return fmt.Errorf("racer not found")
+	if athlete == nil {
+		return fmt.Errorf("athlete not found")
 	}
 
 	// Check if RC model exists
-	rcModel, err := s.modelRepo.GetByID(rm.RCModelID)
+	rcModel, err := s.modelRepo.GetByID(am.RCModelID)
 	if err != nil {
 		return fmt.Errorf("failed to get RC model: %w", err)
 	}
@@ -125,29 +125,29 @@ func (s *RacerModelService) UpdateRacerModel(rm *models.RacerModel) error {
 		return fmt.Errorf("RC model not found")
 	}
 
-	// Check if transponder number is taken by another racer model
-	if existing.TransponderNumber != rm.TransponderNumber {
-		transponderExists, err := s.repo.GetByTransponderNumber(rm.TransponderNumber)
+	// Check if transponder number is taken by another athlete model
+	if existing.TransponderNumber != am.TransponderNumber {
+		transponderExists, err := s.repo.GetByTransponderNumber(am.TransponderNumber)
 		if err != nil {
 			return fmt.Errorf("failed to check transponder number: %w", err)
 		}
-		if transponderExists != nil && transponderExists.ID != rm.ID {
-			return fmt.Errorf("transponder number '%s' already exists", rm.TransponderNumber)
+		if transponderExists != nil && transponderExists.ID != am.ID {
+			return fmt.Errorf("transponder number '%s' already exists", am.TransponderNumber)
 		}
 	}
 
-	return s.repo.Update(rm)
+	return s.repo.Update(am)
 }
 
-// DeleteRacerModel deletes a racer model by ID
-func (s *RacerModelService) DeleteRacerModel(id string) error {
+// DeleteAthleteModel deletes an athlete model by ID
+func (s *AthleteModelService) DeleteAthleteModel(id string) error {
 	if id == "" {
-		return fmt.Errorf("racer model ID is required")
+		return fmt.Errorf("athlete model ID is required")
 	}
 	return s.repo.Delete(id)
 }
 
-// GetRacerModelCount returns total number of racer models
-func (s *RacerModelService) GetRacerModelCount() (int, error) {
+// GetAthleteModelCount returns total number of athlete models
+func (s *AthleteModelService) GetAthleteModelCount() (int, error) {
 	return s.repo.Count()
 }
