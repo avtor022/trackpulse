@@ -62,7 +62,7 @@ func (a *App) Run() {
 func (a *App) createMainContent() *container.AppTabs {
 	a.tabs = container.NewAppTabs(
 		container.NewTabItem(locale.T("tab.monitoring"), a.createMonitoringTab()),
-		container.NewTabItem(locale.T("tab.racers"), a.createAthletesTab()),
+		container.NewTabItem(locale.T("tab.athletes"), a.createAthletesTab()),
 		container.NewTabItem(locale.T("tab.models"), a.createModelsTab()),
 		container.NewTabItem(locale.T("tab.transponders"), a.createTranspondersTab()),
 		container.NewTabItem(locale.T("tab.races"), a.createRacesTab()),
@@ -185,7 +185,7 @@ func (a *App) refreshUI() {
 		case 0:
 			tab.Text = locale.T("tab.monitoring")
 		case 1:
-			tab.Text = locale.T("tab.racers")
+			tab.Text = locale.T("tab.athletes")
 		case 2:
 			tab.Text = locale.T("tab.models")
 		case 3:

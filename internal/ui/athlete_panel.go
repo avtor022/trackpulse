@@ -209,7 +209,7 @@ func (p *AthletePanel) createAthleteTable() *widget.Table {
 	table.OnSelected = func(id widget.TableCellID) {
 		if id.Row >= 0 && id.Row < len(p.allAthletes) {
 			p.selectedAthleteID = p.allAthletes[id.Row].ID
-			p.statusLabel.SetText(fmt.Sprintf("Selected: %s", p.allAthletes[id.Row].FullName))
+			p.statusLabel.SetText(fmt.Sprintf(locale.T("status.selected_athlete"), p.allAthletes[id.Row].FullName))
 		}
 	}
 
@@ -230,9 +230,9 @@ func (p *AthletePanel) refreshData() {
 		// Force table to recalculate rows count and update cell contents
 		p.table.Refresh()
 		if len(p.allAthletes) == 0 {
-			p.statusLabel.SetText("No athletes found")
+			p.statusLabel.SetText(locale.T("status.no_athletes"))
 		} else {
-			p.statusLabel.SetText(fmt.Sprintf("Loaded %d athletes", len(p.allAthletes)))
+			p.statusLabel.SetText(fmt.Sprintf(locale.T("status.loaded_athletes"), len(p.allAthletes)))
 		}
 	}
 }
@@ -252,7 +252,7 @@ func (p *AthletePanel) showEditDialog() {
 	// Look for selected athlete in cache
 	for _, athlete := range p.allAthletes {
 		if athlete.ID == p.selectedAthleteID {
-			p.showAthleteDialog(locale.T("dialog.edit.title"), &athlete)
+			p.showAthleteDialog(locale.T("dialog.new_athlete.title"), &athlete)
 			return
 		}
 	}
