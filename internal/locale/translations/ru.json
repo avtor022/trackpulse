@@ -176,5 +176,18 @@
     "form.transponder.select_model": "Выберите модель",
     "error.required.athlete": "Спортсмен обязателен",
     "error.required.model": "Модель обязательна",
-    "error.required.transponder_number": "Номер транспондера обязателен"
+    "error.required.transponder_number": "Номер транспондера обязателен",
+    "athletemodel.header.number": "Номер транспондера",
+    "athletemodel.header.type": "Тип",
+    "athletemodel.header.active": "Активен",
+    "form.AthleteModel.athlete": "Спортсмен",
+    "form.AthleteModel.model": "Модель",
+    "form.AthleteModel.number": "Номер транспондера",
+    "form.AthleteModel.number_placeholder": "напр., 12345",
+    "form.AthleteModel.type": "Тип транспондера",
+    "form.AthleteModel.type_placeholder": "напр., RFID",
+    "form.AthleteModel.active": "Активен",
+    "form.AthleteModel.select_athlete": "Выберите спортсмена",
+    "form.AthleteModel.select_model": "Выберите модель",
+    "error.required.AthleteModel_number": "Номер транспондера обязателен"
 }

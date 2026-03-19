@@ -24,7 +24,7 @@ type AthleteModelPanel struct {
 	window            fyne.Window          // Reference to window for dialogs
 	selectedID        string               // ID of selected athlete model
 	allAthleteModels    []models.AthleteModel  // Cache of all athlete models
-	allAthletes         []models.Athlete       // Cache of all racers
+	allAthletes         []models.Athlete       // Cache of all athletes
 	allModels         []models.RCModel     // Cache of all RC models
 	headers           []string             // Localized table headers
 }
@@ -139,11 +139,11 @@ func (p *AthleteModelPanel) createAthleteModelTable() *widget.Table {
 			}
 			rm := p.allAthleteModels[i.Row]
 
-			// Find racer name
-			racerName := "-"
+			// Find athlete name
+			athleteName := "-"
 			for _, r := range p.allAthletes {
 				if r.ID == rm.AthleteID {
-					racerName = r.FullName
+					athleteName = r.FullName
 					break
 				}
 			}
@@ -161,7 +161,7 @@ func (p *AthleteModelPanel) createAthleteModelTable() *widget.Table {
 			case 0:
 				o.(*widget.Label).SetText(rm.ID)
 			case 1:
-				o.(*widget.Label).SetText(racerName)
+				o.(*widget.Label).SetText(athleteName)
 			case 2:
 				o.(*widget.Label).SetText(modelName)
 			case 3:
@@ -242,7 +242,7 @@ func (p *AthleteModelPanel) refreshData() {
 			return
 		}
 
-		// Load racers
+		// Load athletes
 		p.allAthletes, err = p.athleteService.GetAllAthletes()
 		if err != nil {
 			fmt.Println("ERROR refreshing athletes:", err)
@@ -330,7 +330,7 @@ func (p *AthleteModelPanel) deleteSelected() {
 
 // showRacerModelDialog shows a dialog for creating or editing a AthleteModel
 func (p *AthleteModelPanel) showRacerModelDialog(title string, rm *models.AthleteModel) {
-	// Get all racers
+	// Get all athletes
 	allAthletes, err := p.athleteService.GetAllAthletes()
 	if err != nil {
 		fmt.Println("ERROR getting athletes:", err)
@@ -342,13 +342,13 @@ func (p *AthleteModelPanel) showRacerModelDialog(title string, rm *models.Athlet
 		fmt.Println("ERROR getting models:", err)
 	}
 
-	// Build racer options for select
-	racerOptions := make(map[string]string) // display -> ID
-	var racerDisplayNames []string
+	// Build athlete options for select
+	athleteOptions := make(map[string]string) // display -> ID
+	var athleteDisplayNames []string
 	for _, r := range allAthletes {
 		display := fmt.Sprintf("%s (#%d)", r.FullName, r.RacerNumber)
-		racerOptions[display] = r.ID
-		racerDisplayNames = append(racerDisplayNames, display)
+		athleteOptions[display] = r.ID
+		athleteDisplayNames = append(athleteDisplayNames, display)
 	}
 
 	// Build model options for select
@@ -370,9 +370,9 @@ func (p *AthleteModelPanel) showRacerModelDialog(title string, rm *models.Athlet
 	activeCheck := widget.NewCheck(locale.T("form.AthleteModel.active"), nil)
 	activeCheck.Checked = true
 
-	// Create selects for racer and model
-	racerSelect := widget.NewSelect(racerDisplayNames, nil)
-	racerSelect.PlaceHolder = locale.T("form.AthleteModel.select_racer")
+	// Create selects for athlete and model
+	athleteSelect := widget.NewSelect(athleteDisplayNames, nil)
+	athleteSelect.PlaceHolder = locale.T("form.AthleteModel.select_athlete")
 
 	modelSelect := widget.NewSelect(modelDisplayNames, nil)
 	modelSelect.PlaceHolder = locale.T("form.AthleteModel.select_model")
@@ -383,10 +383,10 @@ func (p *AthleteModelPanel) showRacerModelDialog(title string, rm *models.Athlet
 		AthleteModelTypeEntry.SetText(rm.AthleteModelType)
 		activeCheck.Checked = rm.IsActive
 
-		// Select racer
-		for display, id := range racerOptions {
+		// Select athlete
+		for display, id := range athleteOptions {
 			if id == rm.AthleteID {
-				racerSelect.SetSelected(display)
+				athleteSelect.SetSelected(display)
 				break
 			}
 		}
@@ -402,7 +402,7 @@ func (p *AthleteModelPanel) showRacerModelDialog(title string, rm *models.Athlet
 
 	// Create form with localized labels
 	form := widget.NewForm(
-		widget.NewFormItem(locale.T("form.AthleteModel.racer"), racerSelect),
+		widget.NewFormItem(locale.T("form.AthleteModel.athlete"), athleteSelect),
 		widget.NewFormItem(locale.T("form.AthleteModel.model"), modelSelect),
 		widget.NewFormItem(locale.T("form.AthleteModel.number"), AthleteModelEntry),
 		widget.NewFormItem(locale.T("form.AthleteModel.type"), AthleteModelTypeEntry),
@@ -414,9 +414,9 @@ func (p *AthleteModelPanel) showRacerModelDialog(title string, rm *models.Athlet
 
 	// Create save button with callback that has access to 'd'
 	saveBtn := widget.NewButton(locale.T("common.save"), func() {
-		// Validate racer selection
-		if racerSelect.Selected == "" {
-			dialog.ShowError(fmt.Errorf(locale.T("error.required.racer")), p.window)
+		// Validate athlete selection
+		if athleteSelect.Selected == "" {
+			dialog.ShowError(fmt.Errorf(locale.T("error.required.athlete")), p.window)
 			return
 		}
 
@@ -433,14 +433,14 @@ func (p *AthleteModelPanel) showRacerModelDialog(title string, rm *models.Athlet
 			return
 		}
 
-		racerID := racerOptions[racerSelect.Selected]
+		athleteID := athleteOptions[athleteSelect.Selected]
 		modelID := modelOptions[modelSelect.Selected]
 
 		var newRM *models.AthleteModel
 		if rm != nil {
 			// Update existing
 			newRM = rm
-			newRM.AthleteID = racerID
+			newRM.AthleteID = athleteID
 			newRM.RCModelID = modelID
 			newRM.AthleteModelNumber = AthleteModelNumber
 			newRM.AthleteModelType = AthleteModelTypeEntry.Text
@@ -461,7 +461,7 @@ func (p *AthleteModelPanel) showRacerModelDialog(title string, rm *models.Athlet
 		} else {
 			// Create new
 			newRM = &models.AthleteModel{
-				AthleteID:        racerID,
+				AthleteID:        athleteID,
 				RCModelID:        modelID,
 				AthleteModelNumber: AthleteModelNumber,
 				AthleteModelType:   AthleteModelTypeEntry.Text,

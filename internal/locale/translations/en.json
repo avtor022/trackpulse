@@ -176,5 +176,18 @@
     "form.transponder.select_model": "Select a model",
     "error.required.athlete": "Athlete is required",
     "error.required.model": "RC model is required",
-    "error.required.transponder_number": "Transponder number is required"
+    "error.required.transponder_number": "Transponder number is required",
+    "athletemodel.header.number": "Transponder Number",
+    "athletemodel.header.type": "Type",
+    "athletemodel.header.active": "Active",
+    "form.AthleteModel.athlete": "Athlete",
+    "form.AthleteModel.model": "RC Model",
+    "form.AthleteModel.number": "Transponder Number",
+    "form.AthleteModel.number_placeholder": "e.g., 12345",
+    "form.AthleteModel.type": "Transponder Type",
+    "form.AthleteModel.type_placeholder": "e.g., RFID",
+    "form.AthleteModel.active": "Is Active",
+    "form.AthleteModel.select_athlete": "Select an athlete",
+    "form.AthleteModel.select_model": "Select a model",
+    "error.required.AthleteModel_number": "Transponder number is required"
 }
