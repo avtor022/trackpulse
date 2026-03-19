@@ -10,14 +10,15 @@ import (
 
 // RCModelService handles business logic for RC models
 type RCModelService struct {
-	modelRepo *repository.RCModelRepository
-	brandRepo *repository.RCModelBrandRepository
-	scaleRepo *repository.RCModelScaleRepository
+	modelRepo   *repository.RCModelRepository
+	brandRepo   *repository.RCModelBrandRepository
+	scaleRepo   *repository.RCModelScaleRepository
+	typeRepo    *repository.RCModelTypeRepository
 }
 
 // NewRCModelService creates a new RC model service
-func NewRCModelService(modelRepo *repository.RCModelRepository, brandRepo *repository.RCModelBrandRepository, scaleRepo *repository.RCModelScaleRepository) *RCModelService {
-	return &RCModelService{modelRepo: modelRepo, brandRepo: brandRepo, scaleRepo: scaleRepo}
+func NewRCModelService(modelRepo *repository.RCModelRepository, brandRepo *repository.RCModelBrandRepository, scaleRepo *repository.RCModelScaleRepository, typeRepo *repository.RCModelTypeRepository) *RCModelService {
+	return &RCModelService{modelRepo: modelRepo, brandRepo: brandRepo, scaleRepo: scaleRepo, typeRepo: typeRepo}
 }
 
 // GetAllModels returns all RC models
@@ -56,6 +57,12 @@ func (s *RCModelService) CreateModel(model *models.RCModel) error {
 	_, err = s.scaleRepo.GetOrCreate(model.Scale)
 	if err != nil {
 		return fmt.Errorf("failed to ensure scale exists: %w", err)
+	}
+
+	// Ensure model type exists in the types table
+	_, err = s.typeRepo.GetOrCreate(model.ModelType)
+	if err != nil {
+		return fmt.Errorf("failed to ensure model type exists: %w", err)
 	}
 
 	// Generate UUID
@@ -102,6 +109,12 @@ func (s *RCModelService) UpdateModel(model *models.RCModel) error {
 	_, err = s.scaleRepo.GetOrCreate(model.Scale)
 	if err != nil {
 		return fmt.Errorf("failed to ensure scale exists: %w", err)
+	}
+
+	// Ensure model type exists in the types table
+	_, err = s.typeRepo.GetOrCreate(model.ModelType)
+	if err != nil {
+		return fmt.Errorf("failed to ensure model type exists: %w", err)
 	}
 
 	return s.modelRepo.Update(model)
@@ -232,6 +245,62 @@ func (s *RCModelService) DeleteScale(name string) error {
 	err = s.scaleRepo.Delete(name)
 	if err != nil {
 		return fmt.Errorf("failed to delete scale: %w", err)
+	}
+
+	return nil
+}
+
+// GetAllModelTypes returns all RC model types
+func (s *RCModelService) GetAllModelTypes() ([]models.RCModelType, error) {
+	return s.typeRepo.GetAll()
+}
+
+// AddModelType adds a new model type to the database
+func (s *RCModelService) AddModelType(name string) error {
+	if name == "" {
+		return fmt.Errorf("model type name is required")
+	}
+
+	// Check if model type already exists
+	existing, err := s.typeRepo.GetByName(name)
+	if err != nil {
+		return fmt.Errorf("failed to check existing model type: %w", err)
+	}
+	if existing != nil {
+		return fmt.Errorf("model type '%s' already exists", name)
+	}
+
+	// Create new model type
+	_, err = s.typeRepo.Create(name)
+	if err != nil {
+		return fmt.Errorf("failed to create model type: %w", err)
+	}
+
+	return nil
+}
+
+// DeleteModelType deletes a model type from the database
+func (s *RCModelService) DeleteModelType(name string) error {
+	if name == "" {
+		return fmt.Errorf("model type name is required")
+	}
+
+	// Check if model type is used by any models
+	models, err := s.modelRepo.GetAll()
+	if err != nil {
+		return fmt.Errorf("failed to check models: %w", err)
+	}
+
+	for _, model := range models {
+		if model.ModelType == name {
+			return fmt.Errorf("cannot delete model type '%s': it is used by model '%s'", name, model.ModelName)
+		}
+	}
+
+	// Delete model type
+	err = s.typeRepo.Delete(name)
+	if err != nil {
+		return fmt.Errorf("failed to delete model type: %w", err)
 	}
 
 	return nil

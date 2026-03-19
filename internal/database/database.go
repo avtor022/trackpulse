@@ -89,6 +89,15 @@ func (db *DB) Initialize() error {
 	);
 	CREATE INDEX IF NOT EXISTS idx_scales_name ON rc_model_scales(name);
 
+	-- RC Model Types dictionary table
+	CREATE TABLE IF NOT EXISTS rc_model_types (
+		id TEXT PRIMARY KEY NOT NULL,
+		name TEXT UNIQUE NOT NULL,
+		created_at TEXT NOT NULL,
+		updated_at TEXT NOT NULL
+	);
+	CREATE INDEX IF NOT EXISTS idx_types_name ON rc_model_types(name);
+
 	-- Racer Models (transponders) table
 	CREATE TABLE IF NOT EXISTS racer_models (
 		id TEXT PRIMARY KEY NOT NULL,
