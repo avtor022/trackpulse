@@ -62,7 +62,7 @@ func (a *App) Run() {
 func (a *App) createMainContent() *container.AppTabs {
 	a.tabs = container.NewAppTabs(
 		container.NewTabItem(locale.T("tab.monitoring"), a.createMonitoringTab()),
-		container.NewTabItem(locale.T("tab.racers"), a.createRacersTab()),
+		container.NewTabItem(locale.T("tab.racers"), a.createAthletesTab()),
 		container.NewTabItem(locale.T("tab.models"), a.createModelsTab()),
 		container.NewTabItem(locale.T("tab.transponders"), a.createTranspondersTab()),
 		container.NewTabItem(locale.T("tab.races"), a.createRacesTab()),
@@ -81,8 +81,8 @@ func (a *App) createMonitoringTab() fyne.CanvasObject {
 	return container.NewCenter(content)
 }
 
-// createRacersTab creates the Racers management tab
-func (a *App) createRacersTab() fyne.CanvasObject {
+// createAthletesTab creates the Athletes management tab
+func (a *App) createAthletesTab() fyne.CanvasObject {
 	a.racerPanel = NewRacerPanel(a.racerService, a.mainWindow)
 	return a.racerPanel.content
 }
