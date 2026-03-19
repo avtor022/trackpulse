@@ -253,16 +253,16 @@ func (p *ModelPanel) refreshData() {
 		// Force table to recalculate rows count and update cell contents
 		p.table.Refresh()
 		if len(p.allModels) == 0 {
-			p.statusLabel.SetText("No models found")
+			p.statusLabel.SetText(locale.T("status.no_models"))
 		} else {
-			p.statusLabel.SetText(fmt.Sprintf("Loaded %d models", len(p.allModels)))
+			p.statusLabel.SetText(fmt.Sprintf(locale.T("status.loaded_models"), len(p.allModels)))
 		}
 	}
 }
 
 // showCreateDialog shows the dialog for creating a new model
 func (p *ModelPanel) showCreateDialog() {
-	p.showModelDialog("Create New RC Model", nil)
+	p.showModelDialog(locale.T("dialog.new_rc_model.title"), nil)
 }
 
 // showEditDialog shows the dialog for editing an existing model

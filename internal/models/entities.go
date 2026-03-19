@@ -2,17 +2,17 @@ package models
 
 import "time"
 
-// Racer represents a pilot/participant in competitions
-type Racer struct {
-	ID           string     `json:"id" db:"id"`
-	RacerNumber  int        `json:"racer_number" db:"racer_number"`
-	FullName     string     `json:"full_name" db:"full_name"`
-	Birthday     *time.Time `json:"birthday,omitempty" db:"birthday"`
-	Country      string     `json:"country" db:"country"`
-	City         string     `json:"city" db:"city"`
-	Rating       int        `json:"rating" db:"rating"`
-	CreatedAt    time.Time  `json:"created_at" db:"created_at"`
-	UpdatedAt    time.Time  `json:"updated_at" db:"updated_at"`
+// Competitor represents a pilot/participant in competitions
+type Competitor struct {
+	ID                 string     `json:"id" db:"id"`
+	CompetitorNumber   int        `json:"competitor_number" db:"competitor_number"`
+	FullName           string     `json:"full_name" db:"full_name"`
+	Birthday           *time.Time `json:"birthday,omitempty" db:"birthday"`
+	Country            string     `json:"country" db:"country"`
+	City               string     `json:"city" db:"city"`
+	Rating             int        `json:"rating" db:"rating"`
+	CreatedAt          time.Time  `json:"created_at" db:"created_at"`
+	UpdatedAt          time.Time  `json:"updated_at" db:"updated_at"`
 }
 
 // RCModel represents an RC model in the catalog
@@ -28,23 +28,23 @@ type RCModel struct {
 	UpdatedAt  time.Time `json:"updated_at" db:"updated_at"`
 }
 
-// RacerModel links racer with model and transponder
-type RacerModel struct {
-	ID               string    `json:"id" db:"id"`
-	RacerID          string    `json:"racer_id" db:"racer_id"`
-	RCModelID        string    `json:"rc_model_id" db:"rc_model_id"`
-	TransponderNumber string   `json:"transponder_number" db:"transponder_number"`
-	TransponderType  string    `json:"transponder_type" db:"transponder_type"`
-	IsActive         bool      `json:"is_active" db:"is_active"`
-	CreatedAt        time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt        time.Time `json:"updated_at" db:"updated_at"`
+// CompetitorModel links competitor with model and transponder
+type CompetitorModel struct {
+	ID                  string    `json:"id" db:"id"`
+	CompetitorID        string    `json:"competitor_id" db:"competitor_id"`
+	RCModelID           string    `json:"rc_model_id" db:"rc_model_id"`
+	TransponderNumber   string    `json:"transponder_number" db:"transponder_number"`
+	TransponderType     string    `json:"transponder_type" db:"transponder_type"`
+	IsActive            bool      `json:"is_active" db:"is_active"`
+	CreatedAt           time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt           time.Time `json:"updated_at" db:"updated_at"`
 }
 
-// Race represents a race/heat event
-type Race struct {
+// Competition represents a competition/heat event
+type Competition struct {
 	ID                string     `json:"id" db:"id"`
-	RaceTitle         string     `json:"race_title" db:"race_title"`
-	RaceType          string     `json:"race_type" db:"race_type"`
+	CompetitionTitle  string     `json:"competition_title" db:"competition_title"`
+	CompetitionType   string     `json:"competition_type" db:"competition_type"`
 	ModelType         string     `json:"model_type" db:"model_type"`
 	ModelScale        string     `json:"model_scale" db:"model_scale"`
 	TrackName         string     `json:"track_name" db:"track_name"`
@@ -57,39 +57,39 @@ type Race struct {
 	UpdatedAt         time.Time  `json:"updated_at" db:"updated_at"`
 }
 
-// RaceParticipant links race with racer-model
-type RaceParticipant struct {
-	ID              string    `json:"id" db:"id"`
-	RaceID          string    `json:"race_id" db:"race_id"`
-	RacerModelID    string    `json:"racer_model_id" db:"racer_model_id"`
-	GridPosition    *int      `json:"grid_position,omitempty" db:"grid_position"`
-	IsFinished      bool      `json:"is_finished" db:"is_finished"`
-	Disqualified    bool      `json:"disqualified" db:"disqualified"`
-	DNFReason       string    `json:"dnf_reason" db:"dnf_reason"`
-	CreatedAt       time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt       time.Time `json:"updated_at" db:"updated_at"`
+// CompetitionParticipant links competition with competitor-model
+type CompetitionParticipant struct {
+	ID                   string    `json:"id" db:"id"`
+	CompetitionID        string    `json:"competition_id" db:"competition_id"`
+	CompetitorModelID    string    `json:"competitor_model_id" db:"competitor_model_id"`
+	GridPosition         *int      `json:"grid_position,omitempty" db:"grid_position"`
+	IsFinished           bool      `json:"is_finished" db:"is_finished"`
+	Disqualified         bool      `json:"disqualified" db:"disqualified"`
+	DNFReason            string    `json:"dnf_reason" db:"dnf_reason"`
+	CreatedAt            time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt            time.Time `json:"updated_at" db:"updated_at"`
 }
 
-// RaceLaps aggregated results for a participant in a race
-type RaceLaps struct {
-	ID                 string    `json:"id" db:"id"`
-	RaceParticipantID  string    `json:"race_participant_id" db:"race_participant_id"`
-	TimeStart          time.Time `json:"time_start" db:"time_start"`
+// CompetitionLaps aggregated results for a participant in a competition
+type CompetitionLaps struct {
+	ID                 string     `json:"id" db:"id"`
+	CompetitionParticipantID string    `json:"competition_participant_id" db:"competition_participant_id"`
+	TimeStart          time.Time  `json:"time_start" db:"time_start"`
 	TimeFinish         *time.Time `json:"time_finish,omitempty" db:"time_finish"`
-	NumberOfLaps       int       `json:"number_of_laps" db:"number_of_laps"`
-	BestLapTimeMs      int       `json:"best_lap_time_ms" db:"best_lap_time_ms"`
-	BestLapNumber      int       `json:"best_lap_number" db:"best_lap_number"`
-	LastLapTimeMs      int       `json:"last_lap_time_ms" db:"last_lap_time_ms"`
+	NumberOfLaps       int        `json:"number_of_laps" db:"number_of_laps"`
+	BestLapTimeMs      int        `json:"best_lap_time_ms" db:"best_lap_time_ms"`
+	BestLapNumber      int        `json:"best_lap_number" db:"best_lap_number"`
+	LastLapTimeMs      int        `json:"last_lap_time_ms" db:"last_lap_time_ms"`
 	LastPassTime       *time.Time `json:"last_pass_time,omitempty" db:"last_pass_time"`
-	TotalRaceTimeMs    int       `json:"total_race_time_ms" db:"total_race_time_ms"`
-	CreatedAt          time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt          time.Time `json:"updated_at" db:"updated_at"`
+	TotalCompetitionTimeMs int    `json:"total_competition_time_ms" db:"total_competition_time_ms"`
+	CreatedAt          time.Time  `json:"created_at" db:"created_at"`
+	UpdatedAt          time.Time  `json:"updated_at" db:"updated_at"`
 }
 
 // LapHistory detailed history of each lap
 type LapHistory struct {
 	ID                  string    `json:"id" db:"id"`
-	RaceParticipantID   string    `json:"race_participant_id" db:"race_participant_id"`
+	CompetitionParticipantID   string    `json:"competition_participant_id" db:"competition_participant_id"`
 	LapNumber           int       `json:"lap_number" db:"lap_number"`
 	LapTimeMs           int       `json:"lap_time_ms" db:"lap_time_ms"`
 	StartTime           time.Time `json:"start_time" db:"start_time"`
@@ -101,15 +101,15 @@ type LapHistory struct {
 
 // RawScan raw RFID scan log
 type RawScan struct {
-	ID                 string    `json:"id" db:"id"`
-	Timestamp          time.Time `json:"timestamp" db:"timestamp"`
-	TagValue           string    `json:"tag_value" db:"tag_value"`
-	ReaderType         string    `json:"reader_type" db:"reader_type"`
-	COMPort            string    `json:"com_port" db:"com_port"`
-	SignalStrength     *int      `json:"signal_strength,omitempty" db:"signal_strength"`
-	IsProcessed        bool      `json:"is_processed" db:"is_processed"`
-	LinkedRacerModelID *string   `json:"linked_racer_model_id,omitempty" db:"linked_racer_model_id"`
-	CreatedAt          time.Time `json:"created_at" db:"created_at"`
+	ID                    string    `json:"id" db:"id"`
+	Timestamp             time.Time `json:"timestamp" db:"timestamp"`
+	TagValue              string    `json:"tag_value" db:"tag_value"`
+	ReaderType            string    `json:"reader_type" db:"reader_type"`
+	COMPort               string    `json:"com_port" db:"com_port"`
+	SignalStrength        *int      `json:"signal_strength,omitempty" db:"signal_strength"`
+	IsProcessed           bool      `json:"is_processed" db:"is_processed"`
+	LinkedCompetitorModelID *string   `json:"linked_competitor_model_id,omitempty" db:"linked_competitor_model_id"`
+	CreatedAt             time.Time `json:"created_at" db:"created_at"`
 }
 
 // SystemSetting system configuration parameter

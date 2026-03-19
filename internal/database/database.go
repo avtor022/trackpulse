@@ -40,10 +40,10 @@ func NewDB(dbPath string) (*DB, error) {
 // Initialize creates all required tables if they don't exist
 func (db *DB) Initialize() error {
 	schema := `
-	-- Racers table
-	CREATE TABLE IF NOT EXISTS racers (
+	-- Competitors table
+	CREATE TABLE IF NOT EXISTS competitors (
 		id TEXT PRIMARY KEY NOT NULL,
-		racer_number INTEGER UNIQUE NOT NULL,
+		competitor_number INTEGER UNIQUE NOT NULL,
 		full_name TEXT NOT NULL,
 		birthday TEXT,
 		country TEXT,
@@ -52,8 +52,8 @@ func (db *DB) Initialize() error {
 		created_at TEXT NOT NULL,
 		updated_at TEXT NOT NULL
 	);
-	CREATE INDEX IF NOT EXISTS idx_racers_number ON racers(racer_number);
-	CREATE INDEX IF NOT EXISTS idx_racers_name ON racers(full_name);
+	CREATE INDEX IF NOT EXISTS idx_competitors_number ON competitors(competitor_number);
+	CREATE INDEX IF NOT EXISTS idx_competitors_name ON competitors(full_name);
 
 	-- RC Models table
 	CREATE TABLE IF NOT EXISTS rc_models (
@@ -98,10 +98,10 @@ func (db *DB) Initialize() error {
 	);
 	CREATE INDEX IF NOT EXISTS idx_types_name ON rc_model_types(name);
 
-	-- Racer Models (transponders) table
-	CREATE TABLE IF NOT EXISTS racer_models (
+	-- Competitor Models (transponders) table
+	CREATE TABLE IF NOT EXISTS competitor_models (
 		id TEXT PRIMARY KEY NOT NULL,
-		racer_id TEXT NOT NULL REFERENCES racers(id) ON DELETE CASCADE,
+		competitor_id TEXT NOT NULL REFERENCES competitors(id) ON DELETE CASCADE,
 		rc_model_id TEXT NOT NULL REFERENCES rc_models(id) ON DELETE CASCADE,
 		transponder_number TEXT NOT NULL UNIQUE,
 		transponder_type TEXT DEFAULT 'RFID',
@@ -109,15 +109,15 @@ func (db *DB) Initialize() error {
 		created_at TEXT NOT NULL,
 		updated_at TEXT NOT NULL
 	);
-	CREATE INDEX IF NOT EXISTS idx_racer_models_transponder ON racer_models(transponder_number);
-	CREATE INDEX IF NOT EXISTS idx_racer_models_racer ON racer_models(racer_id);
-	CREATE INDEX IF NOT EXISTS idx_racer_models_model ON racer_models(rc_model_id);
+	CREATE INDEX IF NOT EXISTS idx_competitor_models_transponder ON competitor_models(transponder_number);
+	CREATE INDEX IF NOT EXISTS idx_competitor_models_racer ON competitor_models(competitor_id);
+	CREATE INDEX IF NOT EXISTS idx_competitor_models_model ON competitor_models(rc_model_id);
 
-	-- Races table
-	CREATE TABLE IF NOT EXISTS races (
+	-- Competitions table
+	CREATE TABLE IF NOT EXISTS competitions (
 		id TEXT PRIMARY KEY NOT NULL,
-		race_title TEXT NOT NULL,
-		race_type TEXT DEFAULT 'qualifying',
+		competition_title TEXT NOT NULL,
+		competition_type TEXT DEFAULT 'qualifying',
 		model_type TEXT,
 		model_scale TEXT,
 		track_name TEXT,
@@ -129,29 +129,29 @@ func (db *DB) Initialize() error {
 		created_at TEXT NOT NULL,
 		updated_at TEXT NOT NULL
 	);
-	CREATE INDEX IF NOT EXISTS idx_races_status ON races(status);
-	CREATE INDEX IF NOT EXISTS idx_races_time_start ON races(time_start);
+	CREATE INDEX IF NOT EXISTS idx_competitions_status ON competitions(status);
+	CREATE INDEX IF NOT EXISTS idx_competitions_time_start ON competitions(time_start);
 
-	-- Race Participants table
-	CREATE TABLE IF NOT EXISTS race_participants (
+	-- Competition Participants table
+	CREATE TABLE IF NOT EXISTS competition_participants (
 		id TEXT PRIMARY KEY NOT NULL,
-		race_id TEXT NOT NULL REFERENCES races(id) ON DELETE CASCADE,
-		racer_model_id TEXT NOT NULL REFERENCES racer_models(id) ON DELETE CASCADE,
+		competition_id TEXT NOT NULL REFERENCES competitions(id) ON DELETE CASCADE,
+		competitor_model_id TEXT NOT NULL REFERENCES competitor_models(id) ON DELETE CASCADE,
 		grid_position INTEGER,
 		is_finished BOOLEAN DEFAULT 0,
 		disqualified BOOLEAN DEFAULT 0,
 		dnf_reason TEXT,
 		created_at TEXT NOT NULL,
 		updated_at TEXT NOT NULL,
-		UNIQUE(race_id, racer_model_id)
+		UNIQUE(competition_id, competitor_model_id)
 	);
-	CREATE INDEX IF NOT EXISTS idx_participants_race ON race_participants(race_id);
-	CREATE INDEX IF NOT EXISTS idx_participants_racer_model ON race_participants(racer_model_id);
+	CREATE INDEX IF NOT EXISTS idx_participants_competition ON competition_participants(competition_id);
+	CREATE INDEX IF NOT EXISTS idx_participants_competitor_model ON competition_participants(competitor_model_id);
 
-	-- Race Laps (aggregated) table
-	CREATE TABLE IF NOT EXISTS race_laps (
+	-- Competition Laps (aggregated) table
+	CREATE TABLE IF NOT EXISTS competition_laps (
 		id TEXT PRIMARY KEY NOT NULL,
-		race_participant_id TEXT NOT NULL UNIQUE REFERENCES race_participants(id) ON DELETE CASCADE,
+		competition_participant_id TEXT NOT NULL UNIQUE REFERENCES competition_participants(id) ON DELETE CASCADE,
 		time_start TEXT NOT NULL,
 		time_finish TEXT,
 		number_of_laps INTEGER DEFAULT 0,
@@ -159,17 +159,17 @@ func (db *DB) Initialize() error {
 		best_lap_number INTEGER DEFAULT 0,
 		last_lap_time_ms INTEGER DEFAULT 0,
 		last_pass_time TEXT,
-		total_race_time_ms INTEGER DEFAULT 0,
+		total_competition_time_ms INTEGER DEFAULT 0,
 		created_at TEXT NOT NULL,
 		updated_at TEXT NOT NULL
 	);
-	CREATE INDEX IF NOT EXISTS idx_race_laps_participant ON race_laps(race_participant_id);
-	CREATE INDEX IF NOT EXISTS idx_race_laps_laps ON race_laps(number_of_laps DESC);
+	CREATE INDEX IF NOT EXISTS idx_competition_laps_participant ON competition_laps(competition_participant_id);
+	CREATE INDEX IF NOT EXISTS idx_competition_laps_laps ON competition_laps(number_of_laps DESC);
 
 	-- Lap History table
 	CREATE TABLE IF NOT EXISTS lap_history (
 		id TEXT PRIMARY KEY NOT NULL,
-		race_participant_id TEXT NOT NULL REFERENCES race_participants(id) ON DELETE CASCADE,
+		competition_participant_id TEXT NOT NULL REFERENCES competition_participants(id) ON DELETE CASCADE,
 		lap_number INTEGER NOT NULL,
 		lap_time_ms INTEGER NOT NULL,
 		start_time TEXT NOT NULL,
@@ -178,8 +178,8 @@ func (db *DB) Initialize() error {
 		invalidation_reason TEXT,
 		created_at TEXT NOT NULL
 	);
-	CREATE INDEX IF NOT EXISTS idx_lap_history_participant ON lap_history(race_participant_id);
-	CREATE INDEX IF NOT EXISTS idx_lap_history_race_lap ON lap_history(race_participant_id, lap_number);
+	CREATE INDEX IF NOT EXISTS idx_lap_history_participant ON lap_history(competition_participant_id);
+	CREATE INDEX IF NOT EXISTS idx_lap_history_competition_lap ON lap_history(competition_participant_id, lap_number);
 	CREATE INDEX IF NOT EXISTS idx_lap_history_time ON lap_history(end_time);
 
 	-- Raw Scans table
@@ -191,7 +191,7 @@ func (db *DB) Initialize() error {
 		com_port TEXT,
 		signal_strength INTEGER,
 		is_processed BOOLEAN DEFAULT 0,
-		linked_racer_model_id TEXT REFERENCES racer_models(id) ON DELETE SET NULL,
+		linked_competitor_model_id TEXT REFERENCES competitor_models(id) ON DELETE SET NULL,
 		created_at TEXT NOT NULL
 	);
 	CREATE INDEX IF NOT EXISTS idx_raw_scans_timestamp ON raw_scans(timestamp);
