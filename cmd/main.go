@@ -58,19 +58,19 @@ func main() {
 	log.Info("Database schema initialized")
 
 	// Initialize repositories
-	racerRepo := repository.NewRacerRepository(db.DB)
+	athleteRepo := repository.NewAthleteRepository(db.DB)
 	modelRepo := repository.NewRCModelRepository(db.DB)
 	brandRepo := repository.NewRCModelBrandRepository(db.DB)
 	scaleRepo := repository.NewRCModelScaleRepository(db.DB)
 	typeRepo := repository.NewRCModelTypeRepository(db.DB)
 	settingsRepo := repository.NewSettingsRepository(db.DB)
-	racerModelRepo := repository.NewRacerModelRepository(db.DB)
+	athleteModelRepo := repository.NewAthleteModelRepository(db.DB)
 
 	// Initialize services
-	racerService := service.NewRacerService(racerRepo)
+	athleteService := service.NewAthleteService(athleteRepo)
 	modelService := service.NewRCModelService(modelRepo, brandRepo, scaleRepo, typeRepo)
 	settingsService := service.NewSettingsService(settingsRepo)
-	racerModelService := service.NewRacerModelService(racerModelRepo, racerRepo, modelRepo)
+	athleteModelService := service.NewAthleteModelService(athleteModelRepo, athleteRepo, modelRepo)
 
 	// Load locale from settings
 	savedLocale, err := settingsService.GetLocale()
@@ -86,6 +86,6 @@ func main() {
 	log.Info("TrackPulse initialization complete!")
 
 	// Start UI
-	uiApp := ui.NewApp(racerService, modelService, settingsService, racerModelService, savedLocale)
+	uiApp := ui.NewApp(athleteService, modelService, settingsService, athleteModelService, savedLocale)
 	uiApp.Run()
 }

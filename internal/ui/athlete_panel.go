@@ -16,15 +16,15 @@ import (
 	"trackpulse/internal/service"
 )
 
-// RacerPanel represents the Racers management panel
-type RacerPanel struct {
-	racerService    *service.RacerService
+// AthletePanel represents the Athletes management panel
+type AthletePanel struct {
+	athleteService  *service.AthleteService
 	content         *fyne.Container
 	table           *widget.Table
 	statusLabel     *widget.Label
 	window          fyne.Window    // Reference to window for dialogs
-	selectedRacerID string         // ID of selected racer
-	allRacers       []models.Racer // Cache of all racers
+	selectedAthleteID string       // ID of selected athlete
+	allAthletes     []models.Athlete // Cache of all athletes
 	// UI components that need to be updated on language change
 	toolbar   *widget.Toolbar
 	headers   []string
@@ -32,7 +32,7 @@ type RacerPanel struct {
 }
 
 // updateLocale updates all localized text in the panel
-func (p *RacerPanel) updateLocale() {
+func (p *AthletePanel) updateLocale() {
 	if p.statusLabel != nil {
 		p.statusLabel.SetText(locale.T("status.ready"))
 	}
@@ -40,12 +40,12 @@ func (p *RacerPanel) updateLocale() {
 	// Update headers
 	headers := []string{
 		locale.T("common.id"),
-		locale.T("racer.header.number"),
-		locale.T("racer.header.name"),
-		locale.T("racer.header.country"),
-		locale.T("racer.header.city"),
-		locale.T("racer.header.birthday"),
-		locale.T("racer.header.rating"),
+		locale.T("athlete.header.number"),
+		locale.T("athlete.header.name"),
+		locale.T("athlete.header.country"),
+		locale.T("athlete.header.city"),
+		locale.T("athlete.header.birthday"),
+		locale.T("athlete.header.rating"),
 		locale.T("model.header.created"),
 		locale.T("model.header.updated"),
 	}
@@ -57,30 +57,30 @@ func (p *RacerPanel) updateLocale() {
 }
 
 // Refresh refreshes the panel UI with current locale
-func (p *RacerPanel) Refresh() {
+func (p *AthletePanel) Refresh() {
 	p.updateLocale()
 }
 
-// NewRacerPanel creates a new racer management panel
-func NewRacerPanel(racerService *service.RacerService, window fyne.Window) *RacerPanel {
-	panel := &RacerPanel{
-		racerService: racerService,
+// NewAthletePanel creates a new athlete management panel
+func NewAthletePanel(athleteService *service.AthleteService, window fyne.Window) *AthletePanel {
+	panel := &AthletePanel{
+		athleteService: athleteService,
 		window:       window,
 	}
 	panel.buildUI()
 	return panel
 }
 
-// buildUI constructs the racer panel UI
-func (p *RacerPanel) buildUI() *fyne.Container {
+// buildUI constructs the athlete panel UI
+func (p *AthletePanel) buildUI() *fyne.Container {
 	// Status label
 	p.statusLabel = widget.NewLabel(locale.T("status.ready"))
 
 	// Toolbar with actions
 	p.toolbar = p.createToolbar()
 
-	// Table for displaying racers
-	p.table = p.createRacerTable()
+	// Table for displaying athletes
+	p.table = p.createAthleteTable()
 
 	// Initialize headers
 	p.updateLocale()
@@ -101,7 +101,7 @@ func (p *RacerPanel) buildUI() *fyne.Container {
 }
 
 // createToolbar creates the action toolbar
-func (p *RacerPanel) createToolbar() *widget.Toolbar {
+func (p *AthletePanel) createToolbar() *widget.Toolbar {
 	return widget.NewToolbar(
 		widget.NewToolbarAction(theme.ContentAddIcon(), func() {
 			p.showCreateDialog()
@@ -119,17 +119,17 @@ func (p *RacerPanel) createToolbar() *widget.Toolbar {
 	)
 }
 
-// createRacerTable creates the data table for racers
-func (p *RacerPanel) createRacerTable() *widget.Table {
+// createAthleteTable creates the data table for athletes
+func (p *AthletePanel) createAthleteTable() *widget.Table {
 	// First load data
-	p.allRacers, _ = p.racerService.GetAllRacers()
+	p.allAthletes, _ = p.athleteService.GetAllAthletes()
 
 	table := widget.NewTable(
 		func() (int, int) {
-			if len(p.allRacers) == 0 {
+			if len(p.allAthletes) == 0 {
 				return 0, 0
 			}
-			return len(p.allRacers), 9 // rows, columns
+			return len(p.allAthletes), 9 // rows, columns
 		},
 		func() fyne.CanvasObject {
 			label := widget.NewLabel("Template")
@@ -137,39 +137,39 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 			return label
 		},
 		func(i widget.TableCellID, o fyne.CanvasObject) {
-			if i.Row >= len(p.allRacers) {
+			if i.Row >= len(p.allAthletes) {
 				o.(*widget.Label).SetText("")
 				return
 			}
-			racer := p.allRacers[i.Row]
+			athlete := p.allAthletes[i.Row]
 			switch i.Col {
 			case 0:
-				o.(*widget.Label).SetText(racer.ID)
+				o.(*widget.Label).SetText(athlete.ID)
 			case 1:
-				o.(*widget.Label).SetText(strconv.Itoa(racer.RacerNumber))
+				o.(*widget.Label).SetText(strconv.Itoa(athlete.RacerNumber))
 			case 2:
-				o.(*widget.Label).SetText(racer.FullName)
+				o.(*widget.Label).SetText(athlete.FullName)
 			case 3:
-				o.(*widget.Label).SetText(racer.Country)
+				o.(*widget.Label).SetText(athlete.Country)
 			case 4:
-				o.(*widget.Label).SetText(racer.City)
+				o.(*widget.Label).SetText(athlete.City)
 			case 5:
-				if racer.Birthday != nil {
-					o.(*widget.Label).SetText(racer.Birthday.Format("02.01.2006"))
+				if athlete.Birthday != nil {
+					o.(*widget.Label).SetText(athlete.Birthday.Format("02.01.2006"))
 				} else {
 					o.(*widget.Label).SetText("-")
 				}
 			case 6:
-				o.(*widget.Label).SetText(strconv.Itoa(racer.Rating))
+				o.(*widget.Label).SetText(strconv.Itoa(athlete.Rating))
 			case 7:
-				if !racer.CreatedAt.IsZero() {
-					o.(*widget.Label).SetText(racer.CreatedAt.Format("2006-01-02 15:04:05"))
+				if !athlete.CreatedAt.IsZero() {
+					o.(*widget.Label).SetText(athlete.CreatedAt.Format("2006-01-02 15:04:05"))
 				} else {
 					o.(*widget.Label).SetText("-")
 				}
 			case 8:
-				if !racer.UpdatedAt.IsZero() {
-					o.(*widget.Label).SetText(racer.UpdatedAt.Format("2006-01-02 15:04:05"))
+				if !athlete.UpdatedAt.IsZero() {
+					o.(*widget.Label).SetText(athlete.UpdatedAt.Format("2006-01-02 15:04:05"))
 				} else {
 					o.(*widget.Label).SetText("-")
 				}
@@ -197,7 +197,7 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 
 	// Set column widths for better visibility
 	table.SetColumnWidth(0, 280) // ID
-	table.SetColumnWidth(1, 80)  // Racer Number
+	table.SetColumnWidth(1, 80)  // Athlete Number
 	table.SetColumnWidth(2, 250) // Full Name
 	table.SetColumnWidth(3, 120) // Country
 	table.SetColumnWidth(4, 120) // City
@@ -207,21 +207,21 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 	table.SetColumnWidth(8, 150) // Updated At
 
 	table.OnSelected = func(id widget.TableCellID) {
-		if id.Row >= 0 && id.Row < len(p.allRacers) {
-			p.selectedRacerID = p.allRacers[id.Row].ID
-			p.statusLabel.SetText(fmt.Sprintf("Selected: %s", p.allRacers[id.Row].FullName))
+		if id.Row >= 0 && id.Row < len(p.allAthletes) {
+			p.selectedAthleteID = p.allAthletes[id.Row].ID
+			p.statusLabel.SetText(fmt.Sprintf("Selected: %s", p.allAthletes[id.Row].FullName))
 		}
 	}
 
 	return table
 }
 
-// refreshData reloads the racer data
-func (p *RacerPanel) refreshData() {
+// refreshData reloads the athlete data
+func (p *AthletePanel) refreshData() {
 	if p.table != nil {
 		// Update data cache
 		var err error
-		p.allRacers, err = p.racerService.GetAllRacers()
+		p.allAthletes, err = p.athleteService.GetAllAthletes()
 		if err != nil {
 			fmt.Println("ERROR refreshing data:", err)
 			p.statusLabel.SetText("Error refreshing data")
@@ -229,30 +229,30 @@ func (p *RacerPanel) refreshData() {
 		}
 		// Force table to recalculate rows count and update cell contents
 		p.table.Refresh()
-		if len(p.allRacers) == 0 {
-			p.statusLabel.SetText("No racers found")
+		if len(p.allAthletes) == 0 {
+			p.statusLabel.SetText("No athletes found")
 		} else {
-			p.statusLabel.SetText(fmt.Sprintf("Loaded %d racers", len(p.allRacers)))
+			p.statusLabel.SetText(fmt.Sprintf("Loaded %d athletes", len(p.allAthletes)))
 		}
 	}
 }
 
-// showCreateDialog shows the dialog for creating a new racer
-func (p *RacerPanel) showCreateDialog() {
-	p.showRacerDialog(locale.T("dialog.new_racer.title"), nil)
+// showCreateDialog shows the dialog for creating a new athlete
+func (p *AthletePanel) showCreateDialog() {
+	p.showAthleteDialog(locale.T("dialog.new_athlete.title"), nil)
 }
 
-// showEditDialog shows the dialog for editing an existing racer
-func (p *RacerPanel) showEditDialog() {
-	if p.selectedRacerID == "" {
+// showEditDialog shows the dialog for editing an existing athlete
+func (p *AthletePanel) showEditDialog() {
+	if p.selectedAthleteID == "" {
 		dialog.ShowInformation(locale.T("common.info"), locale.T("info.select_first"), p.window)
 		return
 	}
 
-	// Look for selected racer in cache
-	for _, racer := range p.allRacers {
-		if racer.ID == p.selectedRacerID {
-			p.showRacerDialog(locale.T("dialog.edit.title"), &racer)
+	// Look for selected athlete in cache
+	for _, athlete := range p.allAthletes {
+		if athlete.ID == p.selectedAthleteID {
+			p.showAthleteDialog(locale.T("dialog.edit.title"), &athlete)
 			return
 		}
 	}
@@ -260,23 +260,23 @@ func (p *RacerPanel) showEditDialog() {
 	dialog.ShowInformation(locale.T("common.info"), locale.T("info.not_found"), p.window)
 }
 
-// deleteSelected deletes the selected racer
-func (p *RacerPanel) deleteSelected() {
-	if p.selectedRacerID == "" {
+// deleteSelected deletes the selected athlete
+func (p *AthletePanel) deleteSelected() {
+	if p.selectedAthleteID == "" {
 		dialog.ShowInformation(locale.T("common.info"), locale.T("info.select_first"), p.window)
 		return
 	}
 
-	// Look for selected racer in cache
-	var racerToDelete *models.Racer
-	for i, racer := range p.allRacers {
-		if racer.ID == p.selectedRacerID {
-			racerToDelete = &p.allRacers[i]
+	// Look for selected athlete in cache
+	var athleteToDelete *models.Athlete
+	for i, athlete := range p.allAthletes {
+		if athlete.ID == p.selectedAthleteID {
+			athleteToDelete = &p.allAthletes[i]
 			break
 		}
 	}
 
-	if racerToDelete == nil {
+	if athleteToDelete == nil {
 		dialog.ShowInformation(locale.T("common.info"), locale.T("info.not_found"), p.window)
 		return
 	}
@@ -284,15 +284,15 @@ func (p *RacerPanel) deleteSelected() {
 	// Show confirmation dialog
 	dialog.ShowConfirm(
 		locale.T("dialog.delete.title"),
-		fmt.Sprintf(locale.T("dialog.delete.message"), racerToDelete.FullName),
+		fmt.Sprintf(locale.T("dialog.delete.message"), athleteToDelete.FullName),
 		func(confirmed bool) {
 			if confirmed {
-				if err := p.racerService.DeleteRacer(racerToDelete.ID); err != nil {
+				if err := p.athleteService.DeleteAthlete(athleteToDelete.ID); err != nil {
 					dialog.ShowError(err, p.window)
 					p.statusLabel.SetText(locale.T("status.delete_failed") + ": " + err.Error())
 				} else {
 					p.refreshData()
-					p.selectedRacerID = ""
+					p.selectedAthleteID = ""
 					p.statusLabel.SetText(locale.T("status.deleted_success"))
 				}
 			}
@@ -301,47 +301,47 @@ func (p *RacerPanel) deleteSelected() {
 	)
 }
 
-// showRacerDialog shows a dialog for creating or editing a racer
-func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
+// showAthleteDialog shows a dialog for creating or editing an athlete
+func (p *AthletePanel) showAthleteDialog(title string, athlete *models.Athlete) {
 	// Create form fields with placeholders and increased width
 	numberEntry := widget.NewEntry()
-	numberEntry.SetPlaceHolder(locale.T("form.racer.number_placeholder"))
+	numberEntry.SetPlaceHolder(locale.T("form.athlete.number_placeholder"))
 
 	nameEntry := widget.NewEntry()
-	nameEntry.SetPlaceHolder(locale.T("form.racer.name_placeholder"))
+	nameEntry.SetPlaceHolder(locale.T("form.athlete.name_placeholder"))
 
 	countryEntry := widget.NewEntry()
-	countryEntry.SetPlaceHolder(locale.T("form.racer.country_placeholder"))
+	countryEntry.SetPlaceHolder(locale.T("form.athlete.country_placeholder"))
 
 	cityEntry := widget.NewEntry()
-	cityEntry.SetPlaceHolder(locale.T("form.racer.city_placeholder"))
+	cityEntry.SetPlaceHolder(locale.T("form.athlete.city_placeholder"))
 
 	birthdayEntry := widget.NewEntry()
-	birthdayEntry.SetPlaceHolder(locale.T("form.racer.birthday_placeholder"))
+	birthdayEntry.SetPlaceHolder(locale.T("form.athlete.birthday_placeholder"))
 
 	ratingEntry := widget.NewEntry()
-	ratingEntry.SetPlaceHolder(locale.T("form.racer.rating_placeholder"))
+	ratingEntry.SetPlaceHolder(locale.T("form.athlete.rating_placeholder"))
 
-	if racer != nil {
+	if athlete != nil {
 		// Edit mode - populate fields
-		numberEntry.SetText(strconv.Itoa(racer.RacerNumber))
-		nameEntry.SetText(racer.FullName)
-		countryEntry.SetText(racer.Country)
-		cityEntry.SetText(racer.City)
-		if racer.Birthday != nil {
-			birthdayEntry.SetText(racer.Birthday.Format("02.01.2006"))
+		numberEntry.SetText(strconv.Itoa(athlete.RacerNumber))
+		nameEntry.SetText(athlete.FullName)
+		countryEntry.SetText(athlete.Country)
+		cityEntry.SetText(athlete.City)
+		if athlete.Birthday != nil {
+			birthdayEntry.SetText(athlete.Birthday.Format("02.01.2006"))
 		}
-		ratingEntry.SetText(strconv.Itoa(racer.Rating))
+		ratingEntry.SetText(strconv.Itoa(athlete.Rating))
 	}
 
 	// Create form with localized labels
 	form := widget.NewForm(
-		widget.NewFormItem(locale.T("form.racer.number"), numberEntry),
-		widget.NewFormItem(locale.T("form.racer.name"), nameEntry),
-		widget.NewFormItem(locale.T("form.racer.country"), countryEntry),
-		widget.NewFormItem(locale.T("form.racer.city"), cityEntry),
-		widget.NewFormItem(locale.T("form.racer.birthday"), birthdayEntry),
-		widget.NewFormItem(locale.T("form.racer.rating"), ratingEntry),
+		widget.NewFormItem(locale.T("form.athlete.number"), numberEntry),
+		widget.NewFormItem(locale.T("form.athlete.name"), nameEntry),
+		widget.NewFormItem(locale.T("form.athlete.country"), countryEntry),
+		widget.NewFormItem(locale.T("form.athlete.city"), cityEntry),
+		widget.NewFormItem(locale.T("form.athlete.birthday"), birthdayEntry),
+		widget.NewFormItem(locale.T("form.athlete.rating"), ratingEntry),
 	)
 
 	// Set minimum width for input fields via wrapper
@@ -363,12 +363,12 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 
 	// Re-create form with fields (Fyne quirk)
 	form = widget.NewForm(
-		widget.NewFormItem(locale.T("form.racer.number"), numberEntry),
-		widget.NewFormItem(locale.T("form.racer.name"), nameEntry),
-		widget.NewFormItem(locale.T("form.racer.country"), countryEntry),
-		widget.NewFormItem(locale.T("form.racer.city"), cityEntry),
-		widget.NewFormItem(locale.T("form.racer.birthday"), birthdayEntry),
-		widget.NewFormItem(locale.T("form.racer.rating"), ratingEntry),
+		widget.NewFormItem(locale.T("form.athlete.number"), numberEntry),
+		widget.NewFormItem(locale.T("form.athlete.name"), nameEntry),
+		widget.NewFormItem(locale.T("form.athlete.country"), countryEntry),
+		widget.NewFormItem(locale.T("form.athlete.city"), cityEntry),
+		widget.NewFormItem(locale.T("form.athlete.birthday"), birthdayEntry),
+		widget.NewFormItem(locale.T("form.athlete.rating"), ratingEntry),
 	)
 
 	// Create dialog without buttons first so we can reference it in the callback
@@ -379,7 +379,7 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 		// Parse values
 		number, err := strconv.Atoi(strings.TrimSpace(numberEntry.Text))
 		if err != nil {
-			errMsg := fmt.Sprintf("invalid racer number: %v (got: '%s')", err, numberEntry.Text)
+			errMsg := fmt.Sprintf("invalid athlete number: %v (got: '%s')", err, numberEntry.Text)
 			fmt.Println("ERROR:", errMsg)
 			dialog.ShowError(fmt.Errorf(errMsg), p.window)
 			return
@@ -394,19 +394,19 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 			}
 		}
 
-		var r *models.Racer
-		if racer != nil {
+		var a *models.Athlete
+		if athlete != nil {
 			// Update existing
-			r = racer
-			r.RacerNumber = number
-			r.FullName = strings.TrimSpace(nameEntry.Text)
-			r.Country = strings.TrimSpace(countryEntry.Text)
-			r.City = strings.TrimSpace(cityEntry.Text)
+			a = athlete
+			a.RacerNumber = number
+			a.FullName = strings.TrimSpace(nameEntry.Text)
+			a.Country = strings.TrimSpace(countryEntry.Text)
+			a.City = strings.TrimSpace(cityEntry.Text)
 			if birthdayEntry.Text != "" {
 				birthdayStr := strings.TrimSpace(birthdayEntry.Text)
 				birthday, err := time.Parse("02.01.2006", birthdayStr)
 				if err == nil {
-					r.Birthday = &birthday
+					a.Birthday = &birthday
 				} else {
 					errMsg := fmt.Sprintf("invalid date format (use DD.MM.YYYY): %v (got: '%s')", err, birthdayStr)
 					fmt.Println("ERROR:", errMsg)
@@ -414,15 +414,15 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 					return
 				}
 			} else {
-				r.Birthday = nil
+				a.Birthday = nil
 			}
-			r.Rating = rating
-			if err := p.racerService.UpdateRacer(r); err != nil {
-				fmt.Println("ERROR updating racer:", err)
+			a.Rating = rating
+			if err := p.athleteService.UpdateAthlete(a); err != nil {
+				fmt.Println("ERROR updating athlete:", err)
 				dialog.ShowError(err, p.window)
 				return
 			}
-			p.statusLabel.SetText("Racer updated successfully")
+			p.statusLabel.SetText("Athlete updated successfully")
 
 			// Close dialog and refresh data in main thread
 			d.Hide()
@@ -431,7 +431,7 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 			})
 		} else {
 			// Create new
-			r = &models.Racer{
+			a = &models.Athlete{
 				RacerNumber: number,
 				FullName:    strings.TrimSpace(nameEntry.Text),
 				Country:     strings.TrimSpace(countryEntry.Text),
@@ -442,7 +442,7 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 				birthdayStr := strings.TrimSpace(birthdayEntry.Text)
 				birthday, err := time.Parse("02.01.2006", birthdayStr)
 				if err == nil {
-					r.Birthday = &birthday
+					a.Birthday = &birthday
 				} else {
 					errMsg := fmt.Sprintf("invalid date format (use DD.MM.YYYY): %v (got: '%s')", err, birthdayStr)
 					fmt.Println("ERROR:", errMsg)
@@ -450,12 +450,12 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 					return
 				}
 			}
-			if err := p.racerService.CreateRacer(r); err != nil {
-				fmt.Println("ERROR creating racer:", err)
+			if err := p.athleteService.CreateAthlete(a); err != nil {
+				fmt.Println("ERROR creating athlete:", err)
 				dialog.ShowError(err, p.window)
 				return
 			}
-			p.statusLabel.SetText("Racer created successfully")
+			p.statusLabel.SetText("Athlete created successfully")
 
 			// Close dialog and refresh data in main thread
 			d.Hide()

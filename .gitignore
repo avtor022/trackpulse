@@ -3,33 +3,31 @@
 *.o
 *.obj
 *.out
+*.a
+*.so
+*.dll
+*.exe
 
 # Dependencies
 vendor/
+Godeps/
 
 # Logs and temp files
 *.log
 *.tmp
-
-# Environment
-.env
-.env.local
-*.env.*
+*.swp
 
 # Editors
 .vscode/
 .idea/
-*.swp
-*.swo
 
 # Coverage
 coverage/
 htmlcov/
 .coverage
 
-# Go-specific
-*.exe
-*.dll
-*.so
-*.a
+# Environment
+.env
+.env.local
+*.env.*
 ```
