@@ -1,21 +1,56 @@
 ```
 # Compiled and build artifacts
+*.pyc
+__pycache__/
 *.o
 *.obj
-*.out
+*.class
 *.exe
 *.dll
 *.so
 *.a
-*.pyc
-__pycache__/
-*.class
-*.jar
-*.war
+*.out
+
+# Dependencies
+.venv/
+venv/
+node_modules/
+dist/
+build/
+target/
+.gradle/
+.mypy_cache/
+.pytest_cache/
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+*.swo
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# Editors
+.vscode/
+.idea/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Coverage
+coverage/
+htmlcov/
+.coverage
+
+# Compressed files
 *.zip
-*.tar.gz
-*.tar
 *.gz
+*.tar
+*.tgz
 *.bz2
 *.xz
 *.7z
@@ -30,185 +65,8 @@ __pycache__/
 *.Z
 *.lz
 *.lzo
-
-# Dependencies
-node_modules/
-venv/
-.venv/
-.env
-.env.local
-.env.*
-.env~*
-.env.local~
-*.env
-*.env.*
-.env*
-.env.*
-.env.local*
-.env.local.*
-
-# Build directories
-dist/
-build/
-target/
-.out/
-bin/
-lib/
-
-# IDE and editor files
-.vscode/
-.idea/
-*.swp
-*.swo
-*.tmp
-*.log
-*.tmp
-*~
-.DS_Store
-Thumbs.db
-
-# Coverage and testing
-.coverage
-coverage/
-htmlcov/
-.pytest_cache/
-.mypy_cache/
-.nyc_output/
-coverage-final.json
-
-# System and OS
-.DS_Store
-ehthumbs.db
-Icon?
-Thumbs.db
-*.DS_Store
-._*
-
-# Compression and archives
-*.zip
 *.tar.gz
-*.tar.xz
 *.tar.bz2
+*.tar.xz
 *.tar.zst
-*.gz
-*.tgz
-*.bz2
-*.xz
-*.7z
-*.rar
-*.Z
-*.lz
-*.lzo
-*.lz4
-*.lzh
-*.cab
-*.arj
-*.rpm
-*.deb
-
-# Documentation and generated files
-docs/_build/
-*.rst.bak
-*.md.bak
-
-# Authentication and security
-*.key
-*.pem
-*.crt
-*.cert
-id_rsa
-id_dsa
-*.orig
-*.rej
-
-# Docker and containers
-.dockerenv
-Dockerfile*
-docker-compose*
-*.dockerignore
-
-# Database
-*.db
-*.db-journal
-*.sqlite
-*.sqlite3
-
-# Logs
-*.log
-**/*.log
-
-# Cache directories
-.cache/
-.cargo/
-.pip/
-.npm/
-.yarn/
-.bazel/
-.gradle/
-.cmake/
-.meson/
-.ninja_log
-.compile_commands.json
-
-# Backup and swap files
-*~
-*.bak
-*.swp
-*.swo
-*#
-.#*
-,*
-*.tmp
-*.temp
-*.backup
-*.bck
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-*.DS_Store
-desktop.ini
-Icon?
-VolumeIcon.icns
-.apdisk
-.fseventsd
-
-# Environment specific
-.envrc
-direnv
-*.envrc
-*.direnv
-.env.local
-.env.production
-.env.development
-.env.test
-.env.staging
-.env.build
-.env.ci
-.env.dev
-.env.prod
-.env.testing
-.env.example
-.env.sample
-.env.template
-.env.defaults
-.env.global
-.env.local.example
-.env.local.sample
-.env.local.template
-.env.local.defaults
-.env.production.local
-.env.development.local
-.env.test.local
-.env.staging.local
-.env.build.local
-.env.ci.local
-.env.dev.local
-.env.prod.local
-.env.testing.local
 ```
