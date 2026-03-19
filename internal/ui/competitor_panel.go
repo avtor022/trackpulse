@@ -230,9 +230,9 @@ func (p *CompetitorPanel) refreshData() {
 		// Force table to recalculate rows count and update cell contents
 		p.table.Refresh()
 		if len(p.allCompetitors) == 0 {
-			p.statusLabel.SetText("No competitors found")
+			p.statusLabel.SetText(locale.T("status.no_competitors"))
 		} else {
-			p.statusLabel.SetText(fmt.Sprintf("Loaded %d competitors", len(p.allCompetitors)))
+			p.statusLabel.SetText(fmt.Sprintf(locale.T("status.loaded_competitors"), len(p.allCompetitors)))
 		}
 	}
 }

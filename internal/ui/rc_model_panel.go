@@ -253,9 +253,9 @@ func (p *ModelPanel) refreshData() {
 		// Force table to recalculate rows count and update cell contents
 		p.table.Refresh()
 		if len(p.allModels) == 0 {
-			p.statusLabel.SetText("No models found")
+			p.statusLabel.SetText(locale.T("status.no_models"))
 		} else {
-			p.statusLabel.SetText(fmt.Sprintf("Loaded %d models", len(p.allModels)))
+			p.statusLabel.SetText(fmt.Sprintf(locale.T("status.loaded_models"), len(p.allModels)))
 		}
 	}
 }

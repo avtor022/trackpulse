@@ -257,9 +257,9 @@ func (p *CompetitorModelPanel) refreshData() {
 		// Force table to recalculate rows count and update cell contents
 		p.table.Refresh()
 		if len(p.allCompetitorModels) == 0 {
-			p.statusLabel.SetText("No transponders found")
+			p.statusLabel.SetText(locale.T("status.no_transponders"))
 		} else {
-			p.statusLabel.SetText(fmt.Sprintf("Loaded %d transponders", len(p.allCompetitorModels)))
+			p.statusLabel.SetText(fmt.Sprintf(locale.T("status.loaded_transponders"), len(p.allCompetitorModels)))
 		}
 	}
 }
