@@ -13,15 +13,17 @@ import (
 
 // App represents the main application UI
 type App struct {
-	fyneApp        fyne.App
-	mainWindow     fyne.Window
-	racerService   *service.RacerService
-	modelService   *service.RCModelService
+	fyneApp         fyne.App
+	mainWindow      fyne.Window
+	racerService    *service.RacerService
+	modelService    *service.RCModelService
 	settingsService *service.SettingsService
-	config         *Config
-	tabs           *container.AppTabs
-	racerPanel     *RacerPanel
-	modelPanel     *ModelPanel
+	racerModelService *service.RacerModelService
+	config          *Config
+	tabs            *container.AppTabs
+	racerPanel      *RacerPanel
+	modelPanel      *ModelPanel
+	racerModelPanel *RacerModelPanel
 }
 
 // Config holds UI configuration
@@ -31,16 +33,17 @@ type Config struct {
 }
 
 // NewApp creates a new TrackPulse application
-func NewApp(racerService *service.RacerService, modelService *service.RCModelService, settingsService *service.SettingsService, language string) *App {
+func NewApp(racerService *service.RacerService, modelService *service.RCModelService, settingsService *service.SettingsService, racerModelService *service.RacerModelService, language string) *App {
 	fyneApp := app.New()
 	mainWindow := fyneApp.NewWindow("TrackPulse")
 
 	return &App{
-		fyneApp:         fyneApp,
-		mainWindow:      mainWindow,
-		racerService:    racerService,
-		modelService:    modelService,
-		settingsService: settingsService,
+		fyneApp:           fyneApp,
+		mainWindow:        mainWindow,
+		racerService:      racerService,
+		modelService:      modelService,
+		settingsService:   settingsService,
+		racerModelService: racerModelService,
 		config: &Config{
 			Language: language,
 			Title:    "TrackPulse",
@@ -92,9 +95,8 @@ func (a *App) createModelsTab() fyne.CanvasObject {
 
 // createTranspondersTab creates the Transponders management tab
 func (a *App) createTranspondersTab() fyne.CanvasObject {
-	content := widget.NewLabel(locale.T("tab.transponders"))
-	content.Alignment = fyne.TextAlignCenter
-	return container.NewCenter(content)
+	a.racerModelPanel = NewRacerModelPanel(a.racerModelService, a.racerService, a.modelService, a.mainWindow)
+	return a.racerModelPanel.content
 }
 
 // createRacesTab creates the Races management tab
@@ -205,6 +207,9 @@ func (a *App) refreshUI() {
 	}
 	if a.modelPanel != nil {
 		a.modelPanel.Refresh()
+	}
+	if a.racerModelPanel != nil {
+		a.racerModelPanel.Refresh()
 	}
 	
 	// Also update settings tab content

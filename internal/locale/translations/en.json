@@ -162,5 +162,19 @@
     "error.not_found": "Not found",
     "settings.language": "Language",
     "settings.language.en": "English",
-    "settings.language.ru": "Russian"
+    "settings.language.ru": "Russian",
+    "transponder.header.number": "Transponder Number",
+    "transponder.header.type": "Type",
+    "transponder.header.active": "Active",
+    "form.transponder.racer": "Racer",
+    "form.transponder.model": "RC Model",
+    "form.transponder.number": "Transponder Number",
+    "form.transponder.number_placeholder": "e.g., 12345",
+    "form.transponder.type": "Transponder Type",
+    "form.transponder.active": "Is Active",
+    "form.transponder.select_racer": "Select a racer",
+    "form.transponder.select_model": "Select a model",
+    "error.required.racer": "Racer is required",
+    "error.required.model": "RC model is required",
+    "error.required.transponder_number": "Transponder number is required"
 }
