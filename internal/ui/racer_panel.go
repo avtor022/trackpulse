@@ -234,10 +234,6 @@ func (p *RacerPanel) refreshData() {
 		} else {
 			p.statusLabel.SetText(fmt.Sprintf("Loaded %d racers", len(p.allRacers)))
 		}
-		fmt.Printf("DEBUG: refreshData completed, total racers: %d\n", len(p.allRacers))
-		for i, r := range p.allRacers {
-			fmt.Printf("DEBUG: Racer[%d]: ID=%s, Number=%d, Name=%s\n", i, r.ID, r.RacerNumber, r.FullName)
-		}
 	}
 }
 
@@ -380,10 +376,6 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 
 	// Create save button with callback that has access to 'd'
 	saveBtn := widget.NewButton(locale.T("common.save"), func() {
-		// Debug: print values
-		fmt.Printf("DEBUG: Number=%s, Name=%s, Country=%s, City=%s, Birthday=%s, Rating=%s\n",
-			numberEntry.Text, nameEntry.Text, countryEntry.Text, cityEntry.Text, birthdayEntry.Text, ratingEntry.Text)
-
 		// Parse values
 		number, err := strconv.Atoi(strings.TrimSpace(numberEntry.Text))
 		if err != nil {
@@ -458,7 +450,6 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 					return
 				}
 			}
-			fmt.Printf("DEBUG: Creating racer: %+v\n", r)
 			if err := p.racerService.CreateRacer(r); err != nil {
 				fmt.Println("ERROR creating racer:", err)
 				dialog.ShowError(err, p.window)
