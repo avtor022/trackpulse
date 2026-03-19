@@ -84,10 +84,6 @@ func main() {
 	log.Info("TrackPulse initialization complete!")
 
 	// Start UI
-	fmt.Println("Starting TrackPulse UI...")
-	fmt.Printf("Database: %s\n", cfg.DBPath)
-	fmt.Printf("Language: %s\n", savedLocale)
-
 	uiApp := ui.NewApp(racerService, modelService, settingsService, savedLocale)
 	uiApp.Run()
 }
