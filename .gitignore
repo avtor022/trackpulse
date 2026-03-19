@@ -3,21 +3,26 @@
 *.o
 *.obj
 *.out
+
 # Dependencies
 vendor/
+
 # Logs and temp files
 *.log
 *.tmp
 *.swp
+
+# Editors
+.idea/
+.vscode/
+
+# Coverage
+coverage/
+htmlcov/
+.coverage
+
 # Environment
 .env
 .env.local
-.env.*
-# Coverage
-.coverage
-coverage/
-htmlcov/
-# Editors
-.vscode/
-.idea/
+*.env.*
 ```
