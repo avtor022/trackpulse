@@ -1021,10 +1021,10 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 
 	// Create form with fields
 	formItems := []*widget.FormItem{
+		widget.NewFormItem(locale.T("form.model.type"), modelTypeWidget),
+		widget.NewFormItem(locale.T("form.model.scale"), scaleWidget),
 		widget.NewFormItem(locale.T("form.model.brand"), brandWidget),
 		widget.NewFormItem(locale.T("form.model.name"), modelNameWidget),
-		widget.NewFormItem(locale.T("form.model.scale"), scaleWidget),
-		widget.NewFormItem(locale.T("form.model.type"), modelTypeWidget),
 		widget.NewFormItem(locale.T("form.model.motor"), motorTypeEntry),
 		widget.NewFormItem(locale.T("form.model.drive"), driveTypeEntry),
 	}
