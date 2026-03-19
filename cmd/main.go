@@ -62,11 +62,12 @@ func main() {
 	modelRepo := repository.NewRCModelRepository(db.DB)
 	brandRepo := repository.NewRCModelBrandRepository(db.DB)
 	scaleRepo := repository.NewRCModelScaleRepository(db.DB)
+	typeRepo := repository.NewRCModelTypeRepository(db.DB)
 	settingsRepo := repository.NewSettingsRepository(db.DB)
 
 	// Initialize services
 	racerService := service.NewRacerService(racerRepo)
-	modelService := service.NewRCModelService(modelRepo, brandRepo, scaleRepo)
+	modelService := service.NewRCModelService(modelRepo, brandRepo, scaleRepo, typeRepo)
 	settingsService := service.NewSettingsService(settingsRepo)
 
 	// Load locale from settings

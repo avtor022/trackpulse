@@ -28,6 +28,7 @@ type ModelPanel struct {
 	brandSelect     *widget.Select   // Reference to brand select widget for locale updates
 	modelNameEntry  *widget.Entry    // Reference to model name entry widget for locale updates
 	scaleSelect     *widget.Select   // Reference to scale select widget for locale updates
+	modelTypeSelect *widget.Select   // Reference to model type select widget for locale updates
 }
 
 // updateLocale updates all localized text in the panel
@@ -63,6 +64,11 @@ func (p *ModelPanel) updateLocale() {
 	// Update scale select placeholder if it exists
 	if p.scaleSelect != nil {
 		p.scaleSelect.PlaceHolder = locale.T("common.select_one")
+	}
+
+	// Update model type select placeholder if it exists
+	if p.modelTypeSelect != nil {
+		p.modelTypeSelect.PlaceHolder = locale.T("common.select_one")
 	}
 
 	if p.table != nil {
@@ -334,6 +340,13 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 		// Continue working even if scales could not be retrieved
 	}
 
+	// Get all model types from the separate reference table
+	allModelTypes, err := p.modelService.GetAllModelTypes()
+	if err != nil {
+		fmt.Println("ERROR getting model types:", err)
+		// Continue working even if model types could not be retrieved
+	}
+
 	// Extract brand names
 	var existingBrands []string
 	for _, brand := range allBrands {
@@ -344,6 +357,12 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 	var existingScales []string
 	for _, scale := range allScales {
 		existingScales = append(existingScales, scale.Name)
+	}
+
+	// Extract model type names
+	var existingModelTypes []string
+	for _, t := range allModelTypes {
+		existingModelTypes = append(existingModelTypes, t.Name)
 	}
 
 	// Create widget for brand selection with delete buttons
@@ -360,6 +379,13 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 	// Add option to create new scale
 	newScaleOption := "+ " + locale.T("common.add") + " " + strings.TrimSuffix(locale.T("form.model.scale"), ":")
 	scaleSelectOptions := append(existingScales, newScaleOption)
+
+	// Create widget for model type selection with delete buttons
+	var modelTypeSelect *widget.Select
+
+	// Add option to create new model type
+	newModelTypeOption := "+ " + locale.T("common.add") + " " + strings.TrimSuffix(locale.T("form.model.type"), ":")
+	modelTypeSelectOptions := append(existingModelTypes, newModelTypeOption)
 
 	var mainDialog dialog.Dialog
 
@@ -562,7 +588,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 	}
 
 	// Use the button as the brand widget
-	brandWidget := brandButton
+	var brandWidget = brandButton
 
 	// Create widget for model name - simple text entry
 	p.modelNameEntry = widget.NewEntry()
@@ -573,7 +599,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 		p.modelNameEntry.SetText(model.ModelName)
 	}
 
-	modelNameWidget := p.modelNameEntry
+	var modelNameWidget = p.modelNameEntry
 
 	// Function to show scale selection popup with delete buttons (similar to brand)
 	var showScalePopup func()
@@ -776,19 +802,206 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 	// Use the button as the scale widget
 	scaleWidget := scaleButton
 
-	// Create widget for model name - simple text entry
-	p.modelNameEntry = widget.NewEntry()
-	p.modelNameEntry.SetPlaceHolder(locale.T("form.model.name_placeholder"))
-	p.modelNameEntry.Resize(fyne.NewSize(250, p.modelNameEntry.MinSize().Height))
+	// Function to show model type selection popup with delete buttons (similar to brand)
+	var showModelTypePopup func()
+	showModelTypePopup = func() {
+		if currentDialog != nil {
+			currentDialog.Hide()
+		}
 
-	if model != nil && model.ModelName != "" {
-		p.modelNameEntry.SetText(model.ModelName)
+		// Create container for model type options
+		modelTypeContainer := container.NewVBox()
+
+		// Add existing model types with delete buttons
+		for _, t := range existingModelTypes {
+			typeName := t
+			// Create horizontal layout for model type name and delete button
+			typeRow := container.NewHBox(
+				widget.NewLabel(t),
+				layout.NewSpacer(),
+			)
+
+			// Create delete button
+			deleteBtn := widget.NewButtonWithIcon("", theme.DeleteIcon(), func() {
+				// Show confirmation dialog
+				dialog.ShowConfirm(
+					locale.T("dialog.delete.title"),
+					fmt.Sprintf(locale.T("dialog.delete_model_type.message"), typeName),
+					func(confirmed bool) {
+						if confirmed {
+							// Delete model type from database
+							if err := p.modelService.DeleteModelType(typeName); err != nil {
+								dialog.ShowError(err, p.window)
+								return
+							}
+
+							// Remove from existingModelTypes slice
+							newExistingModelTypes := []string{}
+							for _, mt := range existingModelTypes {
+								if mt != typeName {
+									newExistingModelTypes = append(newExistingModelTypes, mt)
+								}
+							}
+							existingModelTypes = newExistingModelTypes
+
+							// Refresh the popup
+							showModelTypePopup()
+
+							// Update main dialog model type select if needed
+							if modelTypeSelect.Selected == typeName {
+								modelTypeSelect.SetSelected("")
+							}
+						}
+					},
+					p.window,
+				)
+			})
+			deleteBtn.Importance = widget.DangerImportance
+
+			typeRow.Add(deleteBtn)
+			modelTypeContainer.Add(typeRow)
+		}
+
+		// Add "Add new model type" option
+		addNewModelTypeBtn := widget.NewButton(newModelTypeOption, func() {
+			// Show dialog to add new model type
+			if mainDialog != nil {
+				mainDialog.Hide()
+			}
+			if currentDialog != nil {
+				currentDialog.Hide()
+			}
+
+			newModelTypeEntry := widget.NewEntry()
+			newModelTypeEntry.SetPlaceHolder(locale.T("dialog.add_model_type.placeholder"))
+
+			// Create label and input field vertically for better width
+			label := widget.NewLabel(locale.T("dialog.add_model_type.label"))
+			entryContainer := container.NewVBox(label, newModelTypeEntry)
+
+			newModelTypeDialog := dialog.NewCustomWithoutButtons(locale.T("dialog.add_model_type.title"), entryContainer, p.window)
+
+			cancelBtn := widget.NewButton(locale.T("common.cancel"), func() {
+				newModelTypeDialog.Hide()
+				// Return to main dialog
+				if mainDialog != nil {
+					mainDialog.Show()
+				}
+			})
+
+			saveBtn := widget.NewButton(locale.T("common.save"), func() {
+				newModelTypeName := strings.TrimSpace(newModelTypeEntry.Text)
+				if newModelTypeName == "" {
+					dialog.ShowError(fmt.Errorf(locale.T("info.enter_model_type_name")), p.window)
+					return
+				}
+
+				// Check if model type already exists
+				for _, mt := range existingModelTypes {
+					if strings.EqualFold(mt, newModelTypeName) {
+						dialog.ShowError(fmt.Errorf(locale.T("dialog.new_model_type.error_exists"), newModelTypeName), p.window)
+						return
+					}
+				}
+
+				// Add new model type to reference table
+				if err := p.modelService.AddModelType(newModelTypeName); err != nil {
+					dialog.ShowError(err, p.window)
+					return
+				}
+
+				// Update model type list
+				existingModelTypes = append(existingModelTypes, newModelTypeName)
+				modelTypeSelectOptions = append(existingModelTypes, newModelTypeOption)
+				modelTypeSelect.Options = modelTypeSelectOptions
+
+				newModelTypeDialog.Hide()
+				// Return to main dialog with new model type selected
+				if mainDialog != nil {
+					mainDialog.Show()
+				}
+				modelTypeSelect.SetSelected(newModelTypeName)
+			})
+
+			newModelTypeDialog.SetButtons([]fyne.CanvasObject{cancelBtn, saveBtn})
+
+			// Increase dialog width for new model type
+			parentSize := p.window.Canvas().Size()
+			dialogWidth := parentSize.Width * 0.6
+			if dialogWidth < 700 {
+				dialogWidth = 700
+			}
+			newModelTypeDialog.Resize(fyne.NewSize(dialogWidth, newModelTypeDialog.MinSize().Height))
+
+			currentDialog = newModelTypeDialog
+			newModelTypeDialog.Show()
+		})
+		modelTypeContainer.Add(addNewModelTypeBtn)
+
+		// Create popup dialog
+		popup := dialog.NewCustomWithoutButtons(locale.T("common.select_one"), modelTypeContainer, p.window)
+
+		// Add close button
+		closeBtn := widget.NewButton(locale.T("common.close"), func() {
+			popup.Hide()
+			currentDialog = nil
+			// Return to main dialog
+			if mainDialog != nil {
+				mainDialog.Show()
+			}
+		})
+
+		popup.SetButtons([]fyne.CanvasObject{closeBtn})
+
+		// Resize popup
+		parentSize := p.window.Canvas().Size()
+		popupWidth := parentSize.Width * 0.4
+		if popupWidth < 400 {
+			popupWidth = 400
+		}
+		popup.Resize(fyne.NewSize(popupWidth, popup.MinSize().Height))
+
+		currentDialog = popup
+		popup.Show()
 	}
 
-	modelNameWidget := p.modelNameEntry
+	// Create a button that shows the model type popup when clicked
+	modelTypeButton := widget.NewButton(locale.T("common.select_one"), func() {
+		if mainDialog != nil {
+			mainDialog.Hide()
+		}
+		showModelTypePopup()
+	})
 
-	modelTypeEntry := widget.NewEntry()
-	modelTypeEntry.SetPlaceHolder(locale.T("form.model.type_placeholder"))
+	// Store reference for locale updates
+	p.modelTypeSelect = &widget.Select{PlaceHolder: locale.T("common.select_one")}
+
+	// Helper function to update model type button text
+	updateModelTypeButton := func(selected string) {
+		if selected == "" {
+			modelTypeButton.SetText(locale.T("common.select_one"))
+		} else {
+			modelTypeButton.SetText(selected)
+		}
+	}
+
+	// Create the hidden Select widget to maintain compatibility
+	modelTypeSelect = widget.NewSelect(modelTypeSelectOptions, func(selected string) {
+		updateModelTypeButton(selected)
+		if selected == newModelTypeOption {
+			// This case is now handled in the popup
+			modelTypeSelect.SetSelected("")
+		}
+	})
+
+	// Set initial value if editing
+	if model != nil && model.ModelType != "" {
+		modelTypeSelect.SetSelected(model.ModelType)
+		updateModelTypeButton(model.ModelType)
+	}
+
+	// Use the button as the model type widget
+	modelTypeWidget := modelTypeButton
 
 	motorTypeEntry := widget.NewEntry()
 	motorTypeEntry.SetPlaceHolder(locale.T("form.model.motor_placeholder"))
@@ -798,9 +1011,6 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 
 	if model != nil {
 		// Edit mode - populate fields that are not select widgets
-		if modelTypeEntry != nil {
-			modelTypeEntry.SetText(model.ModelType)
-		}
 		if motorTypeEntry != nil && model.MotorType != "" {
 			motorTypeEntry.SetText(model.MotorType)
 		}
@@ -811,10 +1021,10 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 
 	// Create form with fields
 	formItems := []*widget.FormItem{
+		widget.NewFormItem(locale.T("form.model.type"), modelTypeWidget),
+		widget.NewFormItem(locale.T("form.model.scale"), scaleWidget),
 		widget.NewFormItem(locale.T("form.model.brand"), brandWidget),
 		widget.NewFormItem(locale.T("form.model.name"), modelNameWidget),
-		widget.NewFormItem(locale.T("form.model.scale"), scaleWidget),
-		widget.NewFormItem(locale.T("form.model.type"), modelTypeEntry),
 		widget.NewFormItem(locale.T("form.model.motor"), motorTypeEntry),
 		widget.NewFormItem(locale.T("form.model.drive"), driveTypeEntry),
 	}
@@ -860,7 +1070,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			dialog.ShowError(fmt.Errorf(locale.T("error.required.scale")), p.window)
 			return
 		}
-		if modelTypeEntry.Text == "" {
+		if modelTypeButton.Text == "" || modelTypeButton.Text == locale.T("common.select_one") {
 			dialog.ShowError(fmt.Errorf(locale.T("error.required.type")), p.window)
 			return
 		}
@@ -872,7 +1082,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			m.Brand = brand
 			m.ModelName = modelName
 			m.Scale = scale
-			m.ModelType = modelTypeEntry.Text
+			m.ModelType = modelTypeButton.Text
 			m.MotorType = motorTypeEntry.Text
 			m.DriveType = driveTypeEntry.Text
 			if err := p.modelService.UpdateModel(m); err != nil {
@@ -893,7 +1103,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 				Brand:     brand,
 				ModelName: modelName,
 				Scale:     scale,
-				ModelType: modelTypeEntry.Text,
+				ModelType: modelTypeButton.Text,
 				MotorType: motorTypeEntry.Text,
 				DriveType: driveTypeEntry.Text,
 			}

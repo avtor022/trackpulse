@@ -3,8 +3,10 @@
 *.o
 *.obj
 *.out
-build/
-dist/
+*.a
+*.so
+*.dll
+*.exe
 
 # Dependencies
 vendor/
@@ -19,6 +21,11 @@ vendor/
 # Editors
 .vscode/
 .idea/
+
+# Coverage
+coverage/
+htmlcov/
+.coverage
 
 # Environment
 .env
