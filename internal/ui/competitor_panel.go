@@ -16,15 +16,15 @@ import (
 	"trackpulse/internal/service"
 )
 
-// RacerPanel represents the Racers management panel
-type RacerPanel struct {
-	racerService    *service.RacerService
+// CompetitorPanel represents the Competitors management panel
+type CompetitorPanel struct {
+	competitorService    *service.CompetitorService
 	content         *fyne.Container
 	table           *widget.Table
 	statusLabel     *widget.Label
 	window          fyne.Window    // Reference to window for dialogs
-	selectedRacerID string         // ID of selected racer
-	allRacers       []models.Racer // Cache of all racers
+	selectedCompetitorID string         // ID of selected competitor
+	allCompetitors       []models.Competitor // Cache of all competitors
 	// UI components that need to be updated on language change
 	toolbar   *widget.Toolbar
 	headers   []string
@@ -32,7 +32,7 @@ type RacerPanel struct {
 }
 
 // updateLocale updates all localized text in the panel
-func (p *RacerPanel) updateLocale() {
+func (p *CompetitorPanel) updateLocale() {
 	if p.statusLabel != nil {
 		p.statusLabel.SetText(locale.T("status.ready"))
 	}
@@ -40,12 +40,12 @@ func (p *RacerPanel) updateLocale() {
 	// Update headers
 	headers := []string{
 		locale.T("common.id"),
-		locale.T("racer.header.number"),
-		locale.T("racer.header.name"),
-		locale.T("racer.header.country"),
-		locale.T("racer.header.city"),
-		locale.T("racer.header.birthday"),
-		locale.T("racer.header.rating"),
+		locale.T("competitor.header.number"),
+		locale.T("competitor.header.name"),
+		locale.T("competitor.header.country"),
+		locale.T("competitor.header.city"),
+		locale.T("competitor.header.birthday"),
+		locale.T("competitor.header.rating"),
 		locale.T("model.header.created"),
 		locale.T("model.header.updated"),
 	}
@@ -57,29 +57,29 @@ func (p *RacerPanel) updateLocale() {
 }
 
 // Refresh refreshes the panel UI with current locale
-func (p *RacerPanel) Refresh() {
+func (p *CompetitorPanel) Refresh() {
 	p.updateLocale()
 }
 
-// NewRacerPanel creates a new racer management panel
-func NewRacerPanel(racerService *service.RacerService, window fyne.Window) *RacerPanel {
-	panel := &RacerPanel{
-		racerService: racerService,
+// NewCompetitorPanel creates a new competitor management panel
+func NewCompetitorPanel(competitorService *service.CompetitorService, window fyne.Window) *CompetitorPanel {
+	panel := &CompetitorPanel{
+		competitorService: competitorService,
 		window:       window,
 	}
 	panel.buildUI()
 	return panel
 }
 
-// buildUI constructs the racer panel UI
-func (p *RacerPanel) buildUI() *fyne.Container {
+// buildUI constructs the competitor panel UI
+func (p *CompetitorPanel) buildUI() *fyne.Container {
 	// Status label
 	p.statusLabel = widget.NewLabel(locale.T("status.ready"))
 
 	// Toolbar with actions
 	p.toolbar = p.createToolbar()
 
-	// Table for displaying racers
+	// Table for displaying competitors
 	p.table = p.createRacerTable()
 
 	// Initialize headers
@@ -101,7 +101,7 @@ func (p *RacerPanel) buildUI() *fyne.Container {
 }
 
 // createToolbar creates the action toolbar
-func (p *RacerPanel) createToolbar() *widget.Toolbar {
+func (p *CompetitorPanel) createToolbar() *widget.Toolbar {
 	return widget.NewToolbar(
 		widget.NewToolbarAction(theme.ContentAddIcon(), func() {
 			p.showCreateDialog()
@@ -119,17 +119,17 @@ func (p *RacerPanel) createToolbar() *widget.Toolbar {
 	)
 }
 
-// createRacerTable creates the data table for racers
-func (p *RacerPanel) createRacerTable() *widget.Table {
+// createRacerTable creates the data table for competitors
+func (p *CompetitorPanel) createRacerTable() *widget.Table {
 	// First load data
-	p.allRacers, _ = p.racerService.GetAllRacers()
+	p.allCompetitors, _ = p.competitorService.GetAllRacers()
 
 	table := widget.NewTable(
 		func() (int, int) {
-			if len(p.allRacers) == 0 {
+			if len(p.allCompetitors) == 0 {
 				return 0, 0
 			}
-			return len(p.allRacers), 9 // rows, columns
+			return len(p.allCompetitors), 9 // rows, columns
 		},
 		func() fyne.CanvasObject {
 			label := widget.NewLabel("Template")
@@ -137,39 +137,39 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 			return label
 		},
 		func(i widget.TableCellID, o fyne.CanvasObject) {
-			if i.Row >= len(p.allRacers) {
+			if i.Row >= len(p.allCompetitors) {
 				o.(*widget.Label).SetText("")
 				return
 			}
-			racer := p.allRacers[i.Row]
+			competitor := p.allCompetitors[i.Row]
 			switch i.Col {
 			case 0:
-				o.(*widget.Label).SetText(racer.ID)
+				o.(*widget.Label).SetText(competitor.ID)
 			case 1:
-				o.(*widget.Label).SetText(strconv.Itoa(racer.RacerNumber))
+				o.(*widget.Label).SetText(strconv.Itoa(competitor.RacerNumber))
 			case 2:
-				o.(*widget.Label).SetText(racer.FullName)
+				o.(*widget.Label).SetText(competitor.FullName)
 			case 3:
-				o.(*widget.Label).SetText(racer.Country)
+				o.(*widget.Label).SetText(competitor.Country)
 			case 4:
-				o.(*widget.Label).SetText(racer.City)
+				o.(*widget.Label).SetText(competitor.City)
 			case 5:
-				if racer.Birthday != nil {
-					o.(*widget.Label).SetText(racer.Birthday.Format("02.01.2006"))
+				if competitor.Birthday != nil {
+					o.(*widget.Label).SetText(competitor.Birthday.Format("02.01.2006"))
 				} else {
 					o.(*widget.Label).SetText("-")
 				}
 			case 6:
-				o.(*widget.Label).SetText(strconv.Itoa(racer.Rating))
+				o.(*widget.Label).SetText(strconv.Itoa(competitor.Rating))
 			case 7:
-				if !racer.CreatedAt.IsZero() {
-					o.(*widget.Label).SetText(racer.CreatedAt.Format("2006-01-02 15:04:05"))
+				if !competitor.CreatedAt.IsZero() {
+					o.(*widget.Label).SetText(competitor.CreatedAt.Format("2006-01-02 15:04:05"))
 				} else {
 					o.(*widget.Label).SetText("-")
 				}
 			case 8:
-				if !racer.UpdatedAt.IsZero() {
-					o.(*widget.Label).SetText(racer.UpdatedAt.Format("2006-01-02 15:04:05"))
+				if !competitor.UpdatedAt.IsZero() {
+					o.(*widget.Label).SetText(competitor.UpdatedAt.Format("2006-01-02 15:04:05"))
 				} else {
 					o.(*widget.Label).SetText("-")
 				}
@@ -197,7 +197,7 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 
 	// Set column widths for better visibility
 	table.SetColumnWidth(0, 280) // ID
-	table.SetColumnWidth(1, 80)  // Racer Number
+	table.SetColumnWidth(1, 80)  // Competitor Number
 	table.SetColumnWidth(2, 250) // Full Name
 	table.SetColumnWidth(3, 120) // Country
 	table.SetColumnWidth(4, 120) // City
@@ -207,21 +207,21 @@ func (p *RacerPanel) createRacerTable() *widget.Table {
 	table.SetColumnWidth(8, 150) // Updated At
 
 	table.OnSelected = func(id widget.TableCellID) {
-		if id.Row >= 0 && id.Row < len(p.allRacers) {
-			p.selectedRacerID = p.allRacers[id.Row].ID
-			p.statusLabel.SetText(fmt.Sprintf("Selected: %s", p.allRacers[id.Row].FullName))
+		if id.Row >= 0 && id.Row < len(p.allCompetitors) {
+			p.selectedCompetitorID = p.allCompetitors[id.Row].ID
+			p.statusLabel.SetText(fmt.Sprintf("Selected: %s", p.allCompetitors[id.Row].FullName))
 		}
 	}
 
 	return table
 }
 
-// refreshData reloads the racer data
-func (p *RacerPanel) refreshData() {
+// refreshData reloads the competitor data
+func (p *CompetitorPanel) refreshData() {
 	if p.table != nil {
 		// Update data cache
 		var err error
-		p.allRacers, err = p.racerService.GetAllRacers()
+		p.allCompetitors, err = p.competitorService.GetAllRacers()
 		if err != nil {
 			fmt.Println("ERROR refreshing data:", err)
 			p.statusLabel.SetText("Error refreshing data")
@@ -229,30 +229,30 @@ func (p *RacerPanel) refreshData() {
 		}
 		// Force table to recalculate rows count and update cell contents
 		p.table.Refresh()
-		if len(p.allRacers) == 0 {
-			p.statusLabel.SetText("No racers found")
+		if len(p.allCompetitors) == 0 {
+			p.statusLabel.SetText("No competitors found")
 		} else {
-			p.statusLabel.SetText(fmt.Sprintf("Loaded %d racers", len(p.allRacers)))
+			p.statusLabel.SetText(fmt.Sprintf("Loaded %d competitors", len(p.allCompetitors)))
 		}
 	}
 }
 
-// showCreateDialog shows the dialog for creating a new racer
-func (p *RacerPanel) showCreateDialog() {
+// showCreateDialog shows the dialog for creating a new competitor
+func (p *CompetitorPanel) showCreateDialog() {
 	p.showRacerDialog(locale.T("dialog.new_racer.title"), nil)
 }
 
-// showEditDialog shows the dialog for editing an existing racer
-func (p *RacerPanel) showEditDialog() {
-	if p.selectedRacerID == "" {
+// showEditDialog shows the dialog for editing an existing competitor
+func (p *CompetitorPanel) showEditDialog() {
+	if p.selectedCompetitorID == "" {
 		dialog.ShowInformation(locale.T("common.info"), locale.T("info.select_first"), p.window)
 		return
 	}
 
-	// Look for selected racer in cache
-	for _, racer := range p.allRacers {
-		if racer.ID == p.selectedRacerID {
-			p.showRacerDialog(locale.T("dialog.edit.title"), &racer)
+	// Look for selected competitor in cache
+	for _, competitor := range p.allCompetitors {
+		if competitor.ID == p.selectedCompetitorID {
+			p.showRacerDialog(locale.T("dialog.edit.title"), &competitor)
 			return
 		}
 	}
@@ -260,18 +260,18 @@ func (p *RacerPanel) showEditDialog() {
 	dialog.ShowInformation(locale.T("common.info"), locale.T("info.not_found"), p.window)
 }
 
-// deleteSelected deletes the selected racer
-func (p *RacerPanel) deleteSelected() {
-	if p.selectedRacerID == "" {
+// deleteSelected deletes the selected competitor
+func (p *CompetitorPanel) deleteSelected() {
+	if p.selectedCompetitorID == "" {
 		dialog.ShowInformation(locale.T("common.info"), locale.T("info.select_first"), p.window)
 		return
 	}
 
-	// Look for selected racer in cache
-	var racerToDelete *models.Racer
-	for i, racer := range p.allRacers {
-		if racer.ID == p.selectedRacerID {
-			racerToDelete = &p.allRacers[i]
+	// Look for selected competitor in cache
+	var racerToDelete *models.Competitor
+	for i, competitor := range p.allCompetitors {
+		if competitor.ID == p.selectedCompetitorID {
+			racerToDelete = &p.allCompetitors[i]
 			break
 		}
 	}
@@ -287,12 +287,12 @@ func (p *RacerPanel) deleteSelected() {
 		fmt.Sprintf(locale.T("dialog.delete.message"), racerToDelete.FullName),
 		func(confirmed bool) {
 			if confirmed {
-				if err := p.racerService.DeleteRacer(racerToDelete.ID); err != nil {
+				if err := p.competitorService.DeleteRacer(racerToDelete.ID); err != nil {
 					dialog.ShowError(err, p.window)
 					p.statusLabel.SetText(locale.T("status.delete_failed") + ": " + err.Error())
 				} else {
 					p.refreshData()
-					p.selectedRacerID = ""
+					p.selectedCompetitorID = ""
 					p.statusLabel.SetText(locale.T("status.deleted_success"))
 				}
 			}
@@ -301,47 +301,47 @@ func (p *RacerPanel) deleteSelected() {
 	)
 }
 
-// showRacerDialog shows a dialog for creating or editing a racer
-func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
+// showRacerDialog shows a dialog for creating or editing a competitor
+func (p *CompetitorPanel) showRacerDialog(title string, competitor *models.Competitor) {
 	// Create form fields with placeholders and increased width
 	numberEntry := widget.NewEntry()
-	numberEntry.SetPlaceHolder(locale.T("form.racer.number_placeholder"))
+	numberEntry.SetPlaceHolder(locale.T("form.competitor.number_placeholder"))
 
 	nameEntry := widget.NewEntry()
-	nameEntry.SetPlaceHolder(locale.T("form.racer.name_placeholder"))
+	nameEntry.SetPlaceHolder(locale.T("form.competitor.name_placeholder"))
 
 	countryEntry := widget.NewEntry()
-	countryEntry.SetPlaceHolder(locale.T("form.racer.country_placeholder"))
+	countryEntry.SetPlaceHolder(locale.T("form.competitor.country_placeholder"))
 
 	cityEntry := widget.NewEntry()
-	cityEntry.SetPlaceHolder(locale.T("form.racer.city_placeholder"))
+	cityEntry.SetPlaceHolder(locale.T("form.competitor.city_placeholder"))
 
 	birthdayEntry := widget.NewEntry()
-	birthdayEntry.SetPlaceHolder(locale.T("form.racer.birthday_placeholder"))
+	birthdayEntry.SetPlaceHolder(locale.T("form.competitor.birthday_placeholder"))
 
 	ratingEntry := widget.NewEntry()
-	ratingEntry.SetPlaceHolder(locale.T("form.racer.rating_placeholder"))
+	ratingEntry.SetPlaceHolder(locale.T("form.competitor.rating_placeholder"))
 
-	if racer != nil {
+	if competitor != nil {
 		// Edit mode - populate fields
-		numberEntry.SetText(strconv.Itoa(racer.RacerNumber))
-		nameEntry.SetText(racer.FullName)
-		countryEntry.SetText(racer.Country)
-		cityEntry.SetText(racer.City)
-		if racer.Birthday != nil {
-			birthdayEntry.SetText(racer.Birthday.Format("02.01.2006"))
+		numberEntry.SetText(strconv.Itoa(competitor.RacerNumber))
+		nameEntry.SetText(competitor.FullName)
+		countryEntry.SetText(competitor.Country)
+		cityEntry.SetText(competitor.City)
+		if competitor.Birthday != nil {
+			birthdayEntry.SetText(competitor.Birthday.Format("02.01.2006"))
 		}
-		ratingEntry.SetText(strconv.Itoa(racer.Rating))
+		ratingEntry.SetText(strconv.Itoa(competitor.Rating))
 	}
 
 	// Create form with localized labels
 	form := widget.NewForm(
-		widget.NewFormItem(locale.T("form.racer.number"), numberEntry),
-		widget.NewFormItem(locale.T("form.racer.name"), nameEntry),
-		widget.NewFormItem(locale.T("form.racer.country"), countryEntry),
-		widget.NewFormItem(locale.T("form.racer.city"), cityEntry),
-		widget.NewFormItem(locale.T("form.racer.birthday"), birthdayEntry),
-		widget.NewFormItem(locale.T("form.racer.rating"), ratingEntry),
+		widget.NewFormItem(locale.T("form.competitor.number"), numberEntry),
+		widget.NewFormItem(locale.T("form.competitor.name"), nameEntry),
+		widget.NewFormItem(locale.T("form.competitor.country"), countryEntry),
+		widget.NewFormItem(locale.T("form.competitor.city"), cityEntry),
+		widget.NewFormItem(locale.T("form.competitor.birthday"), birthdayEntry),
+		widget.NewFormItem(locale.T("form.competitor.rating"), ratingEntry),
 	)
 
 	// Set minimum width for input fields via wrapper
@@ -363,12 +363,12 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 
 	// Re-create form with fields (Fyne quirk)
 	form = widget.NewForm(
-		widget.NewFormItem(locale.T("form.racer.number"), numberEntry),
-		widget.NewFormItem(locale.T("form.racer.name"), nameEntry),
-		widget.NewFormItem(locale.T("form.racer.country"), countryEntry),
-		widget.NewFormItem(locale.T("form.racer.city"), cityEntry),
-		widget.NewFormItem(locale.T("form.racer.birthday"), birthdayEntry),
-		widget.NewFormItem(locale.T("form.racer.rating"), ratingEntry),
+		widget.NewFormItem(locale.T("form.competitor.number"), numberEntry),
+		widget.NewFormItem(locale.T("form.competitor.name"), nameEntry),
+		widget.NewFormItem(locale.T("form.competitor.country"), countryEntry),
+		widget.NewFormItem(locale.T("form.competitor.city"), cityEntry),
+		widget.NewFormItem(locale.T("form.competitor.birthday"), birthdayEntry),
+		widget.NewFormItem(locale.T("form.competitor.rating"), ratingEntry),
 	)
 
 	// Create dialog without buttons first so we can reference it in the callback
@@ -379,7 +379,7 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 		// Parse values
 		number, err := strconv.Atoi(strings.TrimSpace(numberEntry.Text))
 		if err != nil {
-			errMsg := fmt.Sprintf("invalid racer number: %v (got: '%s')", err, numberEntry.Text)
+			errMsg := fmt.Sprintf("invalid competitor number: %v (got: '%s')", err, numberEntry.Text)
 			fmt.Println("ERROR:", errMsg)
 			dialog.ShowError(fmt.Errorf(errMsg), p.window)
 			return
@@ -394,10 +394,10 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 			}
 		}
 
-		var r *models.Racer
-		if racer != nil {
+		var r *models.Competitor
+		if competitor != nil {
 			// Update existing
-			r = racer
+			r = competitor
 			r.RacerNumber = number
 			r.FullName = strings.TrimSpace(nameEntry.Text)
 			r.Country = strings.TrimSpace(countryEntry.Text)
@@ -417,12 +417,12 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 				r.Birthday = nil
 			}
 			r.Rating = rating
-			if err := p.racerService.UpdateRacer(r); err != nil {
-				fmt.Println("ERROR updating racer:", err)
+			if err := p.competitorService.UpdateCompetitor(r); err != nil {
+				fmt.Println("ERROR updating competitor:", err)
 				dialog.ShowError(err, p.window)
 				return
 			}
-			p.statusLabel.SetText("Racer updated successfully")
+			p.statusLabel.SetText("Competitor updated successfully")
 
 			// Close dialog and refresh data in main thread
 			d.Hide()
@@ -431,7 +431,7 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 			})
 		} else {
 			// Create new
-			r = &models.Racer{
+			r = &models.Competitor{
 				RacerNumber: number,
 				FullName:    strings.TrimSpace(nameEntry.Text),
 				Country:     strings.TrimSpace(countryEntry.Text),
@@ -450,12 +450,12 @@ func (p *RacerPanel) showRacerDialog(title string, racer *models.Racer) {
 					return
 				}
 			}
-			if err := p.racerService.CreateRacer(r); err != nil {
-				fmt.Println("ERROR creating racer:", err)
+			if err := p.competitorService.CreateCompetitor(r); err != nil {
+				fmt.Println("ERROR creating competitor:", err)
 				dialog.ShowError(err, p.window)
 				return
 			}
-			p.statusLabel.SetText("Racer created successfully")
+			p.statusLabel.SetText("Competitor created successfully")
 
 			// Close dialog and refresh data in main thread
 			d.Hide()

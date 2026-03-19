@@ -13,24 +13,24 @@ import (
 	"trackpulse/internal/service"
 )
 
-// RacerModelPanel represents the Transponders management panel
-type RacerModelPanel struct {
-	racerModelService *service.RacerModelService
-	racerService      *service.RacerService
-	modelService      *service.RCModelService
-	content           *fyne.Container
-	table             *widget.Table
-	statusLabel       *widget.Label
-	window            fyne.Window          // Reference to window for dialogs
-	selectedID        string               // ID of selected racer model
-	allRacerModels    []models.RacerModel  // Cache of all racer models
-	allRacers         []models.Racer       // Cache of all racers
-	allModels         []models.RCModel     // Cache of all RC models
-	headers           []string             // Localized table headers
+// CompetitorModelPanel represents the Transponders management panel
+type CompetitorModelPanel struct {
+	competitorModelService *service.CompetitorModelService
+	competitorService      *service.CompetitorService
+	modelService           *service.RCModelService
+	content                *fyne.Container
+	table                  *widget.Table
+	statusLabel            *widget.Label
+	window                 fyne.Window          // Reference to window for dialogs
+	selectedID             string               // ID of selected racer model
+	allCompetitorModels    []models.CompetitorModel  // Cache of all racer models
+	allCompetitors         []models.Competitor       // Cache of all competitors
+	allModels              []models.RCModel          // Cache of all RC models
+	headers                []string                    // Localized table headers
 }
 
 // updateLocale updates all localized text in the panel
-func (p *RacerModelPanel) updateLocale() {
+func (p *CompetitorModelPanel) updateLocale() {
 	if p.statusLabel != nil {
 		p.statusLabel.SetText(locale.T("status.ready"))
 	}
@@ -54,24 +54,24 @@ func (p *RacerModelPanel) updateLocale() {
 }
 
 // Refresh refreshes the panel UI with current locale
-func (p *RacerModelPanel) Refresh() {
+func (p *CompetitorModelPanel) Refresh() {
 	p.updateLocale()
 }
 
-// NewRacerModelPanel creates a new transponder management panel
-func NewRacerModelPanel(racerModelService *service.RacerModelService, racerService *service.RacerService, modelService *service.RCModelService, window fyne.Window) *RacerModelPanel {
-	panel := &RacerModelPanel{
-		racerModelService: racerModelService,
-		racerService:      racerService,
-		modelService:      modelService,
-		window:            window,
+// NewCompetitorModelPanel creates a new transponder management panel
+func NewCompetitorModelPanel(competitorModelService *service.CompetitorModelService, competitorService *service.CompetitorService, modelService *service.RCModelService, window fyne.Window) *CompetitorModelPanel {
+	panel := &CompetitorModelPanel{
+		competitorModelService: competitorModelService,
+		competitorService:      competitorService,
+		modelService:           modelService,
+		window:                 window,
 	}
 	panel.buildUI()
 	return panel
 }
 
 // buildUI constructs the transponder panel UI
-func (p *RacerModelPanel) buildUI() *fyne.Container {
+func (p *CompetitorModelPanel) buildUI() *fyne.Container {
 	// Status label
 	p.statusLabel = widget.NewLabel(locale.T("status.ready"))
 
@@ -79,7 +79,7 @@ func (p *RacerModelPanel) buildUI() *fyne.Container {
 	toolbar := p.createToolbar()
 
 	// Table for displaying transponders
-	p.table = p.createRacerModelTable()
+	p.table = p.createCompetitorModelTable()
 
 	// Layout
 	content := container.NewBorder(
@@ -97,7 +97,7 @@ func (p *RacerModelPanel) buildUI() *fyne.Container {
 }
 
 // createToolbar creates the action toolbar
-func (p *RacerModelPanel) createToolbar() *widget.Toolbar {
+func (p *CompetitorModelPanel) createToolbar() *widget.Toolbar {
 	return widget.NewToolbar(
 		widget.NewToolbarAction(theme.ContentAddIcon(), func() {
 			p.showCreateDialog()
@@ -115,17 +115,17 @@ func (p *RacerModelPanel) createToolbar() *widget.Toolbar {
 	)
 }
 
-// createRacerModelTable creates the data table for transponders
-func (p *RacerModelPanel) createRacerModelTable() *widget.Table {
+// createCompetitorModelTable creates the data table for transponders
+func (p *CompetitorModelPanel) createCompetitorModelTable() *widget.Table {
 	// First load data
 	p.refreshData()
 
 	table := widget.NewTable(
 		func() (int, int) {
-			if len(p.allRacerModels) == 0 {
+			if len(p.allCompetitorModels) == 0 {
 				return 0, 0
 			}
-			return len(p.allRacerModels), 8 // rows, columns
+			return len(p.allCompetitorModels), 8 // rows, columns
 		},
 		func() fyne.CanvasObject {
 			label := widget.NewLabel("Template")
@@ -133,15 +133,15 @@ func (p *RacerModelPanel) createRacerModelTable() *widget.Table {
 			return label
 		},
 		func(i widget.TableCellID, o fyne.CanvasObject) {
-			if i.Row >= len(p.allRacerModels) {
+			if i.Row >= len(p.allCompetitorModels) {
 				o.(*widget.Label).SetText("")
 				return
 			}
-			rm := p.allRacerModels[i.Row]
+			rm := p.allCompetitorModels[i.Row]
 
 			// Find racer name
 			racerName := "-"
-			for _, r := range p.allRacers {
+			for _, r := range p.allCompetitors {
 				if r.ID == rm.RacerID {
 					racerName = r.FullName
 					break
@@ -221,9 +221,9 @@ func (p *RacerModelPanel) createRacerModelTable() *widget.Table {
 	table.SetColumnWidth(7, 150) // Updated At
 
 	table.OnSelected = func(id widget.TableCellID) {
-		if id.Row >= 0 && id.Row < len(p.allRacerModels) {
-			p.selectedID = p.allRacerModels[id.Row].ID
-			p.statusLabel.SetText(fmt.Sprintf("Selected: %s", p.allRacerModels[id.Row].TransponderNumber))
+		if id.Row >= 0 && id.Row < len(p.allCompetitorModels) {
+			p.selectedID = p.allCompetitorModels[id.Row].ID
+			p.statusLabel.SetText(fmt.Sprintf("Selected: %s", p.allCompetitorModels[id.Row].TransponderNumber))
 		}
 	}
 
@@ -231,11 +231,11 @@ func (p *RacerModelPanel) createRacerModelTable() *widget.Table {
 }
 
 // refreshData reloads the racer model data
-func (p *RacerModelPanel) refreshData() {
+func (p *CompetitorModelPanel) refreshData() {
 	if p.table != nil {
 		// Update data cache
 		var err error
-		p.allRacerModels, err = p.racerModelService.GetAllRacerModels()
+		p.allCompetitorModels, err = p.competitorModelService.GetAllCompetitorModels()
 		if err != nil {
 			fmt.Println("ERROR refreshing racer models:", err)
 			p.statusLabel.SetText("Error refreshing data")
@@ -243,7 +243,7 @@ func (p *RacerModelPanel) refreshData() {
 		}
 
 		// Load racers
-		p.allRacers, err = p.racerService.GetAllRacers()
+		p.allCompetitors, err = p.competitorService.GetAllRacers()
 		if err != nil {
 			fmt.Println("ERROR refreshing racers:", err)
 		}
@@ -256,30 +256,30 @@ func (p *RacerModelPanel) refreshData() {
 
 		// Force table to recalculate rows count and update cell contents
 		p.table.Refresh()
-		if len(p.allRacerModels) == 0 {
+		if len(p.allCompetitorModels) == 0 {
 			p.statusLabel.SetText("No transponders found")
 		} else {
-			p.statusLabel.SetText(fmt.Sprintf("Loaded %d transponders", len(p.allRacerModels)))
+			p.statusLabel.SetText(fmt.Sprintf("Loaded %d transponders", len(p.allCompetitorModels)))
 		}
 	}
 }
 
 // showCreateDialog shows the dialog for creating a new transponder
-func (p *RacerModelPanel) showCreateDialog() {
-	p.showRacerModelDialog("Create New Transponder", nil)
+func (p *CompetitorModelPanel) showCreateDialog() {
+	p.showCompetitorModelDialog("Create New Transponder", nil)
 }
 
 // showEditDialog shows the dialog for editing an existing transponder
-func (p *RacerModelPanel) showEditDialog() {
+func (p *CompetitorModelPanel) showEditDialog() {
 	if p.selectedID == "" {
 		dialog.ShowInformation(locale.T("common.info"), locale.T("info.select_first"), p.window)
 		return
 	}
 
 	// Look for selected racer model in cache
-	for _, rm := range p.allRacerModels {
+	for _, rm := range p.allCompetitorModels {
 		if rm.ID == p.selectedID {
-			p.showRacerModelDialog(locale.T("dialog.edit.title"), &rm)
+			p.showCompetitorModelDialog(locale.T("dialog.edit.title"), &rm)
 			return
 		}
 	}
@@ -288,17 +288,17 @@ func (p *RacerModelPanel) showEditDialog() {
 }
 
 // deleteSelected deletes the selected transponder
-func (p *RacerModelPanel) deleteSelected() {
+func (p *CompetitorModelPanel) deleteSelected() {
 	if p.selectedID == "" {
 		dialog.ShowInformation(locale.T("common.info"), locale.T("info.select_first"), p.window)
 		return
 	}
 
 	// Look for selected racer model in cache
-	var rmToDelete *models.RacerModel
-	for i, rm := range p.allRacerModels {
+	var rmToDelete *models.CompetitorModel
+	for i, rm := range p.allCompetitorModels {
 		if rm.ID == p.selectedID {
-			rmToDelete = &p.allRacerModels[i]
+			rmToDelete = &p.allCompetitorModels[i]
 			break
 		}
 	}
@@ -314,7 +314,7 @@ func (p *RacerModelPanel) deleteSelected() {
 		fmt.Sprintf(locale.T("dialog.delete.message"), rmToDelete.TransponderNumber),
 		func(confirmed bool) {
 			if confirmed {
-				if err := p.racerModelService.DeleteRacerModel(rmToDelete.ID); err != nil {
+				if err := p.competitorModelService.DeleteCompetitorModel(rmToDelete.ID); err != nil {
 					dialog.ShowError(err, p.window)
 					p.statusLabel.SetText(locale.T("status.delete_failed") + ": " + err.Error())
 				} else {
@@ -328,10 +328,10 @@ func (p *RacerModelPanel) deleteSelected() {
 	)
 }
 
-// showRacerModelDialog shows a dialog for creating or editing a transponder
-func (p *RacerModelPanel) showRacerModelDialog(title string, rm *models.RacerModel) {
+// showCompetitorModelDialog shows a dialog for creating or editing a transponder
+func (p *CompetitorModelPanel) showCompetitorModelDialog(title string, rm *models.CompetitorModel) {
 	// Get all racers
-	allRacers, err := p.racerService.GetAllRacers()
+	allRacers, err := p.competitorService.GetAllRacers()
 	if err != nil {
 		fmt.Println("ERROR getting racers:", err)
 	}
@@ -436,7 +436,7 @@ func (p *RacerModelPanel) showRacerModelDialog(title string, rm *models.RacerMod
 		racerID := racerOptions[racerSelect.Selected]
 		modelID := modelOptions[modelSelect.Selected]
 
-		var newRM *models.RacerModel
+		var newRM *models.CompetitorModel
 		if rm != nil {
 			// Update existing
 			newRM = rm
@@ -446,7 +446,7 @@ func (p *RacerModelPanel) showRacerModelDialog(title string, rm *models.RacerMod
 			newRM.TransponderType = transponderTypeEntry.Text
 			newRM.IsActive = activeCheck.Checked
 
-			if err := p.racerModelService.UpdateRacerModel(newRM); err != nil {
+			if err := p.competitorModelService.UpdateCompetitorModel(newRM); err != nil {
 				fmt.Println("ERROR updating transponder:", err)
 				dialog.ShowError(err, p.window)
 				return
@@ -460,7 +460,7 @@ func (p *RacerModelPanel) showRacerModelDialog(title string, rm *models.RacerMod
 			})
 		} else {
 			// Create new
-			newRM = &models.RacerModel{
+			newRM = &models.CompetitorModel{
 				RacerID:           racerID,
 				RCModelID:         modelID,
 				TransponderNumber: transponderNumber,
@@ -468,7 +468,7 @@ func (p *RacerModelPanel) showRacerModelDialog(title string, rm *models.RacerMod
 				IsActive:          activeCheck.Checked,
 			}
 
-			if err := p.racerModelService.CreateRacerModel(newRM); err != nil {
+			if err := p.competitorModelService.CreateCompetitorModel(newRM); err != nil {
 				fmt.Println("ERROR creating transponder:", err)
 				dialog.ShowError(err, p.window)
 				return

@@ -15,15 +15,15 @@ import (
 type App struct {
 	fyneApp         fyne.App
 	mainWindow      fyne.Window
-	racerService    *service.RacerService
+	competitorService    *service.CompetitorService
 	modelService    *service.RCModelService
 	settingsService *service.SettingsService
-	racerModelService *service.RacerModelService
+	competitorModelService *service.CompetitorModelService
 	config          *Config
 	tabs            *container.AppTabs
-	racerPanel      *RacerPanel
+	competitorPanel      *CompetitorPanel
 	modelPanel      *ModelPanel
-	racerModelPanel *RacerModelPanel
+	competitorModelPanel *CompetitorModelPanel
 }
 
 // Config holds UI configuration
@@ -33,17 +33,17 @@ type Config struct {
 }
 
 // NewApp creates a new TrackPulse application
-func NewApp(racerService *service.RacerService, modelService *service.RCModelService, settingsService *service.SettingsService, racerModelService *service.RacerModelService, language string) *App {
+func NewApp(competitorService *service.CompetitorService, modelService *service.RCModelService, settingsService *service.SettingsService, competitorModelService *service.CompetitorModelService, language string) *App {
 	fyneApp := app.New()
 	mainWindow := fyneApp.NewWindow("TrackPulse")
 
 	return &App{
 		fyneApp:           fyneApp,
 		mainWindow:        mainWindow,
-		racerService:      racerService,
+		competitorService:      competitorService,
 		modelService:      modelService,
 		settingsService:   settingsService,
-		racerModelService: racerModelService,
+		competitorModelService: competitorModelService,
 		config: &Config{
 			Language: language,
 			Title:    "TrackPulse",
@@ -62,10 +62,10 @@ func (a *App) Run() {
 func (a *App) createMainContent() *container.AppTabs {
 	a.tabs = container.NewAppTabs(
 		container.NewTabItem(locale.T("tab.monitoring"), a.createMonitoringTab()),
-		container.NewTabItem(locale.T("tab.racers"), a.createRacersTab()),
+		container.NewTabItem(locale.T("tab.competitors"), a.createCompetitorsTab()),
 		container.NewTabItem(locale.T("tab.models"), a.createModelsTab()),
 		container.NewTabItem(locale.T("tab.transponders"), a.createTranspondersTab()),
-		container.NewTabItem(locale.T("tab.races"), a.createRacesTab()),
+		container.NewTabItem(locale.T("tab.competitions"), a.createCompetitionsTab()),
 		container.NewTabItem(locale.T("tab.logs"), a.createLogsTab()),
 		container.NewTabItem(locale.T("tab.settings"), a.createSettingsTab()),
 	)
@@ -81,10 +81,10 @@ func (a *App) createMonitoringTab() fyne.CanvasObject {
 	return container.NewCenter(content)
 }
 
-// createRacersTab creates the Racers management tab
-func (a *App) createRacersTab() fyne.CanvasObject {
-	a.racerPanel = NewRacerPanel(a.racerService, a.mainWindow)
-	return a.racerPanel.content
+// createCompetitorsTab creates the Competitors management tab
+func (a *App) createCompetitorsTab() fyne.CanvasObject {
+	a.competitorPanel = NewCompetitorPanel(a.competitorService, a.mainWindow)
+	return a.competitorPanel.content
 }
 
 // createModelsTab creates the Models management tab
@@ -95,13 +95,13 @@ func (a *App) createModelsTab() fyne.CanvasObject {
 
 // createTranspondersTab creates the Transponders management tab
 func (a *App) createTranspondersTab() fyne.CanvasObject {
-	a.racerModelPanel = NewRacerModelPanel(a.racerModelService, a.racerService, a.modelService, a.mainWindow)
-	return a.racerModelPanel.content
+	a.competitorModelPanel = NewCompetitorModelPanel(a.competitorModelService, a.competitorService, a.modelService, a.mainWindow)
+	return a.competitorModelPanel.content
 }
 
-// createRacesTab creates the Races management tab
-func (a *App) createRacesTab() fyne.CanvasObject {
-	content := widget.NewLabel(locale.T("tab.races"))
+// createCompetitionsTab creates the Competitions management tab
+func (a *App) createCompetitionsTab() fyne.CanvasObject {
+	content := widget.NewLabel(locale.T("tab.competitions"))
 	content.Alignment = fyne.TextAlignCenter
 	return container.NewCenter(content)
 }
@@ -185,13 +185,13 @@ func (a *App) refreshUI() {
 		case 0:
 			tab.Text = locale.T("tab.monitoring")
 		case 1:
-			tab.Text = locale.T("tab.racers")
+			tab.Text = locale.T("tab.competitors")
 		case 2:
 			tab.Text = locale.T("tab.models")
 		case 3:
 			tab.Text = locale.T("tab.transponders")
 		case 4:
-			tab.Text = locale.T("tab.races")
+			tab.Text = locale.T("tab.competitions")
 		case 5:
 			tab.Text = locale.T("tab.logs")
 		case 6:
@@ -202,14 +202,14 @@ func (a *App) refreshUI() {
 	a.tabs.Refresh()
 
 	// Refresh panels only if they have been created
-	if a.racerPanel != nil {
-		a.racerPanel.Refresh()
+	if a.competitorPanel != nil {
+		a.competitorPanel.Refresh()
 	}
 	if a.modelPanel != nil {
 		a.modelPanel.Refresh()
 	}
-	if a.racerModelPanel != nil {
-		a.racerModelPanel.Refresh()
+	if a.competitorModelPanel != nil {
+		a.competitorModelPanel.Refresh()
 	}
 	
 	// Also update settings tab content
