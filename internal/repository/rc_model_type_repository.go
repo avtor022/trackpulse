@@ -45,11 +45,13 @@ func (r *RCModelTypeRepository) GetAll() ([]models.RCModelType, error) {
 			return nil, fmt.Errorf("failed to scan model type: %w", err)
 		}
 
-		if t, err := time.Parse(time.RFC3339, createdAtStr); err == nil {
-			t.CreatedAt = t
+		createdAtTime, err := time.Parse(time.RFC3339, createdAtStr)
+		if err == nil {
+			t.CreatedAt = createdAtTime
 		}
-		if t, err := time.Parse(time.RFC3339, updatedAtStr); err == nil {
-			t.UpdatedAt = t
+		updatedAtTime, err := time.Parse(time.RFC3339, updatedAtStr)
+		if err == nil {
+			t.UpdatedAt = updatedAtTime
 		}
 
 		types = append(types, t)
@@ -81,11 +83,13 @@ func (r *RCModelTypeRepository) GetByName(name string) (*models.RCModelType, err
 		return nil, fmt.Errorf("failed to get model type: %w", err)
 	}
 
-	if t, err := time.Parse(time.RFC3339, createdAtStr); err == nil {
-		t.CreatedAt = t
+	createdAtTime, err := time.Parse(time.RFC3339, createdAtStr)
+	if err == nil {
+		t.CreatedAt = createdAtTime
 	}
-	if t, err := time.Parse(time.RFC3339, updatedAtStr); err == nil {
-		t.UpdatedAt = t
+	updatedAtTime, err := time.Parse(time.RFC3339, updatedAtStr)
+	if err == nil {
+		t.UpdatedAt = updatedAtTime
 	}
 
 	return &t, nil
