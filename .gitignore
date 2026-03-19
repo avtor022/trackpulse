@@ -1,7 +1,4 @@
 ```
-# Logs and temp files
+# Logs
 *.log
-
-# Build artifacts
-build.log
 ```

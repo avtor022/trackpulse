@@ -1011,9 +1011,6 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 
 	if model != nil {
 		// Edit mode - populate fields that are not select widgets
-		if modelTypeEntry != nil {
-			modelTypeEntry.SetText(model.ModelType)
-		}
 		if motorTypeEntry != nil && model.MotorType != "" {
 			motorTypeEntry.SetText(model.MotorType)
 		}
@@ -1073,7 +1070,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			dialog.ShowError(fmt.Errorf(locale.T("error.required.scale")), p.window)
 			return
 		}
-		if modelTypeEntry.Text == "" {
+		if modelTypeButton.Text == "" || modelTypeButton.Text == locale.T("common.select_one") {
 			dialog.ShowError(fmt.Errorf(locale.T("error.required.type")), p.window)
 			return
 		}
@@ -1085,7 +1082,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			m.Brand = brand
 			m.ModelName = modelName
 			m.Scale = scale
-			m.ModelType = modelTypeEntry.Text
+			m.ModelType = modelTypeButton.Text
 			m.MotorType = motorTypeEntry.Text
 			m.DriveType = driveTypeEntry.Text
 			if err := p.modelService.UpdateModel(m); err != nil {
@@ -1106,7 +1103,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 				Brand:     brand,
 				ModelName: modelName,
 				Scale:     scale,
-				ModelType: modelTypeEntry.Text,
+				ModelType: modelTypeButton.Text,
 				MotorType: motorTypeEntry.Text,
 				DriveType: driveTypeEntry.Text,
 			}
