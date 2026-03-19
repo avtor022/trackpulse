@@ -56,6 +56,8 @@
     "dialog.new_brand.error_exists": "Бренд уже существует",
     "dialog.new_competitor.title": "Новый участник",
     "dialog.new_model.title": "Новая модель",
+    "dialog.new_transponder.title": "Новый транспондер",
+    "dialog.new_rc_model.title": "Новая RC модель",
     "dialog.new_model.brand_label": "Бренд:",
     "dialog.new_model.name_label": "Название модели:",
     "dialog.new_model.placeholder": "Введите название модели",

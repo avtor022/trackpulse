@@ -56,6 +56,8 @@
     "dialog.new_brand.error_exists": "Brand already exists",
     "dialog.new_competitor.title": "New Competitor",
     "dialog.new_model.title": "New Model",
+    "dialog.new_transponder.title": "New Transponder",
+    "dialog.new_rc_model.title": "New RC Model",
     "dialog.new_model.brand_label": "Brand:",
     "dialog.new_model.name_label": "Model Name:",
     "dialog.new_model.placeholder": "Enter model name",

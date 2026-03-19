@@ -266,7 +266,7 @@ func (p *CompetitorModelPanel) refreshData() {
 
 // showCreateDialog shows the dialog for creating a new transponder
 func (p *CompetitorModelPanel) showCreateDialog() {
-	p.showCompetitorModelDialog("Create New Transponder", nil)
+	p.showCompetitorModelDialog(locale.T("dialog.new_transponder.title"), nil)
 }
 
 // showEditDialog shows the dialog for editing an existing transponder

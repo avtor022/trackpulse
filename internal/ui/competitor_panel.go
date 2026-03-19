@@ -239,7 +239,7 @@ func (p *CompetitorPanel) refreshData() {
 
 // showCreateDialog shows the dialog for creating a new competitor
 func (p *CompetitorPanel) showCreateDialog() {
-	p.showRacerDialog(locale.T("dialog.new_racer.title"), nil)
+	p.showRacerDialog(locale.T("dialog.new_competitor.title"), nil)
 }
 
 // showEditDialog shows the dialog for editing an existing competitor

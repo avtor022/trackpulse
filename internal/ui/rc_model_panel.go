@@ -262,7 +262,7 @@ func (p *ModelPanel) refreshData() {
 
 // showCreateDialog shows the dialog for creating a new model
 func (p *ModelPanel) showCreateDialog() {
-	p.showModelDialog("Create New RC Model", nil)
+	p.showModelDialog(locale.T("dialog.new_rc_model.title"), nil)
 }
 
 // showEditDialog shows the dialog for editing an existing model
