@@ -33,6 +33,8 @@ type AthleteModel struct {
 	ID               string    `json:"id" db:"id"`
 	AthleteID        string    `json:"athlete_id" db:"athlete_id"`
 	RCModelID        string    `json:"rc_model_id" db:"rc_model_id"`
+	AthleteModelNumber string   `json:"athlete_model_number" db:"athlete_model_number"`
+	AthleteModelType  string    `json:"athlete_model_type" db:"athlete_model_type"`
 	TransponderNumber string   `json:"transponder_number" db:"transponder_number"`
 	TransponderType  string    `json:"transponder_type" db:"transponder_type"`
 	IsActive         bool      `json:"is_active" db:"is_active"`

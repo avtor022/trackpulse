@@ -142,7 +142,7 @@ func (p *AthleteModelPanel) createAthleteModelTable() *widget.Table {
 			// Find racer name
 			racerName := "-"
 			for _, r := range p.allAthletes {
-				if r.ID == rm.RacerID {
+				if r.ID == rm.AthleteID {
 					racerName = r.FullName
 					break
 				}
@@ -243,9 +243,9 @@ func (p *AthleteModelPanel) refreshData() {
 		}
 
 		// Load racers
-		p.allAthletes, err = p.athleteService.GetAllRacers()
+		p.allAthletes, err = p.athleteService.GetAllAthletes()
 		if err != nil {
-			fmt.Println("ERROR refreshing racers:", err)
+			fmt.Println("ERROR refreshing athletes:", err)
 		}
 
 		// Load models
@@ -331,9 +331,9 @@ func (p *AthleteModelPanel) deleteSelected() {
 // showRacerModelDialog shows a dialog for creating or editing a AthleteModel
 func (p *AthleteModelPanel) showRacerModelDialog(title string, rm *models.AthleteModel) {
 	// Get all racers
-	allAthletes, err := p.athleteService.GetAllRacers()
+	allAthletes, err := p.athleteService.GetAllAthletes()
 	if err != nil {
-		fmt.Println("ERROR getting racers:", err)
+		fmt.Println("ERROR getting athletes:", err)
 	}
 
 	// Get all models
@@ -385,7 +385,7 @@ func (p *AthleteModelPanel) showRacerModelDialog(title string, rm *models.Athlet
 
 		// Select racer
 		for display, id := range racerOptions {
-			if id == rm.RacerID {
+			if id == rm.AthleteID {
 				racerSelect.SetSelected(display)
 				break
 			}
@@ -440,7 +440,7 @@ func (p *AthleteModelPanel) showRacerModelDialog(title string, rm *models.Athlet
 		if rm != nil {
 			// Update existing
 			newRM = rm
-			newRM.RacerID = racerID
+			newRM.AthleteID = racerID
 			newRM.RCModelID = modelID
 			newRM.AthleteModelNumber = AthleteModelNumber
 			newRM.AthleteModelType = AthleteModelTypeEntry.Text
@@ -461,8 +461,8 @@ func (p *AthleteModelPanel) showRacerModelDialog(title string, rm *models.Athlet
 		} else {
 			// Create new
 			newRM = &models.AthleteModel{
-				RacerID:           racerID,
-				RCModelID:         modelID,
+				AthleteID:        racerID,
+				RCModelID:        modelID,
 				AthleteModelNumber: AthleteModelNumber,
 				AthleteModelType:   AthleteModelTypeEntry.Text,
 				IsActive:          activeCheck.Checked,
