@@ -562,7 +562,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 	}
 
 	// Use the button as the brand widget
-	brandWidget := brandButton
+	var brandWidget = brandButton
 
 	// Create widget for model name - simple text entry
 	p.modelNameEntry = widget.NewEntry()
@@ -573,7 +573,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 		p.modelNameEntry.SetText(model.ModelName)
 	}
 
-	modelNameWidget := p.modelNameEntry
+	var modelNameWidget = p.modelNameEntry
 
 	// Function to show scale selection popup with delete buttons (similar to brand)
 	var showScalePopup func()
@@ -785,7 +785,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 		p.modelNameEntry.SetText(model.ModelName)
 	}
 
-	modelNameWidget := p.modelNameEntry
+	modelNameWidget = p.modelNameEntry
 
 	modelTypeEntry := widget.NewEntry()
 	modelTypeEntry.SetPlaceHolder(locale.T("form.model.type_placeholder"))
