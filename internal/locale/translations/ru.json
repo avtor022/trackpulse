@@ -189,5 +189,8 @@
     "form.AthleteModel.active": "Активен",
     "form.AthleteModel.select_athlete": "Выберите спортсмена",
     "form.AthleteModel.select_model": "Выберите модель",
-    "error.required.AthleteModel_number": "Номер транспондера обязателен"
+    "error.required.AthleteModel_number": "Номер транспондера обязателен",
+    "status.no_athletemodels": "Транспондеры спортсменов не найдены",
+    "status.loaded_athletemodels": "Загружено транспондеров спортсменов: %d",
+    "dialog.new_athletemodel.title": "Новый транспондер спортсмена"
 }

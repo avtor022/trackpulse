@@ -257,16 +257,16 @@ func (p *AthleteModelPanel) refreshData() {
 		// Force table to recalculate rows count and update cell contents
 		p.table.Refresh()
 		if len(p.allAthleteModels) == 0 {
-			p.statusLabel.SetText("No AthleteModels found")
+			p.statusLabel.SetText(locale.T("status.no_athletemodels"))
 		} else {
-			p.statusLabel.SetText(fmt.Sprintf("Loaded %d AthleteModels", len(p.allAthleteModels)))
+			p.statusLabel.SetText(fmt.Sprintf(locale.T("status.loaded_athletemodels"), len(p.allAthleteModels)))
 		}
 	}
 }
 
 // showCreateDialog shows the dialog for creating a new AthleteModel
 func (p *AthleteModelPanel) showCreateDialog() {
-	p.showRacerModelDialog("Create New AthleteModel", nil)
+	p.showRacerModelDialog(locale.T("dialog.new_athletemodel.title"), nil)
 }
 
 // showEditDialog shows the dialog for editing an existing AthleteModel

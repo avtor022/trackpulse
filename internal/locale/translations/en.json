@@ -189,5 +189,8 @@
     "form.AthleteModel.active": "Is Active",
     "form.AthleteModel.select_athlete": "Select an athlete",
     "form.AthleteModel.select_model": "Select a model",
-    "error.required.AthleteModel_number": "Transponder number is required"
+    "error.required.AthleteModel_number": "Transponder number is required",
+    "status.no_athletemodels": "No athlete models found",
+    "status.loaded_athletemodels": "Loaded %d athlete models",
+    "dialog.new_athletemodel.title": "New Athlete Model"
 }
