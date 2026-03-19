@@ -64,11 +64,13 @@ func main() {
 	scaleRepo := repository.NewRCModelScaleRepository(db.DB)
 	typeRepo := repository.NewRCModelTypeRepository(db.DB)
 	settingsRepo := repository.NewSettingsRepository(db.DB)
+	racerModelRepo := repository.NewRacerModelRepository(db.DB)
 
 	// Initialize services
 	racerService := service.NewRacerService(racerRepo)
 	modelService := service.NewRCModelService(modelRepo, brandRepo, scaleRepo, typeRepo)
 	settingsService := service.NewSettingsService(settingsRepo)
+	racerModelService := service.NewRacerModelService(racerModelRepo, racerRepo, modelRepo)
 
 	// Load locale from settings
 	savedLocale, err := settingsService.GetLocale()
@@ -84,6 +86,6 @@ func main() {
 	log.Info("TrackPulse initialization complete!")
 
 	// Start UI
-	uiApp := ui.NewApp(racerService, modelService, settingsService, savedLocale)
+	uiApp := ui.NewApp(racerService, modelService, settingsService, racerModelService, savedLocale)
 	uiApp.Run()
 }

@@ -162,5 +162,19 @@
     "error.not_found": "Не найдено",
     "settings.language": "Язык",
     "settings.language.en": "Английский",
-    "settings.language.ru": "Русский"
+    "settings.language.ru": "Русский",
+    "transponder.header.number": "Номер транспондера",
+    "transponder.header.type": "Тип",
+    "transponder.header.active": "Активен",
+    "form.transponder.racer": "Гонщик",
+    "form.transponder.model": "Модель",
+    "form.transponder.number": "Номер транспондера",
+    "form.transponder.number_placeholder": "напр., 12345",
+    "form.transponder.type": "Тип транспондера",
+    "form.transponder.active": "Активен",
+    "form.transponder.select_racer": "Выберите гонщика",
+    "form.transponder.select_model": "Выберите модель",
+    "error.required.racer": "Гонщик обязателен",
+    "error.required.model": "Модель обязательна",
+    "error.required.transponder_number": "Номер транспондера обязателен"
 }
