@@ -80,7 +80,7 @@ func (p *CompetitorPanel) buildUI() *fyne.Container {
 	p.toolbar = p.createToolbar()
 
 	// Table for displaying competitors
-	p.table = p.createRacerTable()
+	p.table = p.createCompetitorTable()
 
 	// Initialize headers
 	p.updateLocale()
@@ -120,9 +120,9 @@ func (p *CompetitorPanel) createToolbar() *widget.Toolbar {
 }
 
 // createRacerTable creates the data table for competitors
-func (p *CompetitorPanel) createRacerTable() *widget.Table {
+func (p *CompetitorPanel) createCompetitorTable() *widget.Table {
 	// First load data
-	p.allCompetitors, _ = p.competitorService.GetAllRacers()
+	p.allCompetitors, _ = p.competitorService.GetAllCompetitors()
 
 	table := widget.NewTable(
 		func() (int, int) {
@@ -146,7 +146,7 @@ func (p *CompetitorPanel) createRacerTable() *widget.Table {
 			case 0:
 				o.(*widget.Label).SetText(competitor.ID)
 			case 1:
-				o.(*widget.Label).SetText(strconv.Itoa(competitor.RacerNumber))
+				o.(*widget.Label).SetText(strconv.Itoa(competitor.CompetitorNumber))
 			case 2:
 				o.(*widget.Label).SetText(competitor.FullName)
 			case 3:
@@ -221,7 +221,7 @@ func (p *CompetitorPanel) refreshData() {
 	if p.table != nil {
 		// Update data cache
 		var err error
-		p.allCompetitors, err = p.competitorService.GetAllRacers()
+		p.allCompetitors, err = p.competitorService.GetAllCompetitors()
 		if err != nil {
 			fmt.Println("ERROR refreshing data:", err)
 			p.statusLabel.SetText("Error refreshing data")
@@ -287,7 +287,7 @@ func (p *CompetitorPanel) deleteSelected() {
 		fmt.Sprintf(locale.T("dialog.delete.message"), racerToDelete.FullName),
 		func(confirmed bool) {
 			if confirmed {
-				if err := p.competitorService.DeleteRacer(racerToDelete.ID); err != nil {
+				if err := p.competitorService.DeleteCompetitor(racerToDelete.ID); err != nil {
 					dialog.ShowError(err, p.window)
 					p.statusLabel.SetText(locale.T("status.delete_failed") + ": " + err.Error())
 				} else {
@@ -324,7 +324,7 @@ func (p *CompetitorPanel) showRacerDialog(title string, competitor *models.Compe
 
 	if competitor != nil {
 		// Edit mode - populate fields
-		numberEntry.SetText(strconv.Itoa(competitor.RacerNumber))
+		numberEntry.SetText(strconv.Itoa(competitor.CompetitorNumber))
 		nameEntry.SetText(competitor.FullName)
 		countryEntry.SetText(competitor.Country)
 		cityEntry.SetText(competitor.City)
@@ -398,7 +398,7 @@ func (p *CompetitorPanel) showRacerDialog(title string, competitor *models.Compe
 		if competitor != nil {
 			// Update existing
 			r = competitor
-			r.RacerNumber = number
+			r.CompetitorNumber = number
 			r.FullName = strings.TrimSpace(nameEntry.Text)
 			r.Country = strings.TrimSpace(countryEntry.Text)
 			r.City = strings.TrimSpace(cityEntry.Text)
@@ -432,11 +432,11 @@ func (p *CompetitorPanel) showRacerDialog(title string, competitor *models.Compe
 		} else {
 			// Create new
 			r = &models.Competitor{
-				RacerNumber: number,
-				FullName:    strings.TrimSpace(nameEntry.Text),
-				Country:     strings.TrimSpace(countryEntry.Text),
-				City:        strings.TrimSpace(cityEntry.Text),
-				Rating:      rating,
+				CompetitorNumber: number,
+				FullName:         strings.TrimSpace(nameEntry.Text),
+				Country:          strings.TrimSpace(countryEntry.Text),
+				City:             strings.TrimSpace(cityEntry.Text),
+				Rating:           rating,
 			}
 			if birthdayEntry.Text != "" {
 				birthdayStr := strings.TrimSpace(birthdayEntry.Text)
