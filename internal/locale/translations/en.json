@@ -209,5 +209,13 @@
     "status.no_competitions": "No competitions found",
     "status.loaded_competitions": "Loaded %d competitions",
     "error.required.title": "Competition title is required",
-    "error.required.type": "Competition type is required"
+    "error.required.type": "Competition type is required",
+    "competition.type.qualifying": "Qualifying",
+    "competition.type.final": "Final",
+    "competition.type.practice": "Practice",
+    "competition.type.heat": "Heat",
+    "competition.status.scheduled": "Scheduled",
+    "competition.status.running": "Running",
+    "competition.status.finished": "Finished",
+    "competition.status.cancelled": "Cancelled"
 }

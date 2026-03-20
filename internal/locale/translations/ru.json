@@ -209,5 +209,13 @@
     "status.no_competitions": "Соревнования не найдены",
     "status.loaded_competitions": "Загружено соревнований: %d",
     "error.required.title": "Название соревнования обязательно",
-    "error.required.type": "Тип соревнования обязателен"
+    "error.required.type": "Тип соревнования обязателен",
+    "competition.type.qualifying": "Квалификация",
+    "competition.type.final": "Финал",
+    "competition.type.practice": "Практика",
+    "competition.type.heat": "Заезд",
+    "competition.status.scheduled": "Запланировано",
+    "competition.status.running": "Идёт",
+    "competition.status.finished": "Завершено",
+    "competition.status.cancelled": "Отменено"
 }

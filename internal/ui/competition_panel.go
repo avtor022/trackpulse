@@ -332,10 +332,41 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 	titleEntry := widget.NewEntry()
 	titleEntry.SetPlaceHolder(locale.T("form.competition.title_placeholder"))
 
-	// Competition type select
-	competitionTypes := []string{"qualifying", "final", "practice", "heat"}
+	// Competition type select with localized options
+	competitionTypes := []string{
+		locale.T("competition.type.qualifying"),
+		locale.T("competition.type.final"),
+		locale.T("competition.type.practice"),
+		locale.T("competition.type.heat"),
+	}
 	typeSelect := widget.NewSelect(competitionTypes, nil)
 	typeSelect.PlaceHolder = locale.T("form.competition.type_placeholder")
+
+	// Map display names to internal values
+	typeMap := map[string]string{
+		locale.T("competition.type.qualifying"): "qualifying",
+		locale.T("competition.type.final"):      "final",
+		locale.T("competition.type.practice"):   "practice",
+		locale.T("competition.type.heat"):       "heat",
+	}
+
+	// Status select with localized options
+	statuses := []string{
+		locale.T("competition.status.scheduled"),
+		locale.T("competition.status.running"),
+		locale.T("competition.status.finished"),
+		locale.T("competition.status.cancelled"),
+	}
+	statusSelect := widget.NewSelect(statuses, nil)
+	statusSelect.PlaceHolder = locale.T("form.competition.status_placeholder")
+
+	// Map display names to internal values
+	statusMap := map[string]string{
+		locale.T("competition.status.scheduled"): "scheduled",
+		locale.T("competition.status.running"):   "running",
+		locale.T("competition.status.finished"):  "finished",
+		locale.T("competition.status.cancelled"): "cancelled",
+	}
 
 	// Model type entry
 	modelTypeEntry := widget.NewEntry()
@@ -357,15 +388,13 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 	timeLimitEntry := widget.NewEntry()
 	timeLimitEntry.SetPlaceHolder(locale.T("form.competition.time_limit_placeholder"))
 
-	// Status select
-	statuses := []string{"scheduled", "running", "finished", "cancelled"}
-	statusSelect := widget.NewSelect(statuses, nil)
-	statusSelect.PlaceHolder = locale.T("form.competition.status_placeholder")
-
 	if competition != nil {
 		// Edit mode - populate fields
 		titleEntry.SetText(competition.CompetitionTitle)
-		typeSelect.SetSelected(competition.CompetitionType)
+		// Map internal value to localized display
+		if localizedType, ok := reverseMap(typeMap, competition.CompetitionType); ok {
+			typeSelect.SetSelected(localizedType)
+		}
 		modelTypeEntry.SetText(competition.ModelType)
 		modelScaleEntry.SetText(competition.ModelScale)
 		trackEntry.SetText(competition.TrackName)
@@ -375,7 +404,10 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 		if competition.TimeLimitMinutes != nil {
 			timeLimitEntry.SetText(strconv.Itoa(*competition.TimeLimitMinutes))
 		}
-		statusSelect.SetSelected(competition.Status)
+		// Map internal status to localized display
+		if localizedStatus, ok := reverseMap(statusMap, competition.Status); ok {
+			statusSelect.SetSelected(localizedStatus)
+		}
 	}
 
 	// Create form with localized labels
@@ -402,11 +434,15 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 			return
 		}
 
-		// Validate type
+		// Validate type and map to internal value
 		compType := typeSelect.Selected
 		if compType == "" {
 			dialog.ShowError(fmt.Errorf(locale.T("error.required.type")), p.window)
 			return
+		}
+		// Map localized display to internal value
+		if mappedType, ok := typeMap[compType]; ok {
+			compType = mappedType
 		}
 
 		// Parse lap count
@@ -431,6 +467,12 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 			timeLimitMinutes = &tlm
 		}
 
+		// Map status to internal value
+		statusValue := statusSelect.Selected
+		if mappedStatus, ok := statusMap[statusValue]; ok {
+			statusValue = mappedStatus
+		}
+
 		var newC *models.Competition
 		if competition != nil {
 			// Update existing
@@ -442,7 +484,7 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 			newC.TrackName = strings.TrimSpace(trackEntry.Text)
 			newC.LapCountTarget = lapCountTarget
 			newC.TimeLimitMinutes = timeLimitMinutes
-			newC.Status = statusSelect.Selected
+			newC.Status = statusValue
 
 			if err := p.competitionService.UpdateCompetition(newC); err != nil {
 				fmt.Println("ERROR updating competition:", err)
@@ -466,7 +508,7 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 				TrackName:        strings.TrimSpace(trackEntry.Text),
 				LapCountTarget:   lapCountTarget,
 				TimeLimitMinutes: timeLimitMinutes,
-				Status:           statusSelect.Selected,
+				Status:           statusValue,
 			}
 
 			if err := p.competitionService.CreateCompetition(newC); err != nil {
@@ -513,4 +555,14 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 
 	// Resize the dialog window
 	d.Resize(fyne.NewSize(dialogWidth, dialogHeight))
+}
+
+// reverseMap finds the key by value in a map
+func reverseMap(m map[string]string, value string) (string, bool) {
+	for k, v := range m {
+		if v == value {
+			return k, true
+		}
+	}
+	return "", false
 }
