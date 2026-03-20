@@ -347,7 +347,7 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 		locale.T("competition.type.heat"),
 	}
 	typeSelect := widget.NewSelect(competitionTypes, nil)
-	typeSelect.PlaceHolder = locale.T("form.competition.type_placeholder")
+	typeSelect.PlaceHolder = locale.T("common.select_one")
 
 	// Map display names to internal values
 	typeMap := map[string]string{
@@ -365,7 +365,7 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 		locale.T("competition.status.cancelled"),
 	}
 	statusSelect := widget.NewSelect(statuses, nil)
-	statusSelect.PlaceHolder = locale.T("form.competition.status_placeholder")
+	statusSelect.PlaceHolder = locale.T("common.select_one")
 
 	// Map display names to internal values
 	statusMap := map[string]string{
