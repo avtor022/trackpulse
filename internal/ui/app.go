@@ -19,11 +19,13 @@ type App struct {
 	modelService    *service.RCModelService
 	settingsService *service.SettingsService
 	competitorModelService *service.CompetitorModelService
+	competitionService *service.CompetitionService
 	config          *Config
 	tabs            *container.AppTabs
 	competitorPanel      *CompetitorPanel
 	modelPanel      *ModelPanel
 	competitorModelPanel *CompetitorModelPanel
+	competitionPanel *CompetitionPanel
 }
 
 // Config holds UI configuration
@@ -33,7 +35,7 @@ type Config struct {
 }
 
 // NewApp creates a new TrackPulse application
-func NewApp(competitorService *service.CompetitorService, modelService *service.RCModelService, settingsService *service.SettingsService, competitorModelService *service.CompetitorModelService, language string) *App {
+func NewApp(competitorService *service.CompetitorService, modelService *service.RCModelService, settingsService *service.SettingsService, competitorModelService *service.CompetitorModelService, competitionService *service.CompetitionService, language string) *App {
 	fyneApp := app.New()
 	mainWindow := fyneApp.NewWindow("TrackPulse")
 
@@ -44,6 +46,7 @@ func NewApp(competitorService *service.CompetitorService, modelService *service.
 		modelService:      modelService,
 		settingsService:   settingsService,
 		competitorModelService: competitorModelService,
+		competitionService: competitionService,
 		config: &Config{
 			Language: language,
 			Title:    "TrackPulse",
@@ -101,9 +104,8 @@ func (a *App) createTranspondersTab() fyne.CanvasObject {
 
 // createCompetitionsTab creates the Competitions management tab
 func (a *App) createCompetitionsTab() fyne.CanvasObject {
-	content := widget.NewLabel(locale.T("tab.competitions"))
-	content.Alignment = fyne.TextAlignCenter
-	return container.NewCenter(content)
+	a.competitionPanel = NewCompetitionPanel(a.competitionService, a.mainWindow)
+	return a.competitionPanel.content
 }
 
 // createLogsTab creates the Logs viewing tab
@@ -210,6 +212,9 @@ func (a *App) refreshUI() {
 	}
 	if a.competitorModelPanel != nil {
 		a.competitorModelPanel.Refresh()
+	}
+	if a.competitionPanel != nil {
+		a.competitionPanel.Refresh()
 	}
 	
 	// Also update settings tab content
