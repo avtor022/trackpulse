@@ -193,7 +193,7 @@
     "form.competition.title_placeholder": "Enter competition title",
     "form.competition.type": "Competition Type",
     "form.competition.type_placeholder": "Select type",
-    "form.competition.model_type": "Model Type",
+    "form.competition.model_type": "Select model type",
     "form.competition.model_type_placeholder": "e.g., Buggy",
     "form.competition.model_scale": "Model Scale",
     "form.competition.model_scale_placeholder": "e.g., 1:8",

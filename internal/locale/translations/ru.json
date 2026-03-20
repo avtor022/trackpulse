@@ -193,7 +193,7 @@
     "form.competition.title_placeholder": "Введите название соревнования",
     "form.competition.type": "Тип соревнования",
     "form.competition.type_placeholder": "Выберите тип",
-    "form.competition.model_type": "Тип модели",
+    "form.competition.model_type": "Выберите тип модели",
     "form.competition.model_type_placeholder": "напр., Багги",
     "form.competition.model_scale": "Масштаб модели",
     "form.competition.model_scale_placeholder": "напр., 1:8",
