@@ -214,6 +214,7 @@
     "competition.type.final": "Final",
     "competition.type.practice": "Practice",
     "competition.type.heat": "Heat",
+    "competition.model_type.all": "All Types (Mass Race)",
     "competition.status.scheduled": "Scheduled",
     "competition.status.running": "Running",
     "competition.status.finished": "Finished",

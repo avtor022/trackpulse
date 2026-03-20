@@ -25,6 +25,7 @@ type CompetitionPanel struct {
 	selectedID         string               // ID of selected competition
 	allCompetitions    []models.Competition // Cache of all competitions
 	headers            []string             // Localized table headers
+	allModelTypes      []models.RCModelType // Cache of all model types
 }
 
 // updateLocale updates all localized text in the panel
@@ -252,6 +253,12 @@ func (p *CompetitionPanel) refreshData() {
 			return
 		}
 
+		// Load model types for dropdown
+		p.allModelTypes, err = p.competitionService.GetAllModelTypes()
+		if err != nil {
+			fmt.Println("ERROR loading model types:", err)
+		}
+
 		// Force table to recalculate rows count and update cell contents
 		p.table.Refresh()
 		if len(p.allCompetitions) == 0 {
@@ -368,9 +375,15 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 		locale.T("competition.status.cancelled"): "cancelled",
 	}
 
-	// Model type entry
-	modelTypeEntry := widget.NewEntry()
-	modelTypeEntry.SetPlaceHolder(locale.T("form.competition.model_type_placeholder"))
+	// Model type select - populate from database with "All Types" option for mass race
+	modelTypeOptions := []string{locale.T("competition.model_type.all")} // "All types" option first
+	modelTypeNames := []string{"*"}                                      // Internal value for "all types"
+	for _, mt := range p.allModelTypes {
+		modelTypeOptions = append(modelTypeOptions, mt.Name)
+		modelTypeNames = append(modelTypeNames, mt.Name)
+	}
+	modelTypeSelect := widget.NewSelect(modelTypeOptions, nil)
+	modelTypeSelect.PlaceHolder = locale.T("form.competition.model_type_placeholder")
 
 	// Model scale entry
 	modelScaleEntry := widget.NewEntry()
@@ -395,7 +408,17 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 		if localizedType, ok := reverseMap(typeMap, competition.CompetitionType); ok {
 			typeSelect.SetSelected(localizedType)
 		}
-		modelTypeEntry.SetText(competition.ModelType)
+		// Map internal model type to display value
+		if competition.ModelType == "*" {
+			modelTypeSelect.SetSelected(locale.T("competition.model_type.all"))
+		} else {
+			for i, name := range modelTypeNames {
+				if name == competition.ModelType {
+					modelTypeSelect.SetSelected(modelTypeOptions[i])
+					break
+				}
+			}
+		}
 		modelScaleEntry.SetText(competition.ModelScale)
 		trackEntry.SetText(competition.TrackName)
 		if competition.LapCountTarget != nil {
@@ -414,7 +437,7 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 	form := widget.NewForm(
 		widget.NewFormItem(locale.T("form.competition.title"), titleEntry),
 		widget.NewFormItem(locale.T("form.competition.type"), typeSelect),
-		widget.NewFormItem(locale.T("form.competition.model_type"), modelTypeEntry),
+		widget.NewFormItem(locale.T("form.competition.model_type"), modelTypeSelect),
 		widget.NewFormItem(locale.T("form.competition.model_scale"), modelScaleEntry),
 		widget.NewFormItem(locale.T("form.competition.track"), trackEntry),
 		widget.NewFormItem(locale.T("form.competition.lap_count"), lapCountEntry),
@@ -473,13 +496,23 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 			statusValue = mappedStatus
 		}
 
+		// Map model type selection to internal value
+		modelTypeValue := modelTypeSelect.Selected
+		var modelTypeInternal string
+		for i, opt := range modelTypeOptions {
+			if opt == modelTypeValue {
+				modelTypeInternal = modelTypeNames[i]
+				break
+			}
+		}
+
 		var newC *models.Competition
 		if competition != nil {
 			// Update existing
 			newC = competition
 			newC.CompetitionTitle = compTitle
 			newC.CompetitionType = compType
-			newC.ModelType = strings.TrimSpace(modelTypeEntry.Text)
+			newC.ModelType = modelTypeInternal
 			newC.ModelScale = strings.TrimSpace(modelScaleEntry.Text)
 			newC.TrackName = strings.TrimSpace(trackEntry.Text)
 			newC.LapCountTarget = lapCountTarget
@@ -503,7 +536,7 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 			newC = &models.Competition{
 				CompetitionTitle: compTitle,
 				CompetitionType:  compType,
-				ModelType:        strings.TrimSpace(modelTypeEntry.Text),
+				ModelType:        modelTypeInternal,
 				ModelScale:       strings.TrimSpace(modelScaleEntry.Text),
 				TrackName:        strings.TrimSpace(trackEntry.Text),
 				LapCountTarget:   lapCountTarget,
