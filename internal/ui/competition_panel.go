@@ -383,7 +383,7 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 		modelTypeNames = append(modelTypeNames, mt.Name)
 	}
 	modelTypeSelect := widget.NewSelect(modelTypeOptions, nil)
-	modelTypeSelect.PlaceHolder = locale.T("form.competition.model_type_placeholder")
+	modelTypeSelect.PlaceHolder = locale.T("common.select_one")
 
 	// Model scale entry
 	modelScaleEntry := widget.NewEntry()
