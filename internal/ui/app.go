@@ -34,8 +34,6 @@ type App struct {
 	// Serial connection state
 	port        io.ReadCloser
 	isConnected bool
-	logText     *widget.RichText
-	logScroll   *container.Scroll
 	statusText  *widget.RichText
 	connectBtn  *widget.Button
 	portSelect  *widget.Select
@@ -201,6 +199,7 @@ func (a *App) createSettingsTab() fyne.CanvasObject {
 	a.baudEntry = widget.NewEntry()
 	a.baudEntry.SetPlaceHolder("9600")
 	a.baudEntry.SetText("9600")
+	a.baudEntry.SetMinSize(fyne.NewSize(120, 0))
 
 	a.statusText = widget.NewRichText(
 		&widget.TextSegment{
@@ -229,16 +228,12 @@ func (a *App) createSettingsTab() fyne.CanvasObject {
 		a.portSelect.Refresh()
 	})
 
-	// Log text area
-	a.logText = widget.NewRichText()
-	a.logScroll = container.NewVScroll(a.logText)
-
 	// Serial settings form
 	serialForm := container.NewVBox(
 		widget.NewSeparator(),
 		container.NewHBox(widget.NewLabel(locale.T("settings.serial.port")), a.portSelect, refreshBtn),
 		container.NewHBox(widget.NewLabel(locale.T("settings.serial.baud")), a.baudEntry),
-		container.NewHBox(a.connectBtn, a.statusText),
+		container.NewHBox(a.statusText, a.connectBtn),
 		widget.NewSeparator(),
 	)
 
@@ -249,21 +244,16 @@ func (a *App) createSettingsTab() fyne.CanvasObject {
 		widget.NewSeparator(),
 	)
 
-	// Log header
-	logHeader := widget.NewLabel(locale.T("settings.serial.log_title"))
-	logHeader.TextStyle = fyne.TextStyle{Bold: true}
-
 	// Main layout
 	content := container.NewBorder(
 		container.NewVBox(
 			languageForm,
 			serialForm,
-			logHeader,
 		),
 		nil,
 		nil,
 		nil,
-		a.logScroll,
+		widget.NewLabel(""),
 	)
 
 	return container.NewPadded(content)
@@ -465,22 +455,7 @@ func (a *App) readSerialData() {
 	scanner := bufio.NewScanner(a.port)
 	for scanner.Scan() {
 		line := scanner.Text()
-		timestamp := time.Now().Format("15:04:05")
-
-		// Add new line to log
-		a.logText.Segments = append(a.logText.Segments, &widget.TextSegment{
-			Text:  fmt.Sprintf("[%s] %s\n", timestamp, line),
-			Style: widget.RichTextStyleInline,
-		})
-		a.logText.Refresh()
-
-		// Scroll to bottom
-		a.logScroll.ScrollToBottom()
-
-		// Limit number of lines in log
-		if len(a.logText.Segments) > 200 {
-			a.logText.Segments = a.logText.Segments[len(a.logText.Segments)-200:]
-		}
+		// Data is read but not logged since log panel was removed
 	}
 
 	if err := scanner.Err(); err != nil && a.isConnected {
