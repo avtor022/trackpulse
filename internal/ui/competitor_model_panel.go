@@ -372,10 +372,10 @@ func (p *CompetitorModelPanel) showCompetitorModelDialog(title string, rm *model
 
 	// Create selects for competitor and model
 	competitorSelect := widget.NewSelect(competitorDisplayNames, nil)
-	competitorSelect.PlaceHolder = locale.T("form.transponder.select_competitor")
+	competitorSelect.PlaceHolder = locale.T("common.select_one")
 
 	modelSelect := widget.NewSelect(modelDisplayNames, nil)
-	modelSelect.PlaceHolder = locale.T("form.transponder.select_model")
+	modelSelect.PlaceHolder = locale.T("common.select_one")
 
 	if rm != nil {
 		// Edit mode - populate fields
