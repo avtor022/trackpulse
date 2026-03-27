@@ -19,11 +19,11 @@ import (
 // CompetitorPanel represents the Competitors management panel
 type CompetitorPanel struct {
 	competitorService    *service.CompetitorService
-	content         *fyne.Container
-	table           *widget.Table
-	statusLabel     *widget.Label
-	window          fyne.Window    // Reference to window for dialogs
-	selectedCompetitorID string         // ID of selected competitor
+	content              *fyne.Container
+	table                *widget.Table
+	statusLabel          *widget.Label
+	window               fyne.Window         // Reference to window for dialogs
+	selectedCompetitorID string              // ID of selected competitor
 	allCompetitors       []models.Competitor // Cache of all competitors
 	// UI components that need to be updated on language change
 	toolbar   *widget.Toolbar
@@ -65,7 +65,7 @@ func (p *CompetitorPanel) Refresh() {
 func NewCompetitorPanel(competitorService *service.CompetitorService, window fyne.Window) *CompetitorPanel {
 	panel := &CompetitorPanel{
 		competitorService: competitorService,
-		window:       window,
+		window:            window,
 	}
 	panel.buildUI()
 	return panel

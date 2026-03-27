@@ -21,12 +21,12 @@ type CompetitorModelPanel struct {
 	content                *fyne.Container
 	table                  *widget.Table
 	statusLabel            *widget.Label
-	window                 fyne.Window          // Reference to window for dialogs
-	selectedID             string               // ID of selected competitor model
-	allCompetitorModels    []models.CompetitorModel  // Cache of all competitor models
-	allCompetitors         []models.Competitor       // Cache of all competitors
-	allModels              []models.RCModel          // Cache of all RC models
-	headers                []string                    // Localized table headers
+	window                 fyne.Window              // Reference to window for dialogs
+	selectedID             string                   // ID of selected competitor model
+	allCompetitorModels    []models.CompetitorModel // Cache of all competitor models
+	allCompetitors         []models.Competitor      // Cache of all competitors
+	allModels              []models.RCModel         // Cache of all RC models
+	headers                []string                 // Localized table headers
 }
 
 // updateLocale updates all localized text in the panel
