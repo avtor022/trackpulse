@@ -173,6 +173,7 @@ func (a *App) createSettingsTab() fyne.CanvasObject {
 
 	// Create settings form
 	form := container.NewVBox(
+		widget.NewLabel(locale.T("settings.language_section")),
 		container.NewHBox(languageLabel, languageSelect),
 		widget.NewSeparator(),
 		portScannerUI,
