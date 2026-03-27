@@ -230,22 +230,11 @@ func (p *PortScanner) BuildUI() fyne.CanvasObject {
 	})
 
 	// Панель настроек подключения с использованием Form layout как в диалоге транспондера
-	portLabel := widget.NewLabel("Порт")
-	portLabel.TextStyle = fyne.TextStyle{} // обычный шрифт
-	
-	baudLabel := widget.NewLabel("Скорость (бод)")
-	baudLabel.TextStyle = fyne.TextStyle{} // обычный шрифт
-	
-	connectLabel := widget.NewLabel("")
-	
 	settingsForm := widget.NewForm(
-		widget.NewFormItem("", portLabel),
-		widget.NewFormItem("", baudLabel),
-		widget.NewFormItem("", connectLabel),
+		widget.NewFormItem("Порт", container.NewHBox(p.portSelect, p.refreshBtn)),
+		widget.NewFormItem("Скорость (бод)", p.baudEntry),
+		widget.NewFormItem("", container.NewHBox(p.connectBtn, p.statusText)),
 	)
-	settingsForm.Items[0].Widget = container.NewHBox(p.portSelect, p.refreshBtn)
-	settingsForm.Items[1].Widget = p.baudEntry
-	settingsForm.Items[2].Widget = container.NewHBox(p.connectBtn, p.statusText)
 
 	return settingsForm
 }

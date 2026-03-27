@@ -105,13 +105,10 @@ func (p *SettingsPanel) buildUI() *fyne.Container {
 	p.portScanner = NewPortScanner()
 	portScannerUI := p.portScanner.BuildUI()
 
-	// Create language form
-	languageLabel := widget.NewLabel(locale.T("settings.language"))
-	languageLabel.TextStyle = fyne.TextStyle{} // обычный шрифт
+	// Create language form with normal font label
 	p.languageForm = widget.NewForm(
-		widget.NewFormItem("", languageLabel),
+		widget.NewFormItem(locale.T("settings.language"), p.languageSelect),
 	)
-	p.languageForm.Items[0].Widget = p.languageSelect
 
 	// Create language section label
 	languageSectionLabel := widget.NewLabel(locale.T("settings.language_section"))
@@ -137,11 +134,9 @@ func (p *SettingsPanel) buildUI() *fyne.Container {
 func (p *SettingsPanel) refreshUI() {
 	p.updateLocale()
 	
-	// Update language label text
+	// Update language form label text on locale change
 	if p.languageForm != nil && len(p.languageForm.Items) > 0 {
-		if label, ok := p.languageForm.Items[0].Widget.(*widget.Label); ok {
-			label.SetText(locale.T("settings.language"))
-		}
+		p.languageForm.Items[0].Text = locale.T("settings.language")
 	}
 	
 	// Refresh port scanner UI if needed
