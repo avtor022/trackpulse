@@ -1,12 +1,9 @@
 package ui
 
 import (
-	"fmt"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/widget"
 	"trackpulse/internal/locale"
 	"trackpulse/internal/service"
 )
@@ -24,6 +21,7 @@ type App struct {
 	competitorPanel        *CompetitorPanel
 	modelPanel             *ModelPanel
 	competitorModelPanel   *CompetitorModelPanel
+	settingsPanel          *SettingsPanel
 }
 
 // Config holds UI configuration
@@ -115,71 +113,8 @@ func (a *App) createLogsTab() fyne.CanvasObject {
 
 // createSettingsTab creates the Settings tab
 func (a *App) createSettingsTab() fyne.CanvasObject {
-	// Create language selector
-	languageLabel := widget.NewLabel(locale.T("settings.language"))
-
-	// Build options for language select
-	options := make([]string, 0, len(locale.SupportedLocales))
-	for _, name := range locale.SupportedLocales {
-		options = append(options, name)
-	}
-
-	// Find current language name
-	currentName := "English"
-	for code, name := range locale.SupportedLocales {
-		if code == a.config.Language {
-			currentName = name
-			break
-		}
-	}
-
-	// Create select without callback first
-	languageSelect := widget.NewSelect(options, nil)
-
-	// Set initial value without triggering callback
-	languageSelect.SetSelected(currentName)
-
-	// Now set the callback for future changes
-	languageSelect.OnChanged = func(selected string) {
-		// Find the code for the selected language
-		var selectedCode string
-		for code, name := range locale.SupportedLocales {
-			if name == selected {
-				selectedCode = code
-				break
-			}
-		}
-
-		if selectedCode != "" {
-			locale.SetLocale(selectedCode)
-			a.config.Language = selectedCode
-
-			// Save to database
-			if a.settingsService != nil {
-				err := a.settingsService.SetLocale(selectedCode)
-				if err != nil {
-					// Log error but continue with UI update
-					fmt.Printf("Failed to save locale: %v\n", err)
-				}
-			}
-
-			a.refreshUI()
-		}
-	}
-
-	// Create port scanner
-	portScanner := NewPortScanner()
-	portScannerUI := portScanner.BuildUI()
-
-	// Create settings form
-	form := container.NewVBox(
-		widget.NewLabel(locale.T("settings.language_section")),
-		container.NewHBox(languageLabel, languageSelect),
-		widget.NewSeparator(),
-		portScannerUI,
-	)
-
-	return container.NewPadded(form)
+	a.settingsPanel = NewSettingsPanel(a.settingsService, a.config, a.mainWindow)
+	return a.settingsPanel.content
 }
 
 // refreshUI updates all UI elements with new locale strings
@@ -215,6 +150,9 @@ func (a *App) refreshUI() {
 	}
 	if a.competitorModelPanel != nil {
 		a.competitorModelPanel.Refresh()
+	}
+	if a.settingsPanel != nil {
+		a.settingsPanel.Refresh()
 	}
 
 	// Also update settings tab content

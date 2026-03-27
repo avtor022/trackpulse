@@ -1,1 +1,49 @@
-Nothing should be ignored in this case, as the only change is a modification to a JSON translation file which is a source/config file.
+```
+# Compiled and build artifacts
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.a
+*.out
+
+# Dependencies
+vendor/
+*.mod
+*.sum
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+
+# Editors
+.vscode/
+.idea/
+
+# Coverage
+coverage/
+htmlcov/
+.coverage
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+.Pytest_cache/
+
+# Go specific
+*.test
+*.prof
+go.mod
+go.sum
+```
