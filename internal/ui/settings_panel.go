@@ -110,11 +110,16 @@ func (p *SettingsPanel) buildUI() *fyne.Container {
 		widget.NewFormItem(locale.T("settings.language"), p.languageSelect),
 	)
 
+	// Create language section label
+	languageSectionLabel := widget.NewLabel(locale.T("settings.language_section"))
+	languageSectionLabel.TextStyle = fyne.TextStyle{Bold: true}
+
 	// Create connection settings label
 	connectionLabel := widget.NewLabel(locale.T("settings.connection"))
 
 	// Combine all elements vertically with separators
 	p.content = container.NewVBox(
+		languageSectionLabel,
 		p.languageForm,
 		widget.NewSeparator(),
 		connectionLabel,
