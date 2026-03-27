@@ -144,12 +144,16 @@ func (p *SettingsPanel) refreshUI() {
 		p.portScanner.RefreshPorts()
 	}
 
-	// Re-apply bold style to section labels
-	if p.content != nil && len(p.content.Objects) > 0 {
+	// Re-apply bold style and update text for section labels
+	if p.content != nil && len(p.content.Objects) >= 4 {
+		// Update language section label (index 0)
 		if label, ok := p.content.Objects[0].(*widget.Label); ok {
+			label.Text = locale.T("settings.language_section")
 			label.TextStyle = fyne.TextStyle{Bold: true}
 		}
+		// Update connection section label (index 3)
 		if label, ok := p.content.Objects[3].(*widget.Label); ok {
+			label.Text = locale.T("settings.connection")
 			label.TextStyle = fyne.TextStyle{Bold: true}
 		}
 	}
