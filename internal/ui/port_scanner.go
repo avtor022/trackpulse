@@ -239,6 +239,7 @@ func (p *PortScanner) BuildUI() fyne.CanvasObject {
 		),
 		container.NewHBox(
 			widget.NewLabel("Скорость (бод):"),
+			widget.NewSpacer(),
 			p.baudEntry,
 		),
 		container.NewHBox(
