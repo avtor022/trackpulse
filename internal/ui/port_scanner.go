@@ -232,7 +232,6 @@ func (p *PortScanner) BuildUI() fyne.CanvasObject {
 	// Панель настроек подключения
 	settingsForm := container.NewVBox(
 		widget.NewLabel("Настройка подключения"),
-		widget.NewSeparator(),
 		container.NewHBox(
 			widget.NewLabel("Порт:"),
 			p.portSelect,
