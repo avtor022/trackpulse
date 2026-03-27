@@ -149,10 +149,10 @@ func (p *PortScanner) connect() {
 
 	p.port = port
 	p.isConnected = true
-	p.connectBtn.SetText("Отключиться")
+	p.connectBtn.SetText(locale.T("settings.disconnect"))
 	p.statusText.Segments = []widget.RichTextSegment{
 		&widget.TextSegment{
-			Text: "Подключено",
+			Text: fmt.Sprintf("%s: %s", locale.T("status.label"), locale.T("status.connected")),
 			Style: widget.RichTextStyle{
 				ColorName: theme.ColorNameSuccess,
 				Inline:    true,
@@ -169,10 +169,10 @@ func (p *PortScanner) disconnect() {
 		p.port = nil
 	}
 	p.isConnected = false
-	p.connectBtn.SetText("Подключиться")
+	p.connectBtn.SetText(locale.T("settings.connect"))
 	p.statusText.Segments = []widget.RichTextSegment{
 		&widget.TextSegment{
-			Text: "Отключено",
+			Text: fmt.Sprintf("%s: %s", locale.T("status.label"), locale.T("status.disconnected")),
 			Style: widget.RichTextStyle{
 				ColorName: theme.ColorNameError,
 				Inline:    true,
@@ -190,7 +190,7 @@ func (p *PortScanner) BuildUI() fyne.CanvasObject {
 	// Создание виджетов
 	p.statusText = widget.NewRichText(
 		&widget.TextSegment{
-			Text: "Статус: Отключено",
+			Text: fmt.Sprintf("%s: %s", locale.T("status.label"), locale.T("status.disconnected")),
 			Style: widget.RichTextStyle{
 				Inline: true,
 			},
@@ -214,7 +214,7 @@ func (p *PortScanner) BuildUI() fyne.CanvasObject {
 	p.baudEntry.SetPlaceHolder("9600")
 	p.baudEntry.SetText("9600")
 
-	p.connectBtn = widget.NewButton("Подключиться", p.connect)
+	p.connectBtn = widget.NewButton(locale.T("settings.connect"), p.connect)
 
 	p.refreshBtn = widget.NewButtonWithIcon("", theme.ViewRefreshIcon(), func() {
 		portList, defaultPort := scanPorts()
@@ -259,9 +259,32 @@ func (p *PortScanner) RefreshPorts() {
 
 // RefreshLabels updates the labels in the port scanner form for localization
 func (p *PortScanner) RefreshLabels() {
-	if p.settingsForm != nil && len(p.settingsForm.Items) >= 2 {
+	if p.settingsForm != nil && len(p.settingsForm.Items) >= 3 {
 		p.settingsForm.Items[0].Text = locale.T("settings.port")
 		p.settingsForm.Items[1].Text = locale.T("settings.baud_rate")
+
+		// Update connect button text based on connection state
+		if p.isConnected {
+			p.connectBtn.SetText(locale.T("settings.disconnect"))
+		} else {
+			p.connectBtn.SetText(locale.T("settings.connect"))
+		}
+
+		// Update status text
+		statusText := locale.T("status.disconnected")
+		if p.isConnected {
+			statusText = locale.T("status.connected")
+		}
+		p.statusText.Segments = []widget.RichTextSegment{
+			&widget.TextSegment{
+				Text: fmt.Sprintf("%s: %s", locale.T("status.label"), statusText),
+				Style: widget.RichTextStyle{
+					Inline: true,
+				},
+			},
+		}
+
 		p.settingsForm.Refresh()
+		p.statusText.Refresh()
 	}
 }
