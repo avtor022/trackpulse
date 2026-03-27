@@ -212,6 +212,7 @@ func (p *PortScanner) BuildUI() fyne.CanvasObject {
 	p.baudEntry = widget.NewEntry()
 	p.baudEntry.SetPlaceHolder("9600")
 	p.baudEntry.SetText("9600")
+	p.baudEntry.SetMinRowsChars(1)
 
 	p.connectBtn = widget.NewButton("Подключиться", p.connect)
 
@@ -232,6 +233,7 @@ func (p *PortScanner) BuildUI() fyne.CanvasObject {
 
 	// Панель настроек подключения
 	settingsForm := container.NewVBox(
+		widget.NewLabel("Настройка подключения"),
 		widget.NewSeparator(),
 		container.NewHBox(
 			widget.NewLabel("Порт:"),
@@ -240,7 +242,6 @@ func (p *PortScanner) BuildUI() fyne.CanvasObject {
 		),
 		container.NewHBox(
 			widget.NewLabel("Скорость (бод):"),
-			layout.NewSpacer(),
 			p.baudEntry,
 		),
 		container.NewHBox(
