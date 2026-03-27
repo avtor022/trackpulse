@@ -100,8 +100,9 @@ func (p *SettingsPanel) buildUI() *fyne.Container {
 	portScannerUI := p.portScanner.BuildUI()
 
 	// Create language form with same style as port settings
+	languageSelectContainer := container.NewHBox(p.languageSelect)
 	p.languageForm = widget.NewForm(
-		widget.NewFormItem(locale.T("settings.language"), p.languageSelect),
+		widget.NewFormItem(locale.T("settings.language"), languageSelectContainer),
 	)
 
 	// Create language section label
