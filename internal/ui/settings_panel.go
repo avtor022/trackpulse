@@ -17,7 +17,6 @@ type SettingsPanel struct {
 	config          *Config
 	window          fyne.Window
 	// UI components that need to be updated on language change
-	languageLabel  *widget.Label
 	languageSelect *widget.Select
 	portScanner    *PortScanner
 	languageForm   *widget.Form
@@ -36,9 +35,7 @@ func NewSettingsPanel(settingsService *service.SettingsService, config *Config, 
 
 // updateLocale updates all localized text in the panel
 func (p *SettingsPanel) updateLocale() {
-	if p.languageLabel != nil {
-		p.languageLabel.SetText(locale.T("settings.language"))
-	}
+	// Language label is now part of the form, updated via refreshUI
 }
 
 // Refresh refreshes the panel UI with current locale
@@ -50,9 +47,6 @@ func (p *SettingsPanel) Refresh() {
 // buildUI constructs the settings panel UI
 func (p *SettingsPanel) buildUI() *fyne.Container {
 	// Create language selector
-	p.languageLabel = widget.NewLabel(locale.T("settings.language"))
-
-	// Build options for language select
 	options := make([]string, 0, len(locale.SupportedLocales))
 	for _, name := range locale.SupportedLocales {
 		options = append(options, name)
@@ -105,7 +99,7 @@ func (p *SettingsPanel) buildUI() *fyne.Container {
 	p.portScanner = NewPortScanner()
 	portScannerUI := p.portScanner.BuildUI()
 
-	// Create language form with normal font label
+	// Create language form with same style as port settings
 	p.languageForm = widget.NewForm(
 		widget.NewFormItem(locale.T("settings.language"), p.languageSelect),
 	)
