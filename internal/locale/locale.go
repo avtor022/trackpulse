@@ -33,17 +33,17 @@ func translationsDir() string {
 // loadTranslations loads translations from a JSON file
 func loadTranslations(langCode string) (map[string]string, error) {
 	filePath := filepath.Join(translationsDir(), langCode+".json")
-	
+
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read translation file %s: %w", filePath, err)
 	}
-	
+
 	var translations map[string]string
 	if err := json.Unmarshal(data, &translations); err != nil {
 		return nil, fmt.Errorf("failed to parse translation file %s: %w", filePath, err)
 	}
-	
+
 	return translations, nil
 }
 
@@ -68,7 +68,7 @@ func SetLocale(code string) {
 		translations, _ = loadTranslations("en")
 		code = "en"
 	}
-	
+
 	CurrentLocale = &Locale{
 		code: code,
 		data: translations,

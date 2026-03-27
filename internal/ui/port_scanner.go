@@ -11,17 +11,19 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"github.com/jacobsa/go-serial/serial"
 	"go.bug.st/serial/enumerator"
+	"trackpulse/internal/locale"
 )
 
 // PortScanner handles serial port scanning and connection UI
 type PortScanner struct {
-	port        io.ReadCloser
-	isConnected bool
-	statusText  *widget.RichText
-	connectBtn  *widget.Button
-	portSelect  *widget.Select
-	baudEntry   *widget.Entry
-	refreshBtn  *widget.Button
+	port         io.ReadCloser
+	isConnected  bool
+	statusText   *widget.RichText
+	connectBtn   *widget.Button
+	portSelect   *widget.Select
+	baudEntry    *widget.Entry
+	refreshBtn   *widget.Button
+	settingsForm *widget.Form
 }
 
 // scanPorts scans for available serial ports
@@ -230,13 +232,13 @@ func (p *PortScanner) BuildUI() fyne.CanvasObject {
 	})
 
 	// Панель настроек подключения с использованием Form layout как в диалоге транспондера
-	settingsForm := widget.NewForm(
-		widget.NewFormItem("Порт", container.NewHBox(p.portSelect, p.refreshBtn)),
-		widget.NewFormItem("Скорость (бод)", p.baudEntry),
+	p.settingsForm = widget.NewForm(
+		widget.NewFormItem(locale.T("settings.port"), container.NewHBox(p.portSelect, p.refreshBtn)),
+		widget.NewFormItem(locale.T("settings.baud_rate"), p.baudEntry),
 		widget.NewFormItem("", container.NewHBox(p.connectBtn, p.statusText)),
 	)
 
-	return settingsForm
+	return p.settingsForm
 }
 
 // RefreshPorts refreshes the list of available ports
@@ -253,4 +255,13 @@ func (p *PortScanner) RefreshPorts() {
 		}
 	}
 	p.portSelect.Refresh()
+}
+
+// RefreshLabels updates the labels in the port scanner form for localization
+func (p *PortScanner) RefreshLabels() {
+	if p.settingsForm != nil && len(p.settingsForm.Items) >= 2 {
+		p.settingsForm.Items[0].Text = locale.T("settings.port")
+		p.settingsForm.Items[1].Text = locale.T("settings.baud_rate")
+		p.settingsForm.Refresh()
+	}
 }

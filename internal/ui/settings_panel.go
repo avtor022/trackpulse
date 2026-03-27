@@ -142,6 +142,7 @@ func (p *SettingsPanel) refreshUI() {
 	// Refresh port scanner UI if needed
 	if p.portScanner != nil {
 		p.portScanner.RefreshPorts()
+		p.portScanner.RefreshLabels()
 	}
 
 	// Re-apply bold style and update text for section labels

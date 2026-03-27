@@ -167,6 +167,8 @@
     "settings.language": "Language",
     "settings.language_section": "Language Settings",
     "settings.connection": "Connection Settings",
+    "settings.port": "Port",
+    "settings.baud_rate": "Baud Rate",
     "settings.language.en": "English",
     "settings.language.ru": "Russian",
     "transponder.header.number": "Transponder Number",
