@@ -116,6 +116,7 @@ func (p *SettingsPanel) buildUI() *fyne.Container {
 
 	// Create connection settings label
 	connectionLabel := widget.NewLabel(locale.T("settings.connection"))
+	connectionLabel.TextStyle = fyne.TextStyle{Bold: true}
 
 	// Combine all elements vertically with separators
 	p.content = container.NewVBox(
@@ -141,6 +142,16 @@ func (p *SettingsPanel) refreshUI() {
 	// Refresh port scanner UI if needed
 	if p.portScanner != nil {
 		p.portScanner.RefreshPorts()
+	}
+	
+	// Re-apply bold style to section labels
+	if p.content != nil && len(p.content.Objects) > 0 {
+		if label, ok := p.content.Objects[0].(*widget.Label); ok {
+			label.TextStyle = fyne.TextStyle{Bold: true}
+		}
+		if label, ok := p.content.Objects[3].(*widget.Label); ok {
+			label.TextStyle = fyne.TextStyle{Bold: true}
+		}
 	}
 	
 	if p.content != nil {
