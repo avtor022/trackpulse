@@ -165,7 +165,7 @@
     "error.permission": "Доступ запрещен",
     "error.not_found": "Не найдено",
     "settings.language": "Язык",
-    "settings.language_section": "Настройки языка",
+    "settings.language_section": "Настройка языка",
     "settings.language.en": "Английский",
     "settings.language.ru": "Русский",
     "transponder.header.number": "Номер транспондера",

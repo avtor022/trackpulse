@@ -1,1 +1,1 @@
-Nothing should be ignored in this case, as the changes only include source code files (.json and .go) and there are no build artifacts, dependencies, or temporary files in the change list.
+Nothing should be ignored in this case, as the only change is a modification to a JSON translation file which is a source/config file.
