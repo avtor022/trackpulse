@@ -91,7 +91,12 @@ func (p *SettingsPanel) buildUI() *fyne.Container {
 				}
 			}
 
-			p.refreshUI()
+			// Refresh the entire application UI via GlobalApp
+			if GlobalApp != nil {
+				GlobalApp.refreshUI()
+			} else {
+				p.refreshUI()
+			}
 		}
 	}
 
