@@ -229,23 +229,11 @@ func (p *PortScanner) BuildUI() fyne.CanvasObject {
 		p.portSelect.Refresh()
 	})
 
-	// Панель настроек подключения
-	settingsForm := container.NewVBox(
-		widget.NewLabel("Настройка подключения"),
-		container.NewHBox(
-			widget.NewLabel("Порт:"),
-			p.portSelect,
-			p.refreshBtn,
-		),
-		container.NewHBox(
-			widget.NewLabel("Скорость (бод):"),
-			p.baudEntry,
-		),
-		container.NewHBox(
-			p.connectBtn,
-			p.statusText,
-		),
-		widget.NewSeparator(),
+	// Панель настроек подключения с использованием Form layout как в диалоге транспондера
+	settingsForm := widget.NewForm(
+		widget.NewFormItem("Порт", container.NewHBox(p.portSelect, p.refreshBtn)),
+		widget.NewFormItem("Скорость (бод)", p.baudEntry),
+		widget.NewFormItem("", container.NewHBox(p.connectBtn, p.statusText)),
 	)
 
 	return settingsForm

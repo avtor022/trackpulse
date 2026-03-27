@@ -102,12 +102,10 @@ func (p *SettingsPanel) buildUI() *fyne.Container {
 	portScanner := NewPortScanner()
 	portScannerUI := portScanner.BuildUI()
 
-	// Create settings form
-	form := container.NewVBox(
-		widget.NewLabel(locale.T("settings.language_section")),
-		container.NewHBox(p.languageLabel, p.languageSelect),
-		widget.NewSeparator(),
-		portScannerUI,
+	// Create settings form using Form layout like in transponder dialog
+	form := widget.NewForm(
+		widget.NewFormItem(locale.T("settings.language"), p.languageSelect),
+		widget.NewFormItem("Порт", portScannerUI),
 	)
 
 	p.content = container.NewPadded(form)
