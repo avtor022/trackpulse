@@ -19,6 +19,8 @@ type SettingsPanel struct {
 	// UI components that need to be updated on language change
 	languageLabel  *widget.Label
 	languageSelect *widget.Select
+	portScanner    *PortScanner
+	languageForm   *widget.Form
 }
 
 // NewSettingsPanel creates a new settings panel
@@ -42,6 +44,7 @@ func (p *SettingsPanel) updateLocale() {
 // Refresh refreshes the panel UI with current locale
 func (p *SettingsPanel) Refresh() {
 	p.updateLocale()
+	p.refreshUI()
 }
 
 // buildUI constructs the settings panel UI
@@ -99,22 +102,42 @@ func (p *SettingsPanel) buildUI() *fyne.Container {
 	}
 
 	// Create port scanner
-	portScanner := NewPortScanner()
-	portScannerUI := portScanner.BuildUI()
+	p.portScanner = NewPortScanner()
+	portScannerUI := p.portScanner.BuildUI()
 
-	// Create settings form using Form layout like in transponder dialog
-	form := widget.NewForm(
+	// Create language form
+	p.languageForm = widget.NewForm(
 		widget.NewFormItem(locale.T("settings.language"), p.languageSelect),
-		widget.NewFormItem("Порт", portScannerUI),
 	)
 
-	p.content = container.NewPadded(form)
+	// Create connection settings label
+	connectionLabel := widget.NewLabel(locale.T("settings.connection"))
+
+	// Combine all elements vertically with separators
+	p.content = container.NewVBox(
+		p.languageForm,
+		widget.NewSeparator(),
+		connectionLabel,
+		portScannerUI,
+	)
+
 	return p.content
 }
 
 // refreshUI updates the UI after locale change
 func (p *SettingsPanel) refreshUI() {
 	p.updateLocale()
+	
+	// Update language form item text
+	if p.languageForm != nil && len(p.languageForm.Rows) > 0 {
+		p.languageForm.Rows[0].Text = locale.T("settings.language")
+	}
+	
+	// Refresh port scanner UI if needed
+	if p.portScanner != nil {
+		p.portScanner.Refresh()
+	}
+	
 	if p.content != nil {
 		p.content.Refresh()
 	}

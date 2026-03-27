@@ -166,6 +166,7 @@
     "error.not_found": "Not found",
     "settings.language": "Language",
     "settings.language_section": "Language Settings",
+    "settings.connection": "Connection Settings",
     "settings.language.en": "English",
     "settings.language.ru": "Russian",
     "transponder.header.number": "Transponder Number",
