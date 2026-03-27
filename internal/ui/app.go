@@ -13,17 +13,17 @@ import (
 
 // App represents the main application UI
 type App struct {
-	fyneApp         fyne.App
-	mainWindow      fyne.Window
-	competitorService    *service.CompetitorService
-	modelService    *service.RCModelService
-	settingsService *service.SettingsService
+	fyneApp                fyne.App
+	mainWindow             fyne.Window
+	competitorService      *service.CompetitorService
+	modelService           *service.RCModelService
+	settingsService        *service.SettingsService
 	competitorModelService *service.CompetitorModelService
-	config          *Config
-	tabs            *container.AppTabs
-	competitorPanel      *CompetitorPanel
-	modelPanel      *ModelPanel
-	competitorModelPanel *CompetitorModelPanel
+	config                 *Config
+	tabs                   *container.AppTabs
+	competitorPanel        *CompetitorPanel
+	modelPanel             *ModelPanel
+	competitorModelPanel   *CompetitorModelPanel
 }
 
 // Config holds UI configuration
@@ -38,11 +38,11 @@ func NewApp(competitorService *service.CompetitorService, modelService *service.
 	mainWindow := fyneApp.NewWindow("TrackPulse")
 
 	return &App{
-		fyneApp:           fyneApp,
-		mainWindow:        mainWindow,
+		fyneApp:                fyneApp,
+		mainWindow:             mainWindow,
 		competitorService:      competitorService,
-		modelService:      modelService,
-		settingsService:   settingsService,
+		modelService:           modelService,
+		settingsService:        settingsService,
 		competitorModelService: competitorModelService,
 		config: &Config{
 			Language: language,
@@ -135,10 +135,10 @@ func (a *App) createSettingsTab() fyne.CanvasObject {
 
 	// Create select without callback first
 	languageSelect := widget.NewSelect(options, nil)
-	
+
 	// Set initial value without triggering callback
 	languageSelect.SetSelected(currentName)
-	
+
 	// Now set the callback for future changes
 	languageSelect.OnChanged = func(selected string) {
 		// Find the code for the selected language
@@ -153,7 +153,7 @@ func (a *App) createSettingsTab() fyne.CanvasObject {
 		if selectedCode != "" {
 			locale.SetLocale(selectedCode)
 			a.config.Language = selectedCode
-			
+
 			// Save to database
 			if a.settingsService != nil {
 				err := a.settingsService.SetLocale(selectedCode)
@@ -162,13 +162,19 @@ func (a *App) createSettingsTab() fyne.CanvasObject {
 					fmt.Printf("Failed to save locale: %v\n", err)
 				}
 			}
-			
+
 			a.refreshUI()
 		}
 	}
 
+	// Create port scanner
+	portScanner := NewPortScanner()
+	portScannerUI := portScanner.BuildUI()
+
 	// Create settings form
 	form := container.NewVBox(
+		widget.NewLabel("Настройки подключения"),
+		portScannerUI,
 		widget.NewSeparator(),
 		container.NewHBox(languageLabel, languageSelect),
 		widget.NewSeparator(),
@@ -211,7 +217,7 @@ func (a *App) refreshUI() {
 	if a.competitorModelPanel != nil {
 		a.competitorModelPanel.Refresh()
 	}
-	
+
 	// Also update settings tab content
 	a.tabs.Refresh()
 }
