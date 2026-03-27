@@ -128,14 +128,14 @@ func (p *SettingsPanel) buildUI() *fyne.Container {
 func (p *SettingsPanel) refreshUI() {
 	p.updateLocale()
 	
-	// Update language form item text
-	if p.languageForm != nil && len(p.languageForm.Rows) > 0 {
-		p.languageForm.Rows[0].Text = locale.T("settings.language")
+	// Update language form item text by recreating the form items
+	if p.languageForm != nil && len(p.languageForm.Items) > 0 {
+		p.languageForm.Items[0].Text = locale.T("settings.language")
 	}
 	
 	// Refresh port scanner UI if needed
 	if p.portScanner != nil {
-		p.portScanner.Refresh()
+		p.portScanner.RefreshPorts()
 	}
 	
 	if p.content != nil {
