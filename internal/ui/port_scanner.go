@@ -7,6 +7,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/jacobsa/go-serial/serial"
@@ -240,7 +241,6 @@ func (p *PortScanner) BuildUI() fyne.CanvasObject {
 		),
 		container.NewHBox(
 			widget.NewLabel("Скорость (бод):"),
-			layout.NewSpacer(),
 			p.baudEntry,
 		),
 		container.NewHBox(
