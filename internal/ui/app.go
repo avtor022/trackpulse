@@ -25,6 +25,9 @@ type App struct {
 	settingsPanel          *SettingsPanel
 }
 
+// GlobalApp holds a reference to the main app for locale change notifications
+var GlobalApp *App
+
 // Config holds UI configuration
 type Config struct {
 	Language string
@@ -36,7 +39,7 @@ func NewApp(competitorService *service.CompetitorService, modelService *service.
 	fyneApp := app.New()
 	mainWindow := fyneApp.NewWindow("TrackPulse")
 
-	return &App{
+	appInstance := &App{
 		fyneApp:                fyneApp,
 		mainWindow:             mainWindow,
 		competitorService:      competitorService,
@@ -48,6 +51,11 @@ func NewApp(competitorService *service.CompetitorService, modelService *service.
 			Title:    "TrackPulse",
 		},
 	}
+
+	// Set global reference for locale change notifications
+	GlobalApp = appInstance
+
+	return appInstance
 }
 
 // Run starts the application UI

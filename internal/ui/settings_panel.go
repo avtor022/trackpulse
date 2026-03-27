@@ -17,7 +17,6 @@ type SettingsPanel struct {
 	config          *Config
 	window          fyne.Window
 	// UI components that need to be updated on language change
-	languageLabel  *widget.Label
 	languageSelect *widget.Select
 	portScanner    *PortScanner
 	languageForm   *widget.Form
@@ -36,9 +35,7 @@ func NewSettingsPanel(settingsService *service.SettingsService, config *Config, 
 
 // updateLocale updates all localized text in the panel
 func (p *SettingsPanel) updateLocale() {
-	if p.languageLabel != nil {
-		p.languageLabel.SetText(locale.T("settings.language"))
-	}
+	// Language label is now part of the form, updated via refreshUI
 }
 
 // Refresh refreshes the panel UI with current locale
@@ -50,9 +47,6 @@ func (p *SettingsPanel) Refresh() {
 // buildUI constructs the settings panel UI
 func (p *SettingsPanel) buildUI() *fyne.Container {
 	// Create language selector
-	p.languageLabel = widget.NewLabel(locale.T("settings.language"))
-
-	// Build options for language select
 	options := make([]string, 0, len(locale.SupportedLocales))
 	for _, name := range locale.SupportedLocales {
 		options = append(options, name)
@@ -97,7 +91,12 @@ func (p *SettingsPanel) buildUI() *fyne.Container {
 				}
 			}
 
-			p.refreshUI()
+			// Refresh the entire application UI via GlobalApp
+			if GlobalApp != nil {
+				GlobalApp.refreshUI()
+			} else {
+				p.refreshUI()
+			}
 		}
 	}
 
@@ -105,9 +104,10 @@ func (p *SettingsPanel) buildUI() *fyne.Container {
 	p.portScanner = NewPortScanner()
 	portScannerUI := p.portScanner.BuildUI()
 
-	// Create language form with normal font label
+	// Create language form with same style as port settings
+	languageSelectContainer := container.NewHBox(p.languageSelect)
 	p.languageForm = widget.NewForm(
-		widget.NewFormItem(locale.T("settings.language"), p.languageSelect),
+		widget.NewFormItem(locale.T("settings.language"), languageSelectContainer),
 	)
 
 	// Create language section label
@@ -133,27 +133,32 @@ func (p *SettingsPanel) buildUI() *fyne.Container {
 // refreshUI updates the UI after locale change
 func (p *SettingsPanel) refreshUI() {
 	p.updateLocale()
-	
+
 	// Update language form label text on locale change
 	if p.languageForm != nil && len(p.languageForm.Items) > 0 {
 		p.languageForm.Items[0].Text = locale.T("settings.language")
 	}
-	
+
 	// Refresh port scanner UI if needed
 	if p.portScanner != nil {
 		p.portScanner.RefreshPorts()
+		p.portScanner.RefreshLabels()
 	}
-	
-	// Re-apply bold style to section labels
-	if p.content != nil && len(p.content.Objects) > 0 {
+
+	// Re-apply bold style and update text for section labels
+	if p.content != nil && len(p.content.Objects) >= 4 {
+		// Update language section label (index 0)
 		if label, ok := p.content.Objects[0].(*widget.Label); ok {
+			label.Text = locale.T("settings.language_section")
 			label.TextStyle = fyne.TextStyle{Bold: true}
 		}
+		// Update connection section label (index 3)
 		if label, ok := p.content.Objects[3].(*widget.Label); ok {
+			label.Text = locale.T("settings.connection")
 			label.TextStyle = fyne.TextStyle{Bold: true}
 		}
 	}
-	
+
 	if p.content != nil {
 		p.content.Refresh()
 	}
