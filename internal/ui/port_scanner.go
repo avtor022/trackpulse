@@ -7,7 +7,6 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/jacobsa/go-serial/serial"
@@ -212,7 +211,6 @@ func (p *PortScanner) BuildUI() fyne.CanvasObject {
 	p.baudEntry = widget.NewEntry()
 	p.baudEntry.SetPlaceHolder("9600")
 	p.baudEntry.SetText("9600")
-	p.baudEntry.SetMinRowsChars(1)
 
 	p.connectBtn = widget.NewButton("Подключиться", p.connect)
 
