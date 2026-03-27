@@ -6,8 +6,6 @@
 
 # Dependencies
 vendor/
-*.mod
-*.sum
 
 # Logs and temp files
 *.log
@@ -15,18 +13,22 @@ vendor/
 *.swp
 
 # Editors
-.vscode/
 .idea/
+*.swp
+*.swo
 
-# Coverage and testing
+# Environment
+.env
+.env.local
+*.env.*
+
+# Coverage
 coverage/
 htmlcov/
 .coverage
-*.coverprofile
 
-# Distribution and build
-dist/
+# Build directories
 build/
+dist/
 target/
-bin/
 ```

@@ -100,8 +100,10 @@ func (p *SettingsPanel) buildUI() *fyne.Container {
 	portScannerUI := p.portScanner.BuildUI()
 
 	// Create language form with same style as port settings
+	// Wrap language select in HBox to match the width behavior of port selection
+	languageSelectContainer := container.NewHBox(p.languageSelect)
 	p.languageForm = widget.NewForm(
-		widget.NewFormItem(locale.T("settings.language"), p.languageSelect),
+		widget.NewFormItem(locale.T("settings.language"), languageSelectContainer),
 	)
 
 	// Create language section label
@@ -127,17 +129,17 @@ func (p *SettingsPanel) buildUI() *fyne.Container {
 // refreshUI updates the UI after locale change
 func (p *SettingsPanel) refreshUI() {
 	p.updateLocale()
-	
+
 	// Update language form label text on locale change
 	if p.languageForm != nil && len(p.languageForm.Items) > 0 {
 		p.languageForm.Items[0].Text = locale.T("settings.language")
 	}
-	
+
 	// Refresh port scanner UI if needed
 	if p.portScanner != nil {
 		p.portScanner.RefreshPorts()
 	}
-	
+
 	// Re-apply bold style to section labels
 	if p.content != nil && len(p.content.Objects) > 0 {
 		if label, ok := p.content.Objects[0].(*widget.Label); ok {
@@ -147,7 +149,7 @@ func (p *SettingsPanel) refreshUI() {
 			label.TextStyle = fyne.TextStyle{Bold: true}
 		}
 	}
-	
+
 	if p.content != nil {
 		p.content.Refresh()
 	}
