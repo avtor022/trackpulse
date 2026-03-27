@@ -236,6 +236,13 @@ func (p *PortScanner) BuildUI() fyne.CanvasObject {
 		widget.NewFormItem("", container.NewHBox(p.connectBtn, p.statusText)),
 	)
 
+	// Устанавливаем обычный шрифт для подписей полей формы
+	for _, item := range settingsForm.Items {
+		if item.Text != "" {
+			item.TextStyle = fyne.TextStyle{}
+		}
+	}
+
 	return settingsForm
 }
 
