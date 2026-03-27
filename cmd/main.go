@@ -65,12 +65,14 @@ func main() {
 	typeRepo := repository.NewRCModelTypeRepository(db.DB)
 	settingsRepo := repository.NewSettingsRepository(db.DB)
 	competitorModelRepo := repository.NewCompetitorModelRepository(db.DB)
+	competitionRepo := repository.NewCompetitionRepository(db.DB)
 
 	// Initialize services
 	competitorService := service.NewCompetitorService(competitorRepo)
 	modelService := service.NewRCModelService(modelRepo, brandRepo, scaleRepo, typeRepo)
 	settingsService := service.NewSettingsService(settingsRepo)
 	competitorModelService := service.NewCompetitorModelService(competitorModelRepo, competitorRepo, modelRepo)
+	competitionService := service.NewCompetitionService(competitionRepo, typeRepo)
 
 	// Load locale from settings
 	savedLocale, err := settingsService.GetLocale()
@@ -86,6 +88,6 @@ func main() {
 	log.Info("TrackPulse initialization complete!")
 
 	// Start UI
-	uiApp := ui.NewApp(competitorService, modelService, settingsService, competitorModelService, savedLocale)
+	uiApp := ui.NewApp(competitorService, modelService, settingsService, competitorModelService, competitionService, savedLocale)
 	uiApp.Run()
 }
