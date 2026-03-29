@@ -1,1 +1,19 @@
-Nothing should be ignored in this case, as the changes consist only of source code files (.json and .go) without any build artifacts, dependencies, or temporary files.
+```
+# Compiled and build artifacts
+*.o
+*.obj
+*.out
+# Dependencies
+vendor/
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+# Environment
+.env
+.env.local
+*.env.*
+# Editors
+.vscode/
+.idea/
+```

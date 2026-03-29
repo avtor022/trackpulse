@@ -12,11 +12,12 @@ import (
 type CompetitionService struct {
 	repo       *repository.CompetitionRepository
 	modelTypes *repository.RCModelTypeRepository
+	scaleRepo  *repository.RCModelScaleRepository
 }
 
 // NewCompetitionService creates a new competition service
-func NewCompetitionService(repo *repository.CompetitionRepository, modelTypes *repository.RCModelTypeRepository) *CompetitionService {
-	return &CompetitionService{repo: repo, modelTypes: modelTypes}
+func NewCompetitionService(repo *repository.CompetitionRepository, modelTypes *repository.RCModelTypeRepository, scaleRepo *repository.RCModelScaleRepository) *CompetitionService {
+	return &CompetitionService{repo: repo, modelTypes: modelTypes, scaleRepo: scaleRepo}
 }
 
 // GetAllCompetitions returns all competitions
@@ -32,6 +33,11 @@ func (s *CompetitionService) GetCompetitionByID(id string) (*models.Competition,
 // GetAllModelTypes returns all RC model types for competition selection
 func (s *CompetitionService) GetAllModelTypes() ([]models.RCModelType, error) {
 	return s.modelTypes.GetAll()
+}
+
+// GetAllModelScales returns all RC model scales for competition selection
+func (s *CompetitionService) GetAllModelScales() ([]models.RCModelScale, error) {
+	return s.scaleRepo.GetAll()
 }
 
 // CreateCompetition creates a new competition with validation
