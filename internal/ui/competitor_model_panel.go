@@ -223,7 +223,7 @@ func (p *CompetitorModelPanel) createCompetitorModelTable() *widget.Table {
 	table.OnSelected = func(id widget.TableCellID) {
 		if id.Row >= 0 && id.Row < len(p.allCompetitorModels) {
 			p.selectedID = p.allCompetitorModels[id.Row].ID
-			p.statusLabel.SetText(fmt.Sprintf("Selected: %s", p.allCompetitorModels[id.Row].TransponderNumber))
+			p.statusLabel.SetText(fmt.Sprintf("%s: %s", locale.T("selected"), p.allCompetitorModels[id.Row].TransponderNumber))
 		}
 	}
 
