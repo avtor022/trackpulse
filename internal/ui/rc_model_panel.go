@@ -232,7 +232,7 @@ func (p *ModelPanel) createModelTable() *widget.Table {
 	table.OnSelected = func(id widget.TableCellID) {
 		if id.Row >= 0 && id.Row < len(p.allModels) {
 			p.selectedModelID = p.allModels[id.Row].ID
-			p.statusLabel.SetText(fmt.Sprintf("Selected: %s %s", p.allModels[id.Row].Brand, p.allModels[id.Row].ModelName))
+			p.statusLabel.SetText(fmt.Sprintf("%s: %s %s", locale.T("selected"), p.allModels[id.Row].Brand, p.allModels[id.Row].ModelName))
 		}
 	}
 
