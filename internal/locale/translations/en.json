@@ -224,8 +224,10 @@
     "competition.type.practice": "Practice",
     "competition.type.heat": "Heat",
     "competition.model_type.all": "All Types (Mass Race)",
+    "competition.model_scale.all": "All Scales",
     "competition.status.scheduled": "Scheduled",
     "competition.status.running": "Running",
     "competition.status.finished": "Finished",
-    "competition.status.cancelled": "Cancelled"
+    "competition.status.cancelled": "Cancelled",
+    "selected": "Selected"
 }
