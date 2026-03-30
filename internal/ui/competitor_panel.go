@@ -209,7 +209,7 @@ func (p *CompetitorPanel) createCompetitorTable() *widget.Table {
 	table.OnSelected = func(id widget.TableCellID) {
 		if id.Row >= 0 && id.Row < len(p.allCompetitors) {
 			p.selectedCompetitorID = p.allCompetitors[id.Row].ID
-			p.statusLabel.SetText(fmt.Sprintf("Selected: %s", p.allCompetitors[id.Row].FullName))
+			p.statusLabel.SetText(fmt.Sprintf("%s: %s", locale.T("common.selected"), p.allCompetitors[id.Row].FullName))
 		}
 	}
 
