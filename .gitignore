@@ -1,1 +1,3 @@
-Nothing should be ignored in this case, as the changes consist only of source code files (.json and .go) without any build artifacts, dependencies, or temporary files.
+# Examples where source files only were modified
+internal/locale/translations/en.json
+internal/locale/translations/ru.json
