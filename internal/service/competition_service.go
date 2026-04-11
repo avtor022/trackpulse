@@ -5,17 +5,36 @@ import (
 
 	"github.com/google/uuid"
 	"trackpulse/internal/models"
-	"trackpulse/internal/repository"
 )
+
+// CompetitionRepositoryInterface defines the interface for competition data access
+type CompetitionRepositoryInterface interface {
+	GetAll() ([]models.Competition, error)
+	GetByID(id string) (*models.Competition, error)
+	Create(competition *models.Competition) error
+	Update(competition *models.Competition) error
+	Delete(id string) error
+	Count() (int, error)
+	GetByStatus(status string) ([]models.Competition, error)
+}
+
+// RCModelTypeRepositoryInterface defines the interface for RC model type data access
+type RCModelTypeRepositoryInterface interface {
+	GetAll() ([]models.RCModelType, error)
+	GetByName(name string) (*models.RCModelType, error)
+	Create(name string) (*models.RCModelType, error)
+	GetOrCreate(name string) (*models.RCModelType, error)
+	Delete(name string) error
+}
 
 // CompetitionService handles business logic for competitions
 type CompetitionService struct {
-	repo       *repository.CompetitionRepository
-	modelTypes *repository.RCModelTypeRepository
+	repo       CompetitionRepositoryInterface
+	modelTypes RCModelTypeRepositoryInterface
 }
 
 // NewCompetitionService creates a new competition service
-func NewCompetitionService(repo *repository.CompetitionRepository, modelTypes *repository.RCModelTypeRepository) *CompetitionService {
+func NewCompetitionService(repo CompetitionRepositoryInterface, modelTypes RCModelTypeRepositoryInterface) *CompetitionService {
 	return &CompetitionService{repo: repo, modelTypes: modelTypes}
 }
 
