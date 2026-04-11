@@ -3,23 +3,47 @@
 *.o
 *.obj
 *.out
+*.a
+*.so
+*.dll
+*.exe
 
 # Dependencies
 vendor/
+node_modules/
+venv/
+.venv/
+__pycache__/
+*.egg-info/
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Build directories
+build/
+dist/
+*.pyc
+*.pyo
+*.pyd
+*.jar
+*.war
+*.class
+target/
 
 # Logs and temp files
 *.log
 *.tmp
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
 
-# Environment
+# Environment variables
 .env
 .env.local
 *.env.*
-
-# Coverage
-coverage/
-htmlcov/
-.coverage
+.env.*
+.env.local.*
 
 # Editors
 .vscode/
@@ -27,31 +51,24 @@ htmlcov/
 *.swp
 *.swo
 
-# OS
-.DS_Store
-Thumbs.db
+# Coverage
+coverage/
+htmlcov/
+.coverage
+*.coveragerc
 
-# Compressed files
-*.zip
-*.gz
-*.tar
-*.tgz
-*.bz2
-*.xz
-*.7z
-*.rar
-*.zst
-*.lz4
-*.lzh
-*.cab
-*.arj
-*.rpm
-*.deb
-*.Z
-*.lz
-*.lzo
-*.tar.gz
-*.tar.bz2
-*.tar.xz
-*.tar.zst
+# Testing
+.nyc_output/
+coverage.xml
+*.gcda
+*.gcno
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 ```
