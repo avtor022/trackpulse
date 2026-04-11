@@ -1,0 +1,50 @@
+name: CI/CD Pipeline
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.19'
+          cache: true
+
+      - name: Install dependencies
+        run: go mod download
+
+      - name: Install system dependencies for OpenGL/GLFW
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgl1-mesa-dev \
+            libx11-dev \
+            libxrandr-dev \
+            libxi-dev \
+            libxcursor-dev \
+            libxinerama-dev \
+            libxxf86vm-dev \
+            pkg-config
+
+      - name: Run all tests in tests/ directory
+        run: go test ./tests/... -v -race -coverprofile=coverage.out
+
+      - name: Build application
+        run: go build -v -o trackpulse ./cmd/...
+
+      - name: Verify build artifact
+        run: |
+          ls -la trackpulse
+          file trackpulse
