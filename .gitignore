@@ -3,72 +3,14 @@
 *.o
 *.obj
 *.out
-*.a
-*.so
-*.dll
-*.exe
-
 # Dependencies
 vendor/
-node_modules/
-venv/
-.venv/
-__pycache__/
-*.egg-info/
-.Python
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Build directories
-build/
-dist/
-*.pyc
-*.pyo
-*.pyd
-*.jar
-*.war
-*.class
-target/
-
 # Logs and temp files
 *.log
 *.tmp
 *.swp
-*.swo
-.DS_Store
-Thumbs.db
-
-# Environment variables
+# Environment
 .env
 .env.local
 *.env.*
-.env.*
-.env.local.*
-
-# Editors
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# Coverage
-coverage/
-htmlcov/
-.coverage
-*.coveragerc
-
-# Testing
-.nyc_output/
-coverage.xml
-*.gcda
-*.gcno
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
 ```
