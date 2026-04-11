@@ -1,75 +1,19 @@
-# GitHub workflow files (preserved from current changes)
-!.github/workflows/
-.github/workflows/ci-cd.yml
-
-# Logs and temporary files
+```
+# Compiled and build artifacts
+*.o
+*.obj
+*.out
+# Dependencies
+vendor/
+# Logs and temp files
 *.log
 *.tmp
-
-# Environment variables
+*.swp
+# Environment
 .env
 .env.local
 *.env.*
-
-# Editor/IDE files
+# Editors
 .vscode/
 .idea/
-*.swp
-*.swo
-
-# Dependencies
-node_modules/
-venv/
-.venv/
-__pycache__/
-.mypy_cache/
-.pytest_cache/
-.julia/
-zig*/
-target/
-.gradle/
-
-# Build artifacts
-*.pyc
-*.class
-*.o
-*.exe
-*.dll
-*.so
-*.a
-*.obj
-*.out
-dist/
-build/
-coverage/
-htmlcov/
-*.zip
-*.gz
-*.tar
-*.tgz
-*.bz2
-*.xz
-*.7z
-*.rar
-*.zst
-*.lz4
-*.lzh
-*.cab
-*.arj
-*.rpm
-*.deb
-*.Z
-*.lz
-*.lzo
-*.tar.gz
-*.tar.bz2
-*.tar.xz
-*.tar.zst
-
-# System files
-.DS_Store
-Thumbs.db
-*.tmp
-
-# Coverage
-.coverage
+```
