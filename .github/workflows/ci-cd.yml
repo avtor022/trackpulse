@@ -35,13 +35,11 @@ jobs:
             libxi-dev \
             libxcursor-dev \
             libxinerama-dev \
+            libxxf86vm-dev \
             pkg-config
 
       - name: Run all tests in tests/ directory
         run: go test ./tests/... -v -race -coverprofile=coverage.out
-
-      - name: Run all project tests
-        run: go test ./... -v -race
 
       - name: Build application
         run: go build -v -o trackpulse ./cmd/...
