@@ -5,16 +5,26 @@ import (
 
 	"github.com/google/uuid"
 	"trackpulse/internal/models"
-	"trackpulse/internal/repository"
 )
+
+// CompetitorRepositoryInterface defines the interface for competitor data access
+type CompetitorRepositoryInterface interface {
+	GetAll() ([]models.Competitor, error)
+	GetByID(id string) (*models.Competitor, error)
+	GetByNumber(number int) (*models.Competitor, error)
+	Create(competitor *models.Competitor) error
+	Update(competitor *models.Competitor) error
+	Delete(id string) error
+	Count() (int, error)
+}
 
 // CompetitorService handles business logic for competitors
 type CompetitorService struct {
-	repo *repository.CompetitorRepository
+	repo CompetitorRepositoryInterface
 }
 
 // NewCompetitorService creates a new competitor service
-func NewCompetitorService(repo *repository.CompetitorRepository) *CompetitorService {
+func NewCompetitorService(repo CompetitorRepositoryInterface) *CompetitorService {
 	return &CompetitorService{repo: repo}
 }
 
