@@ -25,6 +25,18 @@ jobs:
       - name: Install dependencies
         run: go mod download
 
+      - name: Install system dependencies for OpenGL/GLFW
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgl1-mesa-dev \
+            libx11-dev \
+            libxrandr-dev \
+            libxi-dev \
+            libxcursor-dev \
+            libxinerama-dev \
+            pkg-config
+
       - name: Run all tests in tests/ directory
         run: go test ./tests/... -v -race -coverprofile=coverage.out
 
