@@ -568,7 +568,7 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 				CompetitionTitle: compTitle,
 				CompetitionType:  compType,
 				ModelType:        modelTypeInternal,
-				ModelScale:       strings.TrimSpace(modelScaleEntry.Text),
+				ModelScale:       modelScaleInternal,
 				TrackName:        strings.TrimSpace(trackEntry.Text),
 				LapCountTarget:   lapCountTarget,
 				TimeLimitMinutes: timeLimitMinutes,

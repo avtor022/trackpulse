@@ -3,10 +3,6 @@
 *.o
 *.obj
 *.out
-*.a
-*.so
-*.dll
-*.exe
 
 # Dependencies
 vendor/
@@ -20,58 +16,54 @@ vendor/
 .vscode/
 .idea/
 
-# Coverage
+# Coverage reports
 coverage/
 htmlcov/
 .coverage
+
+# Test cache
+*.pytest_cache/
+.testmondata/
 
 # Distribution artifacts
 dist/
 build/
 target/
 
-# Environment
+# Virtual environments
+.venv/
+venv/
 .env
 .env.local
 *.env.*
 
-# Python specific
+# Byte-compiled Python files
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-.Python
-env/
-venv/
-.venv/
-pip-log.txt
-pip-delete-this-directory.txt
-.tox/
-.coverage*
-.nox/
-.pytest_cache/
+
+# MyPy cache
 .mypy_cache/
 
-# Go specific
-*.out
-*.prof
-*.test
+# Gradle
+.gradle/
+
+# Go build artifacts
 *.exe
 *.dll
 *.so
-*.dylib
-*.jar
-*.war
+*.a
+
+# Compressed files
 *.zip
-*.tar.gz
-*.tar.xz
-*.tar.bz2
-*.tar.zst
-*.7z
-*.rar
 *.gz
+*.tar
+*.tgz
 *.bz2
 *.xz
+*.7z
+*.rar
 *.zst
 *.lz4
 *.lzh
@@ -82,4 +74,8 @@ pip-delete-this-directory.txt
 *.Z
 *.lz
 *.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
 ```
