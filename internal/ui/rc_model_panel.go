@@ -414,12 +414,6 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 		}
 	})
 
-	// Set initial value if editing
-	if model != nil && model.Brand != "" {
-		brandSelect.SetSelected(model.Brand)
-		updateBrandButton(model.Brand)
-	}
-
 	var showBrandPopup func()
 	showBrandPopup = func() {
 		if brandPopupManager == nil {
@@ -483,7 +477,11 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 	}
 
 	// Create a button that shows the brand popup when clicked
-	brandButton = widget.NewButton(locale.T("common.select_one"), func() {
+	initialBrandText := locale.T("common.select_one")
+	if model != nil && model.Brand != "" {
+		initialBrandText = model.Brand
+	}
+	brandButton = widget.NewButton(initialBrandText, func() {
 		if mainDialog != nil {
 			mainDialog.Hide()
 		}
