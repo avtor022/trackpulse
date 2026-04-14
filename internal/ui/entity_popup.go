@@ -7,7 +7,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
-	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"trackpulse/internal/locale"
@@ -60,12 +59,6 @@ func ShowEntityPopup(window fyne.Window, config EntityConfig, currentDialog *dia
 			}
 		})
 		
-		// Create horizontal layout for item button and delete button
-		itemRow := container.NewHBox(
-			itemBtn,
-			layout.NewSpacer(),
-		)
-
 		// Create delete button
 		deleteBtn := widget.NewButtonWithIcon("", theme.DeleteIcon(), func() {
 			// Show confirmation dialog
@@ -103,7 +96,8 @@ func ShowEntityPopup(window fyne.Window, config EntityConfig, currentDialog *dia
 		})
 		deleteBtn.Importance = widget.DangerImportance
 
-		itemRow.Add(deleteBtn)
+		// Create horizontal layout for item button and delete button, aligned left
+		itemRow := container.NewHBox(itemBtn, deleteBtn)
 		entityContainer.Add(itemRow)
 	}
 
