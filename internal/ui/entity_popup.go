@@ -7,7 +7,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
-	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"trackpulse/internal/locale"
@@ -97,12 +96,14 @@ func ShowEntityPopup(window fyne.Window, config EntityConfig, currentDialog *dia
 		})
 		deleteBtn.Importance = widget.DangerImportance
 
-		// Create horizontal layout: item button on left, spacer, delete button on right
-		itemRow := container.NewHBox(itemBtn, layout.NewSpacer(), deleteBtn)
+		// Create horizontal layout: item button on left (stretched), delete button on right (fixed small size)
+		// Wrap itemBtn in a container that forces it to expand
+		itemBtnWrapper := container.NewHBox(itemBtn)
+		itemRow := container.NewBorder(nil, nil, nil, deleteBtn, itemBtnWrapper)
 		entityContainer.Add(itemRow)
 	}
 
-	// Add "Add new" option
+	// Add "Add new" option - make it full width like other buttons
 	addNewBtn := widget.NewButton(config.NewOptionText, func() {
 		// Show dialog to add new item
 		if mainDialog != nil {
@@ -175,7 +176,9 @@ func ShowEntityPopup(window fyne.Window, config EntityConfig, currentDialog *dia
 		*currentDialog = newItemDialog
 		newItemDialog.Show()
 	})
-	entityContainer.Add(addNewBtn)
+	// Wrap add button in a container to make it full width
+	addNewBtnWrapper := container.NewHBox(addNewBtn)
+	entityContainer.Add(addNewBtnWrapper)
 
 	// Create popup dialog
 	popup := dialog.NewCustomWithoutButtons(locale.T("common.select_one"), entityContainer, window)
