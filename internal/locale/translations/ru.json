@@ -215,6 +215,7 @@
     "competition.type.practice": "Практика",
     "competition.type.heat": "Заезд",
     "competition.model_type.all": "Все типы (Массовый заезд)",
+    "competition.model_scale.all": "Все масштабы",
     "competition.status.scheduled": "Запланировано",
     "competition.status.running": "Идёт",
     "competition.status.finished": "Завершено",

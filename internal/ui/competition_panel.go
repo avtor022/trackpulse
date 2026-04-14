@@ -21,11 +21,11 @@ type CompetitionPanel struct {
 	content            *fyne.Container
 	table              *widget.Table
 	statusLabel        *widget.Label
-	window             fyne.Window          // Reference to window for dialogs
-	selectedID         string               // ID of selected competition
-	allCompetitions    []models.Competition // Cache of all competitions
-	headers            []string             // Localized table headers
-	allModelTypes      []models.RCModelType // Cache of all model types
+	window             fyne.Window           // Reference to window for dialogs
+	selectedID         string                // ID of selected competition
+	allCompetitions    []models.Competition  // Cache of all competitions
+	headers            []string              // Localized table headers
+	allModelTypes      []models.RCModelType  // Cache of all model types
 	allModelScales     []models.RCModelScale // Cache of all model scales
 }
 
@@ -392,9 +392,9 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 	modelTypeSelect := widget.NewSelect(modelTypeOptions, nil)
 	modelTypeSelect.PlaceHolder = locale.T("common.select_one")
 
-	// Model scale select - populate from database
-	scaleOptions := []string{}
-	scaleNames := []string{}
+	// Model scale select - populate from database with "All Scales" option for mass race
+	scaleOptions := []string{locale.T("competition.model_scale.all")} // "All scales" option first
+	scaleNames := []string{"*"}                                       // Internal value for "all scales"
 	for _, ms := range p.allModelScales {
 		scaleOptions = append(scaleOptions, ms.Name)
 		scaleNames = append(scaleNames, ms.Name)
@@ -433,7 +433,9 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 			}
 		}
 		// Map internal model scale to display value
-		if competition.ModelScale != "" {
+		if competition.ModelScale == "*" {
+			modelScaleSelect.SetSelected(locale.T("competition.model_scale.all"))
+		} else if competition.ModelScale != "" {
 			for i, name := range scaleNames {
 				if name == competition.ModelScale {
 					modelScaleSelect.SetSelected(scaleOptions[i])
