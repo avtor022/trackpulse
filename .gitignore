@@ -1,1 +1,32 @@
-Nothing to output - the file changes consist only of Go source files (.go) and no build artifacts, dependencies, or temporary files that need to be ignored.
+```
+# Compiled and build artifacts
+*.o
+*.obj
+*.out
+
+# Dependencies
+vendor/
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+
+# Environment
+.env
+.env.local
+.env.*
+
+# Editors
+.vscode/
+.idea/
+
+# Coverage reports
+coverage/
+htmlcov/
+.coverage
+
+# Go-specific
+*.test
+*.prof
+```

@@ -163,11 +163,59 @@ func (m *MockRCModelScaleRepositoryForCompetition) Delete(name string) error {
 	return nil
 }
 
+// MockTrackNameRepository is a mock implementation of TrackNameRepository for testing
+type MockTrackNameRepository struct {
+	trackNames map[string]*models.TrackName
+}
+
+func NewMockTrackNameRepository() *MockTrackNameRepository {
+	return &MockTrackNameRepository{
+		trackNames: make(map[string]*models.TrackName),
+	}
+}
+
+func (m *MockTrackNameRepository) GetAll() ([]models.TrackName, error) {
+	result := make([]models.TrackName, 0, len(m.trackNames))
+	for _, t := range m.trackNames {
+		result = append(result, *t)
+	}
+	return result, nil
+}
+
+func (m *MockTrackNameRepository) GetByName(name string) (*models.TrackName, error) {
+	if t, ok := m.trackNames[name]; ok {
+		return t, nil
+	}
+	return nil, nil
+}
+
+func (m *MockTrackNameRepository) Create(name string) (*models.TrackName, error) {
+	id := uuid.New().String()
+	t := &models.TrackName{
+		ID:   id,
+		Name: name,
+	}
+	m.trackNames[name] = t
+	return t, nil
+}
+
+func (m *MockTrackNameRepository) GetOrCreate(name string) (*models.TrackName, error) {
+	if t, ok := m.trackNames[name]; ok {
+		return t, nil
+	}
+	return m.Create(name)
+}
+
+func (m *MockTrackNameRepository) Delete(name string) error {
+	delete(m.trackNames, name)
+	return nil
+}
+
 // TestCompetitionService_GetAllCompetitions tests the GetAllCompetitions method
 func TestCompetitionService_GetAllCompetitions(t *testing.T) {
 	mockCompRepo := NewMockCompetitionRepository()
 	mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
-	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition())
+	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockTrackNameRepository())
 
 	// Add some test data
 	timeStart := time.Now().Add(time.Hour)
@@ -206,7 +254,7 @@ func TestCompetitionService_GetAllCompetitions(t *testing.T) {
 func TestCompetitionService_GetCompetitionByID_Success(t *testing.T) {
 	mockCompRepo := NewMockCompetitionRepository()
 	mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
-	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition())
+	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockTrackNameRepository())
 
 	compID := uuid.New().String()
 	competition := &models.Competition{
@@ -233,7 +281,7 @@ func TestCompetitionService_GetCompetitionByID_Success(t *testing.T) {
 func TestCompetitionService_GetCompetitionByID_NotFound(t *testing.T) {
 	mockCompRepo := NewMockCompetitionRepository()
 	mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
-	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition())
+	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockTrackNameRepository())
 
 	retrieved, err := svc.GetCompetitionByID(uuid.New().String())
 	if err != nil {
@@ -248,7 +296,7 @@ func TestCompetitionService_GetCompetitionByID_NotFound(t *testing.T) {
 func TestCompetitionService_CreateCompetition_Success(t *testing.T) {
 	mockCompRepo := NewMockCompetitionRepository()
 	mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
-	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition())
+	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockTrackNameRepository())
 
 	competition := &models.Competition{
 		CompetitionTitle: "New Competition",
@@ -280,7 +328,7 @@ func TestCompetitionService_CreateCompetition_Success(t *testing.T) {
 func TestCompetitionService_CreateCompetition_EmptyTitle(t *testing.T) {
 	mockCompRepo := NewMockCompetitionRepository()
 	mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
-	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition())
+	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockTrackNameRepository())
 
 	competition := &models.Competition{
 		CompetitionTitle: "",
@@ -297,7 +345,7 @@ func TestCompetitionService_CreateCompetition_EmptyTitle(t *testing.T) {
 func TestCompetitionService_CreateCompetition_EmptyType(t *testing.T) {
 	mockCompRepo := NewMockCompetitionRepository()
 	mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
-	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition())
+	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockTrackNameRepository())
 
 	competition := &models.Competition{
 		CompetitionTitle: "Valid Title",
@@ -314,7 +362,7 @@ func TestCompetitionService_CreateCompetition_EmptyType(t *testing.T) {
 func TestCompetitionService_UpdateCompetition_Success(t *testing.T) {
 	mockCompRepo := NewMockCompetitionRepository()
 	mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
-	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition())
+	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockTrackNameRepository())
 
 	// Create initial competition
 	compID := uuid.New().String()
@@ -352,7 +400,7 @@ func TestCompetitionService_UpdateCompetition_Success(t *testing.T) {
 func TestCompetitionService_UpdateCompetition_EmptyID(t *testing.T) {
 	mockCompRepo := NewMockCompetitionRepository()
 	mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
-	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition())
+	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockTrackNameRepository())
 
 	c := &models.Competition{
 		ID:               "",
@@ -370,7 +418,7 @@ func TestCompetitionService_UpdateCompetition_EmptyID(t *testing.T) {
 func TestCompetitionService_UpdateCompetition_EmptyTitle(t *testing.T) {
 	mockCompRepo := NewMockCompetitionRepository()
 	mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
-	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition())
+	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockTrackNameRepository())
 
 	c := &models.Competition{
 		ID:               uuid.New().String(),
@@ -389,7 +437,7 @@ func TestCompetitionService_UpdateCompetition_EmptyTitle(t *testing.T) {
 func TestCompetitionService_UpdateCompetition_EmptyType(t *testing.T) {
 	mockCompRepo := NewMockCompetitionRepository()
 	mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
-	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition())
+	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockTrackNameRepository())
 
 	c := &models.Competition{
 		ID:               uuid.New().String(),
@@ -408,7 +456,7 @@ func TestCompetitionService_UpdateCompetition_EmptyType(t *testing.T) {
 func TestCompetitionService_UpdateCompetition_NotFound(t *testing.T) {
 	mockCompRepo := NewMockCompetitionRepository()
 	mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
-	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition())
+	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockTrackNameRepository())
 
 	c := &models.Competition{
 		ID:               uuid.New().String(),
@@ -426,7 +474,7 @@ func TestCompetitionService_UpdateCompetition_NotFound(t *testing.T) {
 func TestCompetitionService_DeleteCompetition_Success(t *testing.T) {
 	mockCompRepo := NewMockCompetitionRepository()
 	mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
-	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition())
+	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockTrackNameRepository())
 
 	// Create competition
 	c := &models.Competition{
@@ -453,7 +501,7 @@ func TestCompetitionService_DeleteCompetition_Success(t *testing.T) {
 func TestCompetitionService_DeleteCompetition_EmptyID(t *testing.T) {
 	mockCompRepo := NewMockCompetitionRepository()
 	mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
-	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition())
+	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockTrackNameRepository())
 
 	err := svc.DeleteCompetition("")
 	if err == nil {
@@ -465,7 +513,7 @@ func TestCompetitionService_DeleteCompetition_EmptyID(t *testing.T) {
 func TestCompetitionService_GetCompetitionCount(t *testing.T) {
 	mockCompRepo := NewMockCompetitionRepository()
 	mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
-	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition())
+	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockTrackNameRepository())
 
 	// Empty count
 	count, err := svc.GetCompetitionCount()
@@ -499,7 +547,7 @@ func TestCompetitionService_GetCompetitionCount(t *testing.T) {
 func TestCompetitionService_GetCompetitionsByStatus(t *testing.T) {
 	mockCompRepo := NewMockCompetitionRepository()
 	mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
-	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition())
+	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockTrackNameRepository())
 
 	// Add competitions with different statuses
 	c1 := &models.Competition{
@@ -563,7 +611,7 @@ func TestCompetitionService_GetCompetitionsByStatus(t *testing.T) {
 func TestCompetitionService_GetAllModelTypes(t *testing.T) {
 	mockCompRepo := NewMockCompetitionRepository()
 	mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
-	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition())
+	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockTrackNameRepository())
 
 	// Add some model types
 	mockTypeRepo.Create("Buggy")
