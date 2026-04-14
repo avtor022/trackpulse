@@ -125,11 +125,11 @@ func (m *ReferencePopupManager) ShowPopup(mainDialog dialog.Dialog, currentDialo
 		selectBtn.Importance = widget.LowImportance
 		
 		// Create horizontal container with select button and delete button
-		// Use VBox to stack buttons vertically, each taking full width
 		selectBtn.Importance = widget.MediumImportance
 		deleteBtn.Importance = widget.DangerImportance
 		
-		itemRow := container.NewVBox(selectBtn, deleteBtn)
+		// Place both buttons on the same row using HBox
+		itemRow := container.NewHBox(selectBtn, deleteBtn)
 		itemContainer.Add(itemRow)
 	}
 
