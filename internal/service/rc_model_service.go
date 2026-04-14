@@ -14,11 +14,12 @@ type RCModelService struct {
 	brandRepo   *repository.RCModelBrandRepository
 	scaleRepo   *repository.RCModelScaleRepository
 	typeRepo    *repository.RCModelTypeRepository
+	trackRepo   *repository.RCModelTrackRepository
 }
 
 // NewRCModelService creates a new RC model service
-func NewRCModelService(modelRepo *repository.RCModelRepository, brandRepo *repository.RCModelBrandRepository, scaleRepo *repository.RCModelScaleRepository, typeRepo *repository.RCModelTypeRepository) *RCModelService {
-	return &RCModelService{modelRepo: modelRepo, brandRepo: brandRepo, scaleRepo: scaleRepo, typeRepo: typeRepo}
+func NewRCModelService(modelRepo *repository.RCModelRepository, brandRepo *repository.RCModelBrandRepository, scaleRepo *repository.RCModelScaleRepository, typeRepo *repository.RCModelTypeRepository, trackRepo *repository.RCModelTrackRepository) *RCModelService {
+	return &RCModelService{modelRepo: modelRepo, brandRepo: brandRepo, scaleRepo: scaleRepo, typeRepo: typeRepo, trackRepo: trackRepo}
 }
 
 // GetAllModels returns all RC models
@@ -301,6 +302,50 @@ func (s *RCModelService) DeleteModelType(name string) error {
 	err = s.typeRepo.Delete(name)
 	if err != nil {
 		return fmt.Errorf("failed to delete model type: %w", err)
+	}
+
+	return nil
+}
+
+// GetAllTracks returns all RC model tracks
+func (s *RCModelService) GetAllTracks() ([]models.RCModelTrack, error) {
+	return s.trackRepo.GetAll()
+}
+
+// AddTrack adds a new track to the database
+func (s *RCModelService) AddTrack(name string) error {
+	if name == "" {
+		return fmt.Errorf("track name is required")
+	}
+
+	// Check if track already exists
+	existing, err := s.trackRepo.GetByName(name)
+	if err != nil {
+		return fmt.Errorf("failed to check existing track: %w", err)
+	}
+	if existing != nil {
+		return fmt.Errorf("track '%s' already exists", name)
+	}
+
+	// Create new track
+	_, err = s.trackRepo.Create(name)
+	if err != nil {
+		return fmt.Errorf("failed to create track: %w", err)
+	}
+
+	return nil
+}
+
+// DeleteTrack deletes a track from the database
+func (s *RCModelService) DeleteTrack(name string) error {
+	if name == "" {
+		return fmt.Errorf("track name is required")
+	}
+
+	// Delete track
+	err := s.trackRepo.Delete(name)
+	if err != nil {
+		return fmt.Errorf("failed to delete track: %w", err)
 	}
 
 	return nil
