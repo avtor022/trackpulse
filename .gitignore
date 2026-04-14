@@ -1,42 +1,225 @@
 ```
-# Compiled and binary files
+# Compiled and build artifacts
+*.pyc
+__pycache__/
 *.o
 *.obj
+*.so
+*.dll
+*.exe
+*.class
 *.out
+*.a
+*.lib
 
 # Dependencies
-vendor/
+node_modules/
+venv/
+.venv/
+.env
+.env.local
+.env.*
+
+# Build directories
+dist/
+build/
+target/
+*.egg-info/
 
 # Logs and temp files
 *.log
 *.tmp
-
-# Environment
-.env
-.env.local
-*.env.*
-
-# Editors
-.vscode/
-.idea/
 *.swp
 *.swo
+*.bak
+*.~
+*~
 
-# Coverage
-coverage/
-htmlcov/
+# Coverage reports
 .coverage
+htmlcov/
+coverage/
 
-# Build artifacts
+# IDE specific
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+.settings/
+.project
+.classpath
+.pytest_cache/
+.mypy_cache/
+.nyc_output/
+coverage.xml
+
+# OS generated
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+.directory
+*.nib
+.vagrant/
+.svn/
+
+# Archives
+*.zip
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.gz
+*.rar
+*.7z
+*.bz2
+*.xz
+*.zst
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Testing
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.egg
+*.whl
+dist/
+build/
+*.egg-info/
+
+# Documentation
+docs/_build/
+*.pdf
+*.docx
+*.rtf
+
+# Node.js
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.git/modules/
+*.sublime-workspace
+.pytest_cache/
+.hypothesis/
+.DS_Store
+.venv
+venv
+ENV
+env.bak
+venv.bak
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.prof
+vendor/
+Godeps/
+bin/
+*.mod
+*.sum
+.sum.lock
+*.cache
+*.out
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+hs_err_pid*
+replay_pid*
+*.idx
+*.data
+*.log
+*.tmp
+.DS_Store
+*.swp
+*.swo
+*~
+._*
+.DS_Store
+.DS_Store?
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+*.iml
+*.ipr
+*.iws
+.idea/
+*.o
+*.so
+*.dll
+*.class
+*.pyc
+*.pyo
+*.pyd
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.dll
+*.exe
+*.class
+*.out
+*.a
+*.lib
+*.obj
+*.o
+*.swp
+*.swo
+*.tmp
+*.log
+*.env
+*.env.local
+*.env.*
+node_modules/
 dist/
 build/
 target/
-*.class
-*.pyc
-__pycache__/
-.mypy_cache/
-.pytest_cache/
-node_modules/
 .venv/
 venv/
+.env
+.env.local
+.env.*
+*.log
+*.tmp
+*.swp
+*.swo
+*.bak
+*~
+~*
+.DS_Store
+Thumbs.db
 ```

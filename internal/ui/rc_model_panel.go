@@ -389,182 +389,15 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 
 	var mainDialog dialog.Dialog
 
-	// Function to show brand selection popup with delete buttons
-	var showBrandPopup func()
-	showBrandPopup = func() {
-		if currentDialog != nil {
-			currentDialog.Hide()
-		}
-
-		// Create container for brand options
-		brandContainer := container.NewVBox()
-
-		// Add existing brands with delete buttons
-		for _, brand := range existingBrands {
-			brandName := brand
-			// Create horizontal layout for brand name and delete button
-			brandRow := container.NewHBox(
-				widget.NewLabel(brand),
-				layout.NewSpacer(),
-			)
-
-			// Create delete button
-			deleteBtn := widget.NewButtonWithIcon("", theme.DeleteIcon(), func() {
-				// Show confirmation dialog
-				dialog.ShowConfirm(
-					locale.T("dialog.delete.title"),
-					fmt.Sprintf(locale.T("dialog.delete_brand.message"), brandName),
-					func(confirmed bool) {
-						if confirmed {
-							// Delete brand from database
-							if err := p.modelService.DeleteBrand(brandName); err != nil {
-								dialog.ShowError(err, p.window)
-								return
-							}
-
-							// Remove from existingBrands slice
-							newExistingBrands := []string{}
-							for _, b := range existingBrands {
-								if b != brandName {
-									newExistingBrands = append(newExistingBrands, b)
-								}
-							}
-							existingBrands = newExistingBrands
-
-							// Refresh the popup
-							showBrandPopup()
-
-							// Update main dialog brand select if needed
-							if brandSelect.Selected == brandName {
-								brandSelect.SetSelected("")
-							}
-						}
-					},
-					p.window,
-				)
-			})
-			deleteBtn.Importance = widget.DangerImportance
-
-			brandRow.Add(deleteBtn)
-			brandContainer.Add(brandRow)
-		}
-
-		// Add "Add new brand" option
-		addNewBtn := widget.NewButton(newBrandOption, func() {
-			// Show dialog to add new brand
-			if mainDialog != nil {
-				mainDialog.Hide()
-			}
-			if currentDialog != nil {
-				currentDialog.Hide()
-			}
-
-			newBrandEntry := widget.NewEntry()
-			newBrandEntry.SetPlaceHolder(locale.T("dialog.add_brand.placeholder"))
-
-			// Create label and input field vertically for better width
-			label := widget.NewLabel(locale.T("dialog.add_brand.label"))
-			entryContainer := container.NewVBox(label, newBrandEntry)
-
-			newBrandDialog := dialog.NewCustomWithoutButtons(locale.T("dialog.add_brand.title"), entryContainer, p.window)
-
-			cancelBtn := widget.NewButton(locale.T("common.cancel"), func() {
-				newBrandDialog.Hide()
-				// Return to main dialog
-				if mainDialog != nil {
-					mainDialog.Show()
-				}
-			})
-
-			saveBtn := widget.NewButton(locale.T("common.save"), func() {
-				newBrandName := strings.TrimSpace(newBrandEntry.Text)
-				if newBrandName == "" {
-					dialog.ShowError(fmt.Errorf(locale.T("info.enter_brand_name")), p.window)
-					return
-				}
-
-				// Check if brand already exists
-				for _, b := range existingBrands {
-					if strings.EqualFold(b, newBrandName) {
-						dialog.ShowError(fmt.Errorf(locale.T("dialog.new_brand.error_exists"), newBrandName), p.window)
-						return
-					}
-				}
-
-				// Add new brand to reference table
-				if err := p.modelService.AddBrand(newBrandName); err != nil {
-					dialog.ShowError(err, p.window)
-					return
-				}
-
-				// Update brand list
-				existingBrands = append(existingBrands, newBrandName)
-				selectOptions = append(existingBrands, newBrandOption)
-				brandSelect.Options = selectOptions
-
-				newBrandDialog.Hide()
-				// Return to main dialog with new brand selected
-				if mainDialog != nil {
-					mainDialog.Show()
-				}
-				brandSelect.SetSelected(newBrandName)
-			})
-
-			newBrandDialog.SetButtons([]fyne.CanvasObject{cancelBtn, saveBtn})
-
-			// Increase dialog width for new brand
-			parentSize := p.window.Canvas().Size()
-			dialogWidth := parentSize.Width * 0.6
-			if dialogWidth < 700 {
-				dialogWidth = 700
-			}
-			newBrandDialog.Resize(fyne.NewSize(dialogWidth, newBrandDialog.MinSize().Height))
-
-			currentDialog = newBrandDialog
-			newBrandDialog.Show()
-		})
-		brandContainer.Add(addNewBtn)
-
-		// Create popup dialog
-		popup := dialog.NewCustomWithoutButtons(locale.T("common.select_one"), brandContainer, p.window)
-
-		// Add close button
-		closeBtn := widget.NewButton(locale.T("common.close"), func() {
-			popup.Hide()
-			currentDialog = nil
-			// Return to main dialog
-			if mainDialog != nil {
-				mainDialog.Show()
-			}
-		})
-
-		popup.SetButtons([]fyne.CanvasObject{closeBtn})
-
-		// Resize popup
-		parentSize := p.window.Canvas().Size()
-		popupWidth := parentSize.Width * 0.4
-		if popupWidth < 400 {
-			popupWidth = 400
-		}
-		popup.Resize(fyne.NewSize(popupWidth, popup.MinSize().Height))
-
-		currentDialog = popup
-		popup.Show()
-	}
-
-	// Create a button that shows the brand popup when clicked
-	brandButton := widget.NewButton(locale.T("common.select_one"), func() {
-		if mainDialog != nil {
-			mainDialog.Hide()
-		}
-		showBrandPopup()
-	})
-
-	// Store reference for locale updates - we'll update the button text via brandSelect placeholder
-	p.brandSelect = &widget.Select{PlaceHolder: locale.T("common.select_one")}
+	// Create brand popup manager
+	var brandPopupManager *ReferencePopupManager
 
 	// Helper function to update brand button text
+	var brandButton *widget.Button
 	updateBrandButton := func(selected string) {
+		if brandButton == nil {
+			return
+		}
 		if selected == "" {
 			brandButton.SetText(locale.T("common.select_one"))
 		} else {
@@ -587,8 +420,81 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 		updateBrandButton(model.Brand)
 	}
 
+	var showBrandPopup func()
+	showBrandPopup = func() {
+		if brandPopupManager == nil {
+			// Convert existingBrands to ReferenceItem slice
+			items := make([]ReferenceItem, len(existingBrands))
+			for i, b := range existingBrands {
+				items[i] = ReferenceItem{Name: b}
+			}
+
+			brandPopupManager = NewReferencePopupManager(
+				p.window,
+				ReferencePopupConfig{
+					Title:          "common.select_one",
+					AddTitle:       "dialog.add_brand.title",
+					AddLabel:       "dialog.add_brand.label",
+					AddPlaceholder: "dialog.add_brand.placeholder",
+					DeleteMessage:  "dialog.delete_brand.message",
+					NewErrorExists: "dialog.new_brand.error_exists",
+					EnterNameInfo:  "info.enter_brand_name",
+					GetAllFunc: func() ([]ReferenceItem, error) {
+						allBrands, err := p.modelService.GetAllBrands()
+						if err != nil {
+							return nil, err
+						}
+						result := make([]ReferenceItem, len(allBrands))
+						for i, b := range allBrands {
+							result[i] = ReferenceItem{Name: b.Name}
+						}
+						return result, nil
+					},
+					AddFunc: func(name string) error {
+						return p.modelService.AddBrand(name)
+					},
+					DeleteFunc: func(name string) error {
+						return p.modelService.DeleteBrand(name)
+					},
+					OnItemSelected: func(selected string) {
+						brandSelect.SetSelected(selected)
+						updateBrandButton(selected)
+					},
+					UpdateOptions: func(opts []string) {
+						selectOptions = opts
+						brandSelect.Options = selectOptions
+					},
+				},
+				existingBrands,
+				newBrandOption,
+				func(selected string) {
+					brandSelect.SetSelected(selected)
+					updateBrandButton(selected)
+				},
+				func(opts []string) {
+					selectOptions = opts
+					brandSelect.Options = selectOptions
+				},
+			)
+		}
+		brandPopupManager.ShowPopup(mainDialog, &currentDialog, func(d dialog.Dialog) {
+			currentDialog = d
+		})
+	}
+
+	// Create a button that shows the brand popup when clicked
+	brandButton = widget.NewButton(locale.T("common.select_one"), func() {
+		if mainDialog != nil {
+			mainDialog.Hide()
+		}
+		showBrandPopup()
+	})
+
 	// Use the button as the brand widget
 	var brandWidget = brandButton
+
+	// Store reference for locale updates - we'll update the button text via brandSelect placeholder
+	p.brandSelect = &widget.Select{PlaceHolder: locale.T("common.select_one")}
 
 	// Create widget for model name - simple text entry
 	p.modelNameEntry = widget.NewEntry()
