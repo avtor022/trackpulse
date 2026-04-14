@@ -57,7 +57,7 @@ func TestReferencePopupManagerCreation(t *testing.T) {
 	config := ui.ReferencePopupConfig{
 		Title:          "dialog.title",
 		AddTitle:       "dialog.add.title",
-		AddLabel:       "dialog.add.label",
+		AddLabel:       "dialog.label",
 		AddPlaceholder: "dialog.add.placeholder",
 		DeleteMessage:  "dialog.delete.message",
 		NewErrorExists: "dialog.error.exists",
@@ -102,6 +102,9 @@ func TestReferencePopupManagerCreation(t *testing.T) {
 	if len(updatedOptions) != 3 {
 		t.Errorf("Expected 3 options after update, got %d", len(updatedOptions))
 	}
+
+	// Verify selectedValue variable is used (even if callback wasn't triggered in this test)
+	_ = selectedValue
 }
 
 // TestGetAllFuncError tests error handling in GetAllFunc
@@ -179,6 +182,9 @@ func TestOnSelectCallback(t *testing.T) {
 	// Note: We can't directly test the onSelect callback being triggered
 	// during ShowPopup without a real window, but we verify it's stored
 	_ = manager
+
+	// Verify selectedValue variable is used (even if callback wasn't triggered in this test)
+	_ = selectedValue
 }
 
 // TestEmptyItemsList tests handling of empty items list
