@@ -1,42 +1,98 @@
 ```
-# Compiled and binary files
+# Compiled and build artifacts
+*.pyc
+__pycache__/
 *.o
 *.obj
+*.class
+*.exe
+*.dll
+*.so
+*.a
 *.out
+*.pyd
+*.dylib
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.7z
+*.rar
+*.gz
+*.bz2
+*.xz
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
 
 # Dependencies
-vendor/
-
-# Logs and temp files
-*.log
-*.tmp
-
-# Environment
+node_modules/
+venv/
+.venv/
 .env
 .env.local
-*.env.*
+.env.*
 
-# Editors
+# Build directories
+dist/
+build/
+target/
+.gradle/
+.cargo/
+.packages/
+
+# Python specific
+*.pyc
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.coverage.*
+
+# Go specific
+*.o
+*.a
+*.so
+*.exe
+*.dll
+*.dylib
+*.test
+*.prof
+
+# Editors and IDEs
 .vscode/
 .idea/
 *.swp
 *.swo
+*.tmp
 
-# Coverage
-coverage/
-htmlcov/
-.coverage
+# Logs
+*.log
 
-# Build artifacts
-dist/
-build/
-target/
-*.class
-*.pyc
-__pycache__/
-.mypy_cache/
-.pytest_cache/
-node_modules/
-.venv/
-venv/
+# OS generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
 ```
+
+Wait, let me reconsider. The changes are only Go source files (.go), which are source code files. According to rule #6, if the change list contains ONLY source files and NO build artifacts, dependencies, or temp files, I should output an empty .gitignore.
+
+The files added and modified are:
+- internal/ui/entity_popup.go (Go source file)
+- internal/ui/rc_model_panel.go (Go source file)
+
+These are both source code files, not build artifacts or dependencies.
+
+(empty - no output)
