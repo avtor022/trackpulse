@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"trackpulse/internal/locale"
@@ -96,8 +97,8 @@ func ShowEntityPopup(window fyne.Window, config EntityConfig, currentDialog *dia
 		})
 		deleteBtn.Importance = widget.DangerImportance
 
-		// Create horizontal layout for item button and delete button, aligned left
-		itemRow := container.NewHBox(itemBtn, deleteBtn)
+		// Create horizontal layout: item button on left, spacer, delete button on right
+		itemRow := container.NewHBox(itemBtn, layout.NewSpacer(), deleteBtn)
 		entityContainer.Add(itemRow)
 	}
 
