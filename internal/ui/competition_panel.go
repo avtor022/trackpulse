@@ -21,11 +21,12 @@ type CompetitionPanel struct {
 	content            *fyne.Container
 	table              *widget.Table
 	statusLabel        *widget.Label
-	window             fyne.Window          // Reference to window for dialogs
-	selectedID         string               // ID of selected competition
-	allCompetitions    []models.Competition // Cache of all competitions
-	headers            []string             // Localized table headers
-	allModelTypes      []models.RCModelType // Cache of all model types
+	window             fyne.Window           // Reference to window for dialogs
+	selectedID         string                // ID of selected competition
+	allCompetitions    []models.Competition  // Cache of all competitions
+	headers            []string              // Localized table headers
+	allModelTypes      []models.RCModelType  // Cache of all model types
+	allModelScales     []models.RCModelScale // Cache of all model scales
 }
 
 // updateLocale updates all localized text in the panel
@@ -259,6 +260,12 @@ func (p *CompetitionPanel) refreshData() {
 			fmt.Println("ERROR loading model types:", err)
 		}
 
+		// Load model scales for dropdown
+		p.allModelScales, err = p.competitionService.GetAllModelScales()
+		if err != nil {
+			fmt.Println("ERROR loading model scales:", err)
+		}
+
 		// Force table to recalculate rows count and update cell contents
 		p.table.Refresh()
 		if len(p.allCompetitions) == 0 {
@@ -385,9 +392,15 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 	modelTypeSelect := widget.NewSelect(modelTypeOptions, nil)
 	modelTypeSelect.PlaceHolder = locale.T("common.select_one")
 
-	// Model scale entry
-	modelScaleEntry := widget.NewEntry()
-	modelScaleEntry.SetPlaceHolder(locale.T("form.competition.model_scale_placeholder"))
+	// Model scale select - populate from database with "All Scales" option for mass race
+	scaleOptions := []string{locale.T("competition.model_scale.all")} // "All scales" option first
+	scaleNames := []string{"*"}                                       // Internal value for "all scales"
+	for _, ms := range p.allModelScales {
+		scaleOptions = append(scaleOptions, ms.Name)
+		scaleNames = append(scaleNames, ms.Name)
+	}
+	modelScaleSelect := widget.NewSelect(scaleOptions, nil)
+	modelScaleSelect.PlaceHolder = locale.T("common.select_one")
 
 	// Track name entry
 	trackEntry := widget.NewEntry()
@@ -419,7 +432,17 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 				}
 			}
 		}
-		modelScaleEntry.SetText(competition.ModelScale)
+		// Map internal model scale to display value
+		if competition.ModelScale == "*" {
+			modelScaleSelect.SetSelected(locale.T("competition.model_scale.all"))
+		} else if competition.ModelScale != "" {
+			for i, name := range scaleNames {
+				if name == competition.ModelScale {
+					modelScaleSelect.SetSelected(scaleOptions[i])
+					break
+				}
+			}
+		}
 		trackEntry.SetText(competition.TrackName)
 		if competition.LapCountTarget != nil {
 			lapCountEntry.SetText(strconv.Itoa(*competition.LapCountTarget))
@@ -438,7 +461,7 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 		widget.NewFormItem(locale.T("form.competition.title"), titleEntry),
 		widget.NewFormItem(locale.T("form.competition.type"), typeSelect),
 		widget.NewFormItem(locale.T("form.competition.model_type"), modelTypeSelect),
-		widget.NewFormItem(locale.T("form.competition.model_scale"), modelScaleEntry),
+		widget.NewFormItem(locale.T("form.competition.model_scale"), modelScaleSelect),
 		widget.NewFormItem(locale.T("form.competition.track"), trackEntry),
 		widget.NewFormItem(locale.T("form.competition.lap_count"), lapCountEntry),
 		widget.NewFormItem(locale.T("form.competition.time_limit"), timeLimitEntry),
@@ -506,6 +529,16 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 			}
 		}
 
+		// Map model scale selection to internal value
+		modelScaleValue := modelScaleSelect.Selected
+		var modelScaleInternal string
+		for i, opt := range scaleOptions {
+			if opt == modelScaleValue {
+				modelScaleInternal = scaleNames[i]
+				break
+			}
+		}
+
 		var newC *models.Competition
 		if competition != nil {
 			// Update existing
@@ -513,7 +546,7 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 			newC.CompetitionTitle = compTitle
 			newC.CompetitionType = compType
 			newC.ModelType = modelTypeInternal
-			newC.ModelScale = strings.TrimSpace(modelScaleEntry.Text)
+			newC.ModelScale = modelScaleInternal
 			newC.TrackName = strings.TrimSpace(trackEntry.Text)
 			newC.LapCountTarget = lapCountTarget
 			newC.TimeLimitMinutes = timeLimitMinutes
@@ -537,7 +570,7 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 				CompetitionTitle: compTitle,
 				CompetitionType:  compType,
 				ModelType:        modelTypeInternal,
-				ModelScale:       strings.TrimSpace(modelScaleEntry.Text),
+				ModelScale:       modelScaleInternal,
 				TrackName:        strings.TrimSpace(trackEntry.Text),
 				LapCountTarget:   lapCountTarget,
 				TimeLimitMinutes: timeLimitMinutes,

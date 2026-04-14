@@ -31,11 +31,21 @@ type RCModelTypeRepositoryInterface interface {
 type CompetitionService struct {
 	repo       CompetitionRepositoryInterface
 	modelTypes RCModelTypeRepositoryInterface
+	scales     RCModelScaleRepositoryInterface
+}
+
+// RCModelScaleRepositoryInterface defines the interface for RC model scale data access
+type RCModelScaleRepositoryInterface interface {
+	GetAll() ([]models.RCModelScale, error)
+	GetByName(name string) (*models.RCModelScale, error)
+	Create(name string) (*models.RCModelScale, error)
+	GetOrCreate(name string) (*models.RCModelScale, error)
+	Delete(name string) error
 }
 
 // NewCompetitionService creates a new competition service
-func NewCompetitionService(repo CompetitionRepositoryInterface, modelTypes RCModelTypeRepositoryInterface) *CompetitionService {
-	return &CompetitionService{repo: repo, modelTypes: modelTypes}
+func NewCompetitionService(repo CompetitionRepositoryInterface, modelTypes RCModelTypeRepositoryInterface, scales RCModelScaleRepositoryInterface) *CompetitionService {
+	return &CompetitionService{repo: repo, modelTypes: modelTypes, scales: scales}
 }
 
 // GetAllCompetitions returns all competitions
@@ -51,6 +61,11 @@ func (s *CompetitionService) GetCompetitionByID(id string) (*models.Competition,
 // GetAllModelTypes returns all RC model types for competition selection
 func (s *CompetitionService) GetAllModelTypes() ([]models.RCModelType, error) {
 	return s.modelTypes.GetAll()
+}
+
+// GetAllModelScales returns all RC model scales for competition selection
+func (s *CompetitionService) GetAllModelScales() ([]models.RCModelScale, error) {
+	return s.scales.GetAll()
 }
 
 // CreateCompetition creates a new competition with validation
