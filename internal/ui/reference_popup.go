@@ -128,9 +128,8 @@ func (m *ReferencePopupManager) ShowPopup(mainDialog dialog.Dialog, currentDialo
 		selectBtn.Importance = widget.MediumImportance
 		deleteBtn.Importance = widget.DangerImportance
 		
-		// Place both buttons on the same row using Grid with columns
-		// Expand select button to fill available space, keep delete button compact
-		itemRow := container.NewGridWithColumns(2, selectBtn, deleteBtn)
+		// Place both buttons on the same row: select button expands, delete button stays compact
+		itemRow := container.NewBorder(nil, nil, nil, deleteBtn, selectBtn)
 		itemContainer.Add(itemRow)
 	}
 
