@@ -131,7 +131,7 @@ func (m *ReferencePopupManager) ShowPopup(mainDialog dialog.Dialog, currentDialo
 		// Place both buttons on the same row using HBox
 		// Expand select button to fill available space, keep delete button compact
 		itemRow := container.NewHBox(
-			container.NewPadded(selectBtn),
+			selectBtn,
 			deleteBtn,
 		)
 		itemContainer.Add(itemRow)
