@@ -2,14 +2,13 @@
 # Compiled and binary files
 *.pyc
 __pycache__/
+*.class
 *.o
 *.obj
-*.so
-*.dll
 *.exe
-*.class
+*.dll
+*.so
 *.a
-*.lib
 *.out
 
 # Dependencies
@@ -18,49 +17,54 @@ venv/
 .venv/
 .env
 .env.local
-*.env.*
+.env.*
 
 # Build artifacts
 dist/
 build/
 target/
-*.jar
-*.war
-*.zip
 *.tar.gz
-*.tar.xz
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
 
-# Editor/IDE files
+# Editors and IDEs
 .vscode/
 .idea/
 *.swp
 *.swo
 *.tmp
+
+# Logs
 *.log
-*.bak
-*~
+
+# Coverage
+coverage/
+htmlcov/
+.coverage
 
 # System files
 .DS_Store
 Thumbs.db
 
-# Coverage reports
-coverage/
-htmlcov/
-.coverage
-
-# Python specific
-*.pyc
-__pycache__/
-*.pyo
-*.pyd
-.Python
-*.so
-*.egg-info/
-.eggs/
-
-# Cache directories
+# Caches
 .mypy_cache/
 .pytest_cache/
-.hypothesis/
+.gradle/
+
 ```

@@ -42,9 +42,8 @@ func ShowEntityPopup(window fyne.Window, config EntityConfig, currentDialog *dia
 	for _, item := range *config.ExistingItems {
 		itemName := item
 		
-		// Create label that can be clicked to select the item
-		itemLabel := widget.NewLabel(item)
-		itemLabel.OnTapped = func() {
+		// Create button that shows the item name and can be clicked to select it
+		itemBtn := widget.NewButton(item, func() {
 			// Select this item and close popup
 			if mainDialog != nil {
 				mainDialog.Hide()
@@ -59,11 +58,11 @@ func ShowEntityPopup(window fyne.Window, config EntityConfig, currentDialog *dia
 			if mainDialog != nil {
 				mainDialog.Show()
 			}
-		}
+		})
 		
-		// Create horizontal layout for item name and delete button
+		// Create horizontal layout for item button and delete button
 		itemRow := container.NewHBox(
-			itemLabel,
+			itemBtn,
 			layout.NewSpacer(),
 		)
 
