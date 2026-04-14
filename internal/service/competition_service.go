@@ -32,6 +32,7 @@ type CompetitionService struct {
 	repo       CompetitionRepositoryInterface
 	modelTypes RCModelTypeRepositoryInterface
 	scales     RCModelScaleRepositoryInterface
+	tracks     TrackNameRepositoryInterface
 }
 
 // RCModelScaleRepositoryInterface defines the interface for RC model scale data access
@@ -43,9 +44,18 @@ type RCModelScaleRepositoryInterface interface {
 	Delete(name string) error
 }
 
+// TrackNameRepositoryInterface defines the interface for track name data access
+type TrackNameRepositoryInterface interface {
+	GetAll() ([]models.TrackName, error)
+	GetByName(name string) (*models.TrackName, error)
+	Create(name string) (*models.TrackName, error)
+	GetOrCreate(name string) (*models.TrackName, error)
+	Delete(name string) error
+}
+
 // NewCompetitionService creates a new competition service
-func NewCompetitionService(repo CompetitionRepositoryInterface, modelTypes RCModelTypeRepositoryInterface, scales RCModelScaleRepositoryInterface) *CompetitionService {
-	return &CompetitionService{repo: repo, modelTypes: modelTypes, scales: scales}
+func NewCompetitionService(repo CompetitionRepositoryInterface, modelTypes RCModelTypeRepositoryInterface, scales RCModelScaleRepositoryInterface, tracks TrackNameRepositoryInterface) *CompetitionService {
+	return &CompetitionService{repo: repo, modelTypes: modelTypes, scales: scales, tracks: tracks}
 }
 
 // GetAllCompetitions returns all competitions
@@ -66,6 +76,11 @@ func (s *CompetitionService) GetAllModelTypes() ([]models.RCModelType, error) {
 // GetAllModelScales returns all RC model scales for competition selection
 func (s *CompetitionService) GetAllModelScales() ([]models.RCModelScale, error) {
 	return s.scales.GetAll()
+}
+
+// GetAllTrackNames returns all track names for competition selection
+func (s *CompetitionService) GetAllTrackNames() ([]models.TrackName, error) {
+	return s.tracks.GetAll()
 }
 
 // CreateCompetition creates a new competition with validation
