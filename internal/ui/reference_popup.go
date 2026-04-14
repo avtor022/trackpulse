@@ -76,6 +76,22 @@ func (m *ReferencePopupManager) ShowPopup(mainDialog dialog.Dialog, currentDialo
 			layout.NewSpacer(),
 		)
 
+		// Make the entire row clickable for selection
+		itemRowWrapper := container.NewVBox(itemRow)
+		itemRowWrapper.OnTapped = func() {
+			// Select this item
+			if m.onSelect != nil {
+				m.onSelect(itemName)
+			}
+			// Hide popup and return to main dialog
+			if *currentDialog != nil {
+				(*currentDialog).Hide()
+			}
+			if mainDialog != nil {
+				mainDialog.Show()
+			}
+		}
+
 		// Create delete button
 		deleteBtn := widget.NewButtonWithIcon("", theme.DeleteIcon(), func() {
 			// Show confirmation dialog
@@ -114,7 +130,7 @@ func (m *ReferencePopupManager) ShowPopup(mainDialog dialog.Dialog, currentDialo
 		deleteBtn.Importance = widget.DangerImportance
 
 		itemRow.Add(deleteBtn)
-		itemContainer.Add(itemRow)
+		itemContainer.Add(itemRowWrapper)
 	}
 
 	// Add "Add new" option
