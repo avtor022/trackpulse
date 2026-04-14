@@ -41,9 +41,29 @@ func ShowEntityPopup(window fyne.Window, config EntityConfig, currentDialog *dia
 	// Add existing items with delete buttons
 	for _, item := range *config.ExistingItems {
 		itemName := item
+		
+		// Create label that can be clicked to select the item
+		itemLabel := widget.NewLabel(item)
+		itemLabel.OnTapped = func() {
+			// Select this item and close popup
+			if mainDialog != nil {
+				mainDialog.Hide()
+			}
+			if *currentDialog != nil {
+				(*currentDialog).Hide()
+				*currentDialog = nil
+			}
+			// Update the select widget with selected item
+			(*selectWidget).SetSelected(itemName)
+			// Return to main dialog
+			if mainDialog != nil {
+				mainDialog.Show()
+			}
+		}
+		
 		// Create horizontal layout for item name and delete button
 		itemRow := container.NewHBox(
-			widget.NewLabel(item),
+			itemLabel,
 			layout.NewSpacer(),
 		)
 
