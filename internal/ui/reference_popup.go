@@ -107,7 +107,7 @@ func (m *ReferencePopupManager) ShowPopup(mainDialog dialog.Dialog, currentDialo
 		})
 		deleteBtn.Importance = widget.DangerImportance
 
-		// Create button with label and delete button on the right
+		// Create button with label
 		selectBtn := widget.NewButton(item, func() {
 			// Select this item
 			if m.onSelect != nil {
@@ -124,7 +124,9 @@ func (m *ReferencePopupManager) ShowPopup(mainDialog dialog.Dialog, currentDialo
 		selectBtn.Alignment = widget.ButtonAlignLeading
 		selectBtn.Importance = widget.LowImportance
 		
-		itemContainer.Add(selectBtn)
+		// Create horizontal container with select button and delete button
+		itemRow := container.NewHBox(selectBtn, deleteBtn)
+		itemContainer.Add(itemRow)
 	}
 
 	// Add "Add new" option
