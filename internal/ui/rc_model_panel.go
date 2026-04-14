@@ -391,11 +391,6 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 
 	// Create brand popup manager
 	var brandPopupManager *ReferencePopupManager
-	var currentDialog dialog.Dialog // Reference to current popup dialog
-
-	// Add option to create new brand
-	newBrandOption := "+ " + locale.T("common.add") + " " + strings.TrimSuffix(locale.T("form.model.brand"), ":")
-	selectOptions := append(existingBrands, newBrandOption)
 
 	// Helper function to update brand button text
 	var brandButton *widget.Button
@@ -411,7 +406,6 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 	}
 
 	// Create the hidden Select widget to maintain compatibility
-	var brandSelect *widget.Select
 	brandSelect = widget.NewSelect(selectOptions, func(selected string) {
 		updateBrandButton(selected)
 		if selected == newBrandOption {
