@@ -7,7 +7,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
-	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"trackpulse/internal/locale"
@@ -70,27 +69,6 @@ func (m *ReferencePopupManager) ShowPopup(mainDialog dialog.Dialog, currentDialo
 	// Add existing items with delete buttons
 	for _, item := range m.items {
 		itemName := item
-		// Create horizontal layout for item name and delete button
-		itemRow := container.NewHBox(
-			widget.NewLabel(item),
-			layout.NewSpacer(),
-		)
-
-		// Make the entire row clickable for selection
-		itemRowWrapper := container.NewVBox(itemRow)
-		itemRowWrapper.OnTapped = func() {
-			// Select this item
-			if m.onSelect != nil {
-				m.onSelect(itemName)
-			}
-			// Hide popup and return to main dialog
-			if *currentDialog != nil {
-				(*currentDialog).Hide()
-			}
-			if mainDialog != nil {
-				mainDialog.Show()
-			}
-		}
 
 		// Create delete button
 		deleteBtn := widget.NewButtonWithIcon("", theme.DeleteIcon(), func() {
@@ -129,8 +107,24 @@ func (m *ReferencePopupManager) ShowPopup(mainDialog dialog.Dialog, currentDialo
 		})
 		deleteBtn.Importance = widget.DangerImportance
 
-		itemRow.Add(deleteBtn)
-		itemContainer.Add(itemRowWrapper)
+		// Create button with label and delete button on the right
+		selectBtn := widget.NewButton(item, func() {
+			// Select this item
+			if m.onSelect != nil {
+				m.onSelect(itemName)
+			}
+			// Hide popup and return to main dialog
+			if *currentDialog != nil {
+				(*currentDialog).Hide()
+			}
+			if mainDialog != nil {
+				mainDialog.Show()
+			}
+		})
+		selectBtn.Alignment = widget.ButtonAlignLeading
+		selectBtn.Importance = widget.LowImportance
+		
+		itemContainer.Add(selectBtn)
 	}
 
 	// Add "Add new" option
