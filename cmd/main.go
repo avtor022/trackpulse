@@ -66,13 +66,14 @@ func main() {
 	settingsRepo := repository.NewSettingsRepository(db.DB)
 	competitorModelRepo := repository.NewCompetitorModelRepository(db.DB)
 	competitionRepo := repository.NewCompetitionRepository(db.DB)
+	trackNameRepo := repository.NewTrackNameRepository(db.DB)
 
 	// Initialize services
 	competitorService := service.NewCompetitorService(competitorRepo)
 	modelService := service.NewRCModelService(modelRepo, brandRepo, scaleRepo, typeRepo)
 	settingsService := service.NewSettingsService(settingsRepo)
 	competitorModelService := service.NewCompetitorModelService(competitorModelRepo, competitorRepo, modelRepo)
-	competitionService := service.NewCompetitionService(competitionRepo, typeRepo, scaleRepo)
+	competitionService := service.NewCompetitionService(competitionRepo, typeRepo, scaleRepo, trackNameRepo)
 
 	// Load locale from settings
 	savedLocale, err := settingsService.GetLocale()

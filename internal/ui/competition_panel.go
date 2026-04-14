@@ -20,13 +20,14 @@ type CompetitionPanel struct {
 	competitionService *service.CompetitionService
 	content            *fyne.Container
 	table              *widget.Table
-	statusLabel        *widget.Label
-	window             fyne.Window           // Reference to window for dialogs
-	selectedID         string                // ID of selected competition
-	allCompetitions    []models.Competition  // Cache of all competitions
-	headers            []string              // Localized table headers
-	allModelTypes      []models.RCModelType  // Cache of all model types
-	allModelScales     []models.RCModelScale // Cache of all model scales
+	statusLabel        *widget.Label           // Reference to window for dialogs
+	window             fyne.Window             // Reference to window for dialogs
+	selectedID         string                  // ID of selected competition
+	allCompetitions    []models.Competition    // Cache of all competitions
+	headers            []string                // Localized table headers
+	allModelTypes      []models.RCModelType    // Cache of all model types
+	allModelScales     []models.RCModelScale   // Cache of all model scales
+	allTrackNames      []models.TrackName      // Cache of all track names
 }
 
 // updateLocale updates all localized text in the panel
@@ -266,6 +267,12 @@ func (p *CompetitionPanel) refreshData() {
 			fmt.Println("ERROR loading model scales:", err)
 		}
 
+		// Load track names for dropdown
+		p.allTrackNames, err = p.competitionService.GetAllTrackNames()
+		if err != nil {
+			fmt.Println("ERROR loading track names:", err)
+		}
+
 		// Force table to recalculate rows count and update cell contents
 		p.table.Refresh()
 		if len(p.allCompetitions) == 0 {
@@ -402,7 +409,22 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 	modelScaleSelect := widget.NewSelect(scaleOptions, nil)
 	modelScaleSelect.PlaceHolder = locale.T("common.select_one")
 
-	// Track name entry
+	// Track name select - populate from database with option to add new track
+	trackNameOptions := make([]string, len(p.allTrackNames))
+	trackNameValues := make([]string, len(p.allTrackNames))
+	for i, tn := range p.allTrackNames {
+		trackNameOptions[i] = tn.Name
+		trackNameValues[i] = tn.Name
+	}
+	
+	// Add option to create new track name
+	newTrackOption := "+ " + locale.T("common.add") + " " + strings.TrimSuffix(locale.T("form.competition.track"), ":")
+	trackNameOptions = append(trackNameOptions, newTrackOption)
+	
+	trackNameSelect := widget.NewSelect(trackNameOptions, nil)
+	trackNameSelect.PlaceHolder = locale.T("common.select_one")
+
+	// Track name entry for adding new track
 	trackEntry := widget.NewEntry()
 	trackEntry.SetPlaceHolder(locale.T("form.competition.track_placeholder"))
 
@@ -443,7 +465,11 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 				}
 			}
 		}
-		trackEntry.SetText(competition.TrackName)
+		// Set track name
+		if competition.TrackName != "" {
+			trackNameSelect.SetSelected(competition.TrackName)
+			trackEntry.SetText(competition.TrackName)
+		}
 		if competition.LapCountTarget != nil {
 			lapCountEntry.SetText(strconv.Itoa(*competition.LapCountTarget))
 		}
@@ -456,14 +482,175 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 		}
 	}
 
+	var mainDialog dialog.Dialog
+	var currentDialog dialog.Dialog
+
+	// Function to show track name selection popup with add new option
+	showTrackPopup := func() {
+		if currentDialog != nil {
+			currentDialog.Hide()
+		}
+
+		// Create container for track name options
+		trackContainer := container.NewVBox()
+
+		// Add existing track names
+		for _, trackName := range trackNameValues {
+			tnName := trackName
+			trackRow := container.NewHBox(
+				widget.NewLabel(trackName),
+			)
+			trackContainer.Add(trackRow)
+
+			// Add click handler to select this track
+			tapGesture := fyne.NewPointerEvent(fyne.EventFlags{})
+			_ = tapGesture
+		}
+
+		// Add "Add new track" option
+		addNewBtn := widget.NewButton(newTrackOption, func() {
+			if mainDialog != nil {
+				mainDialog.Hide()
+			}
+			if currentDialog != nil {
+				currentDialog.Hide()
+			}
+
+			newTrackEntry := widget.NewEntry()
+			newTrackEntry.SetPlaceHolder(locale.T("form.competition.track_placeholder"))
+
+			label := widget.NewLabel(locale.T("form.competition.track"))
+			entryContainer := container.NewVBox(label, newTrackEntry)
+
+			newTrackDialog := dialog.NewCustomWithoutButtons(locale.T("dialog.add_track.title"), entryContainer, p.window)
+
+			cancelBtn := widget.NewButton(locale.T("common.cancel"), func() {
+				newTrackDialog.Hide()
+				if mainDialog != nil {
+					mainDialog.Show()
+				}
+			})
+
+			saveBtn := widget.NewButton(locale.T("common.save"), func() {
+				newTrackName := strings.TrimSpace(newTrackEntry.Text)
+				if newTrackName == "" {
+					dialog.ShowError(fmt.Errorf(locale.T("info.enter_track_name")), p.window)
+					return
+				}
+
+				// Check if track already exists
+				for _, t := range trackNameValues {
+					if strings.EqualFold(t, newTrackName) {
+						dialog.ShowError(fmt.Errorf(locale.T("dialog.new_track.error_exists"), newTrackName), p.window)
+						return
+					}
+				}
+
+				// Add new track name to reference table
+				if err := p.competitionService.AddTrackName(newTrackName); err != nil {
+					dialog.ShowError(err, p.window)
+					return
+				}
+
+				// Update track list
+				trackNameOptions = append(trackNameOptions[:len(trackNameOptions)-1], newTrackName)
+				trackNameOptions = append(trackNameOptions, newTrackOption)
+				trackNameValues = append(trackNameValues, newTrackName)
+				trackNameSelect.Options = trackNameOptions
+
+				newTrackDialog.Hide()
+				if mainDialog != nil {
+					mainDialog.Show()
+				}
+				trackNameSelect.SetSelected(newTrackName)
+				trackEntry.SetText(newTrackName)
+			})
+
+			newTrackDialog.SetButtons([]fyne.CanvasObject{cancelBtn, saveBtn})
+
+			parentSize := p.window.Canvas().Size()
+			dialogWidth := parentSize.Width * 0.6
+			if dialogWidth < 700 {
+				dialogWidth = 700
+			}
+			newTrackDialog.Resize(fyne.NewSize(dialogWidth, newTrackDialog.MinSize().Height))
+
+			currentDialog = newTrackDialog
+			newTrackDialog.Show()
+		})
+		trackContainer.Add(addNewBtn)
+
+		// Create popup dialog
+		popup := dialog.NewCustomWithoutButtons(locale.T("common.select_one"), trackContainer, p.window)
+
+		closeBtn := widget.NewButton(locale.T("common.close"), func() {
+			popup.Hide()
+			currentDialog = nil
+			if mainDialog != nil {
+				mainDialog.Show()
+			}
+		})
+
+		popup.SetButtons([]fyne.CanvasObject{closeBtn})
+
+		parentSize := p.window.Canvas().Size()
+		popupWidth := parentSize.Width * 0.4
+		if popupWidth < 400 {
+			popupWidth = 400
+		}
+		popup.Resize(fyne.NewSize(popupWidth, popup.MinSize().Height))
+
+		currentDialog = popup
+		popup.Show()
+	}
+
+	// Create a button that shows the track popup when clicked
+	trackButton := widget.NewButton(locale.T("common.select_one"), func() {
+		if mainDialog != nil {
+			mainDialog.Hide()
+		}
+		showTrackPopup()
+	})
+
+	// Update track button text based on selection
+	updateTrackButton := func(selected string) {
+		if selected == "" || selected == newTrackOption {
+			trackButton.SetText(locale.T("common.select_one"))
+		} else {
+			trackButton.SetText(selected)
+			trackEntry.SetText(selected)
+		}
+	}
+
+	// Set up track name select handler
+	trackNameSelect.OnChanged = func(selected string) {
+		if selected == newTrackOption {
+			trackNameSelect.SetSelected("")
+			if mainDialog != nil {
+				mainDialog.Hide()
+			}
+			showTrackPopup()
+		} else {
+			updateTrackButton(selected)
+		}
+	}
+
+	// Set initial value if editing
+	if competition != nil && competition.TrackName != "" {
+		updateTrackButton(competition.TrackName)
+	}
+
+	// Use the button as the track widget
+	var trackWidget = trackButton
+
 	// Create form with localized labels in the requested order:
-	// 1. Competition Type, 2. Model Type, 3. Model Scale, 4. Title, 5. Track, 6. Lap Count, 7. Time Limit, 8. Status
+	// 1. Track Name (first), 2. Competition Type, 3. Model Type, 4. Model Scale, 5. Title, 6. Lap Count, 7. Time Limit, 8. Status
 	form := widget.NewForm(
+		widget.NewFormItem(locale.T("form.competition.track"), trackWidget),
 		widget.NewFormItem(locale.T("form.competition.type"), typeSelect),
 		widget.NewFormItem(locale.T("form.competition.model_type"), modelTypeSelect),
 		widget.NewFormItem(locale.T("form.competition.model_scale"), modelScaleSelect),
 		widget.NewFormItem(locale.T("form.competition.title"), titleEntry),
-		widget.NewFormItem(locale.T("form.competition.track"), trackEntry),
 		widget.NewFormItem(locale.T("form.competition.lap_count"), lapCountEntry),
 		widget.NewFormItem(locale.T("form.competition.time_limit"), timeLimitEntry),
 		widget.NewFormItem(locale.T("form.competition.status"), statusSelect),
@@ -471,6 +658,7 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 
 	// Create dialog without buttons first so we can reference it in the callback
 	d := dialog.NewCustomWithoutButtons(title, form, p.window)
+	mainDialog = d
 
 	// Create save button with callback that has access to 'd'
 	saveBtn := widget.NewButton(locale.T("common.save"), func() {
@@ -491,6 +679,9 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 		if mappedType, ok := typeMap[compType]; ok {
 			compType = mappedType
 		}
+
+		// Get track name from entry (which is updated by select)
+		trackNameValue := strings.TrimSpace(trackEntry.Text)
 
 		// Parse lap count
 		var lapCountTarget *int
@@ -548,7 +739,7 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 			newC.CompetitionType = compType
 			newC.ModelType = modelTypeInternal
 			newC.ModelScale = modelScaleInternal
-			newC.TrackName = strings.TrimSpace(trackEntry.Text)
+			newC.TrackName = trackNameValue
 			newC.LapCountTarget = lapCountTarget
 			newC.TimeLimitMinutes = timeLimitMinutes
 			newC.Status = statusValue
@@ -572,7 +763,7 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 				CompetitionType:  compType,
 				ModelType:        modelTypeInternal,
 				ModelScale:       modelScaleInternal,
-				TrackName:        strings.TrimSpace(trackEntry.Text),
+				TrackName:        trackNameValue,
 				LapCountTarget:   lapCountTarget,
 				TimeLimitMinutes: timeLimitMinutes,
 				Status:           statusValue,

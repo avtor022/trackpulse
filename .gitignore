@@ -11,7 +11,44 @@ vendor/
 *.log
 *.tmp
 
+# Environment
+.env
+.env.local
+*.env.*
+
 # Editors
 .vscode/
 .idea/
+
+# Coverage
+coverage/
+htmlcov/
+.coverage
+
+# Build outputs
+dist/
+build/
+target/
+
+# Python specific
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# Virtual environments
+venv/
+.venv/
+env/
+.ENV
+
+# Go specific
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Original rules preserved
 ```
