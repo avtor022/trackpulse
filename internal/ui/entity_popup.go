@@ -97,9 +97,8 @@ func ShowEntityPopup(window fyne.Window, config EntityConfig, currentDialog *dia
 		deleteBtn.Importance = widget.DangerImportance
 
 		// Create horizontal layout: item button on left (stretched), delete button on right (fixed small size)
-		// Wrap itemBtn in a container that forces it to expand
-		itemBtnWrapper := container.NewHBox(itemBtn)
-		itemRow := container.NewBorder(nil, nil, nil, deleteBtn, itemBtnWrapper)
+		// Use HBox with spacer to push delete button to the right and stretch item button
+		itemRow := container.NewHBox(itemBtn, widget.NewSpacer(), deleteBtn)
 		entityContainer.Add(itemRow)
 	}
 
@@ -176,9 +175,7 @@ func ShowEntityPopup(window fyne.Window, config EntityConfig, currentDialog *dia
 		*currentDialog = newItemDialog
 		newItemDialog.Show()
 	})
-	// Wrap add button in a container to make it full width
-	addNewBtnWrapper := container.NewHBox(addNewBtn)
-	entityContainer.Add(addNewBtnWrapper)
+	entityContainer.Add(addNewBtn)
 
 	// Create popup dialog
 	popup := dialog.NewCustomWithoutButtons(locale.T("common.select_one"), entityContainer, window)
