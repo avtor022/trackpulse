@@ -1,1 +1,32 @@
-Nothing should be ignored based on the provided file changes. The only modified file is a Go source code file (`internal/ui/rc_model_panel.go`), which is a legitimate source file that should not be ignored. There are no build artifacts, dependency directories, temporary files, or other ignorable items in the changes list.
+```
+# Compiled and build artifacts
+*.o
+*.obj
+*.out
+
+# Dependencies
+vendor/
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# Editors
+.vscode/
+.idea/
+
+# Coverage
+coverage/
+htmlcov/
+.coverage
+
+# Go-specific
+*.test
+*.prof
+```
