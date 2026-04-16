@@ -32,20 +32,21 @@ type CompetitionService struct {
 	repo       CompetitionRepositoryInterface
 	modelTypes RCModelTypeRepositoryInterface
 	scales     RCModelScaleRepositoryInterface
+	tracks     CompetitionTrackRepositoryInterface
 }
 
-// RCModelScaleRepositoryInterface defines the interface for RC model scale data access
-type RCModelScaleRepositoryInterface interface {
-	GetAll() ([]models.RCModelScale, error)
-	GetByName(name string) (*models.RCModelScale, error)
-	Create(name string) (*models.RCModelScale, error)
-	GetOrCreate(name string) (*models.RCModelScale, error)
+// CompetitionTrackRepositoryInterface defines the interface for competition track data access
+type CompetitionTrackRepositoryInterface interface {
+	GetAll() ([]models.CompetitionTrack, error)
+	GetByName(name string) (*models.CompetitionTrack, error)
+	Create(name string) (*models.CompetitionTrack, error)
+	GetOrCreate(name string) (*models.CompetitionTrack, error)
 	Delete(name string) error
 }
 
 // NewCompetitionService creates a new competition service
-func NewCompetitionService(repo CompetitionRepositoryInterface, modelTypes RCModelTypeRepositoryInterface, scales RCModelScaleRepositoryInterface) *CompetitionService {
-	return &CompetitionService{repo: repo, modelTypes: modelTypes, scales: scales}
+func NewCompetitionService(repo CompetitionRepositoryInterface, modelTypes RCModelTypeRepositoryInterface, scales RCModelScaleRepositoryInterface, tracks CompetitionTrackRepositoryInterface) *CompetitionService {
+	return &CompetitionService{repo: repo, modelTypes: modelTypes, scales: scales, tracks: tracks}
 }
 
 // GetAllCompetitions returns all competitions
@@ -66,6 +67,22 @@ func (s *CompetitionService) GetAllModelTypes() ([]models.RCModelType, error) {
 // GetAllModelScales returns all RC model scales for competition selection
 func (s *CompetitionService) GetAllModelScales() ([]models.RCModelScale, error) {
 	return s.scales.GetAll()
+}
+
+// GetAllCompetitionTracks returns all competition tracks for competition selection
+func (s *CompetitionService) GetAllCompetitionTracks() ([]models.CompetitionTrack, error) {
+	return s.tracks.GetAll()
+}
+
+// AddCompetitionTrack adds a new competition track
+func (s *CompetitionService) AddCompetitionTrack(name string) error {
+	_, err := s.tracks.Create(name)
+	return err
+}
+
+// DeleteCompetitionTrack deletes a competition track by name
+func (s *CompetitionService) DeleteCompetitionTrack(name string) error {
+	return s.tracks.Delete(name)
 }
 
 // CreateCompetition creates a new competition with validation
