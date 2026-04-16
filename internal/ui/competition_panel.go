@@ -17,16 +17,16 @@ import (
 
 // CompetitionPanel represents the Competitions management panel
 type CompetitionPanel struct {
-	competitionService *service.CompetitionService
-	content            *fyne.Container
-	table              *widget.Table
-	statusLabel        *widget.Label
-	window             fyne.Window                 // Reference to window for dialogs
-	selectedID         string                      // ID of selected competition
-	allCompetitions    []models.Competition        // Cache of all competitions
-	headers            []string                    // Localized table headers
-	allModelTypes      []models.RCModelType        // Cache of all model types
-	allModelScales     []models.RCModelScale       // Cache of all model scales
+	competitionService   *service.CompetitionService
+	content              *fyne.Container
+	table                *widget.Table
+	statusLabel          *widget.Label
+	window               fyne.Window               // Reference to window for dialogs
+	selectedID           string                    // ID of selected competition
+	allCompetitions      []models.Competition      // Cache of all competitions
+	headers              []string                  // Localized table headers
+	allModelTypes        []models.RCModelType      // Cache of all model types
+	allModelScales       []models.RCModelScale     // Cache of all model scales
 	allCompetitionTracks []models.CompetitionTrack // Cache of all competition tracks
 }
 
