@@ -27,6 +27,15 @@ type RCModelTypeRepositoryInterface interface {
 	Delete(name string) error
 }
 
+// RCModelScaleRepositoryInterface defines the interface for RC model scale data access
+type RCModelScaleRepositoryInterface interface {
+	GetAll() ([]models.RCModelScale, error)
+	GetByName(name string) (*models.RCModelScale, error)
+	Create(name string) (*models.RCModelScale, error)
+	GetOrCreate(name string) (*models.RCModelScale, error)
+	Delete(name string) error
+}
+
 // CompetitionService handles business logic for competitions
 type CompetitionService struct {
 	repo       CompetitionRepositoryInterface
