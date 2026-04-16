@@ -591,11 +591,11 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 		widget.NewFormItem(locale.T("form.competition.status"), statusSelect),
 	)
 
-	// Store mainDialog for use in popup
-	mainDialog = d
-
 	// Create dialog without buttons first so we can reference it in the callback
 	d := dialog.NewCustomWithoutButtons(title, form, p.window)
+
+	// Store mainDialog for use in popup
+	mainDialog = d
 
 	// Create save button with callback that has access to 'd'
 	saveBtn := widget.NewButton(locale.T("common.save"), func() {
