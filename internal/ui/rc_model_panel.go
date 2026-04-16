@@ -7,7 +7,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
-	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"trackpulse/internal/locale"
@@ -505,182 +504,15 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 
 	var modelNameWidget = p.modelNameEntry
 
-	// Function to show scale selection popup with delete buttons (similar to brand)
-	var showScalePopup func()
-	showScalePopup = func() {
-		if currentDialog != nil {
-			currentDialog.Hide()
-		}
-
-		// Create container for scale options
-		scaleContainer := container.NewVBox()
-
-		// Add existing scales with delete buttons
-		for _, scale := range existingScales {
-			scaleName := scale
-			// Create horizontal layout for scale name and delete button
-			scaleRow := container.NewHBox(
-				widget.NewLabel(scale),
-				layout.NewSpacer(),
-			)
-
-			// Create delete button
-			deleteBtn := widget.NewButtonWithIcon("", theme.DeleteIcon(), func() {
-				// Show confirmation dialog
-				dialog.ShowConfirm(
-					locale.T("dialog.delete.title"),
-					fmt.Sprintf(locale.T("dialog.delete_scale.message"), scaleName),
-					func(confirmed bool) {
-						if confirmed {
-							// Delete scale from database
-							if err := p.modelService.DeleteScale(scaleName); err != nil {
-								dialog.ShowError(err, p.window)
-								return
-							}
-
-							// Remove from existingScales slice
-							newExistingScales := []string{}
-							for _, s := range existingScales {
-								if s != scaleName {
-									newExistingScales = append(newExistingScales, s)
-								}
-							}
-							existingScales = newExistingScales
-
-							// Refresh the popup
-							showScalePopup()
-
-							// Update main dialog scale select if needed
-							if scaleSelect.Selected == scaleName {
-								scaleSelect.SetSelected("")
-							}
-						}
-					},
-					p.window,
-				)
-			})
-			deleteBtn.Importance = widget.DangerImportance
-
-			scaleRow.Add(deleteBtn)
-			scaleContainer.Add(scaleRow)
-		}
-
-		// Add "Add new scale" option
-		addNewScaleBtn := widget.NewButton(newScaleOption, func() {
-			// Show dialog to add new scale
-			if mainDialog != nil {
-				mainDialog.Hide()
-			}
-			if currentDialog != nil {
-				currentDialog.Hide()
-			}
-
-			newScaleEntry := widget.NewEntry()
-			newScaleEntry.SetPlaceHolder(locale.T("dialog.add_scale.placeholder"))
-
-			// Create label and input field vertically for better width
-			label := widget.NewLabel(locale.T("dialog.add_scale.label"))
-			entryContainer := container.NewVBox(label, newScaleEntry)
-
-			newScaleDialog := dialog.NewCustomWithoutButtons(locale.T("dialog.add_scale.title"), entryContainer, p.window)
-
-			cancelBtn := widget.NewButton(locale.T("common.cancel"), func() {
-				newScaleDialog.Hide()
-				// Return to main dialog
-				if mainDialog != nil {
-					mainDialog.Show()
-				}
-			})
-
-			saveBtn := widget.NewButton(locale.T("common.save"), func() {
-				newScaleName := strings.TrimSpace(newScaleEntry.Text)
-				if newScaleName == "" {
-					dialog.ShowError(fmt.Errorf(locale.T("info.enter_scale_name")), p.window)
-					return
-				}
-
-				// Check if scale already exists
-				for _, s := range existingScales {
-					if strings.EqualFold(s, newScaleName) {
-						dialog.ShowError(fmt.Errorf(locale.T("dialog.new_scale.error_exists"), newScaleName), p.window)
-						return
-					}
-				}
-
-				// Add new scale to reference table
-				if err := p.modelService.AddScale(newScaleName); err != nil {
-					dialog.ShowError(err, p.window)
-					return
-				}
-
-				// Update scale list
-				existingScales = append(existingScales, newScaleName)
-				scaleSelectOptions = append(existingScales, newScaleOption)
-				scaleSelect.Options = scaleSelectOptions
-
-				newScaleDialog.Hide()
-				// Return to main dialog with new scale selected
-				if mainDialog != nil {
-					mainDialog.Show()
-				}
-				scaleSelect.SetSelected(newScaleName)
-			})
-
-			newScaleDialog.SetButtons([]fyne.CanvasObject{cancelBtn, saveBtn})
-
-			// Increase dialog width for new scale
-			parentSize := p.window.Canvas().Size()
-			dialogWidth := parentSize.Width * 0.6
-			if dialogWidth < 700 {
-				dialogWidth = 700
-			}
-			newScaleDialog.Resize(fyne.NewSize(dialogWidth, newScaleDialog.MinSize().Height))
-
-			currentDialog = newScaleDialog
-			newScaleDialog.Show()
-		})
-		scaleContainer.Add(addNewScaleBtn)
-
-		// Create popup dialog
-		popup := dialog.NewCustomWithoutButtons(locale.T("common.select_one"), scaleContainer, p.window)
-
-		// Add close button
-		closeBtn := widget.NewButton(locale.T("common.close"), func() {
-			popup.Hide()
-			currentDialog = nil
-			// Return to main dialog
-			if mainDialog != nil {
-				mainDialog.Show()
-			}
-		})
-
-		popup.SetButtons([]fyne.CanvasObject{closeBtn})
-
-		// Resize popup
-		parentSize := p.window.Canvas().Size()
-		popupWidth := parentSize.Width * 0.4
-		if popupWidth < 400 {
-			popupWidth = 400
-		}
-		popup.Resize(fyne.NewSize(popupWidth, popup.MinSize().Height))
-
-		currentDialog = popup
-		popup.Show()
-	}
-
-	// Create a button that shows the scale popup when clicked
-	scaleButton := widget.NewButton(locale.T("common.select_one"), func() {
-		if mainDialog != nil {
-			mainDialog.Hide()
-		}
-		showScalePopup()
-	})
-
-	// Store reference for locale updates
-	p.scaleSelect = &widget.Select{PlaceHolder: locale.T("common.select_one")}
+	// Create scale popup manager
+	var scalePopupManager *ReferencePopupManager
 
 	// Helper function to update scale button text
+	var scaleButton *widget.Button
 	updateScaleButton := func(selected string) {
+		if scaleButton == nil {
+			return
+		}
 		if selected == "" {
 			scaleButton.SetText(locale.T("common.select_one"))
 		} else {
@@ -697,191 +529,95 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 		}
 	})
 
-	// Set initial value if editing
-	if model != nil && model.Scale != "" {
-		scaleSelect.SetSelected(model.Scale)
-		updateScaleButton(model.Scale)
-	}
+	var showScalePopup func()
+	showScalePopup = func() {
+		if scalePopupManager == nil {
+			// Convert existingScales to ReferenceItem slice
+			items := make([]ReferenceItem, len(existingScales))
+			for i, s := range existingScales {
+				items[i] = ReferenceItem{Name: s}
+			}
 
-	// Use the button as the scale widget
-	scaleWidget := scaleButton
-
-	// Function to show model type selection popup with delete buttons (similar to brand)
-	var showModelTypePopup func()
-	showModelTypePopup = func() {
-		if currentDialog != nil {
-			currentDialog.Hide()
-		}
-
-		// Create container for model type options
-		modelTypeContainer := container.NewVBox()
-
-		// Add existing model types with delete buttons
-		for _, t := range existingModelTypes {
-			typeName := t
-			// Create horizontal layout for model type name and delete button
-			typeRow := container.NewHBox(
-				widget.NewLabel(t),
-				layout.NewSpacer(),
-			)
-
-			// Create delete button
-			deleteBtn := widget.NewButtonWithIcon("", theme.DeleteIcon(), func() {
-				// Show confirmation dialog
-				dialog.ShowConfirm(
-					locale.T("dialog.delete.title"),
-					fmt.Sprintf(locale.T("dialog.delete_model_type.message"), typeName),
-					func(confirmed bool) {
-						if confirmed {
-							// Delete model type from database
-							if err := p.modelService.DeleteModelType(typeName); err != nil {
-								dialog.ShowError(err, p.window)
-								return
-							}
-
-							// Remove from existingModelTypes slice
-							newExistingModelTypes := []string{}
-							for _, mt := range existingModelTypes {
-								if mt != typeName {
-									newExistingModelTypes = append(newExistingModelTypes, mt)
-								}
-							}
-							existingModelTypes = newExistingModelTypes
-
-							// Refresh the popup
-							showModelTypePopup()
-
-							// Update main dialog model type select if needed
-							if modelTypeSelect.Selected == typeName {
-								modelTypeSelect.SetSelected("")
-							}
+			scalePopupManager = NewReferencePopupManager(
+				p.window,
+				ReferencePopupConfig{
+					Title:          "common.select_one",
+					AddTitle:       "dialog.add_scale.title",
+					AddLabel:       "dialog.add_scale.label",
+					AddPlaceholder: "dialog.add_scale.placeholder",
+					DeleteMessage:  "dialog.delete_scale.message",
+					NewErrorExists: "dialog.new_scale.error_exists",
+					EnterNameInfo:  "info.enter_scale_name",
+					GetAllFunc: func() ([]ReferenceItem, error) {
+						allScales, err := p.modelService.GetAllScales()
+						if err != nil {
+							return nil, err
 						}
+						result := make([]ReferenceItem, len(allScales))
+						for i, s := range allScales {
+							result[i] = ReferenceItem{Name: s.Name}
+						}
+						return result, nil
 					},
-					p.window,
-				)
-			})
-			deleteBtn.Importance = widget.DangerImportance
-
-			typeRow.Add(deleteBtn)
-			modelTypeContainer.Add(typeRow)
+					AddFunc: func(name string) error {
+						return p.modelService.AddScale(name)
+					},
+					DeleteFunc: func(name string) error {
+						return p.modelService.DeleteScale(name)
+					},
+					OnItemSelected: func(selected string) {
+						scaleSelect.SetSelected(selected)
+						updateScaleButton(selected)
+					},
+					UpdateOptions: func(opts []string) {
+						scaleSelectOptions = opts
+						scaleSelect.Options = scaleSelectOptions
+					},
+				},
+				existingScales,
+				newScaleOption,
+				func(selected string) {
+					scaleSelect.SetSelected(selected)
+					updateScaleButton(selected)
+				},
+				func(opts []string) {
+					scaleSelectOptions = opts
+					scaleSelect.Options = scaleSelectOptions
+				},
+			)
 		}
-
-		// Add "Add new model type" option
-		addNewModelTypeBtn := widget.NewButton(newModelTypeOption, func() {
-			// Show dialog to add new model type
-			if mainDialog != nil {
-				mainDialog.Hide()
-			}
-			if currentDialog != nil {
-				currentDialog.Hide()
-			}
-
-			newModelTypeEntry := widget.NewEntry()
-			newModelTypeEntry.SetPlaceHolder(locale.T("dialog.add_model_type.placeholder"))
-
-			// Create label and input field vertically for better width
-			label := widget.NewLabel(locale.T("dialog.add_model_type.label"))
-			entryContainer := container.NewVBox(label, newModelTypeEntry)
-
-			newModelTypeDialog := dialog.NewCustomWithoutButtons(locale.T("dialog.add_model_type.title"), entryContainer, p.window)
-
-			cancelBtn := widget.NewButton(locale.T("common.cancel"), func() {
-				newModelTypeDialog.Hide()
-				// Return to main dialog
-				if mainDialog != nil {
-					mainDialog.Show()
-				}
-			})
-
-			saveBtn := widget.NewButton(locale.T("common.save"), func() {
-				newModelTypeName := strings.TrimSpace(newModelTypeEntry.Text)
-				if newModelTypeName == "" {
-					dialog.ShowError(fmt.Errorf(locale.T("info.enter_model_type_name")), p.window)
-					return
-				}
-
-				// Check if model type already exists
-				for _, mt := range existingModelTypes {
-					if strings.EqualFold(mt, newModelTypeName) {
-						dialog.ShowError(fmt.Errorf(locale.T("dialog.new_model_type.error_exists"), newModelTypeName), p.window)
-						return
-					}
-				}
-
-				// Add new model type to reference table
-				if err := p.modelService.AddModelType(newModelTypeName); err != nil {
-					dialog.ShowError(err, p.window)
-					return
-				}
-
-				// Update model type list
-				existingModelTypes = append(existingModelTypes, newModelTypeName)
-				modelTypeSelectOptions = append(existingModelTypes, newModelTypeOption)
-				modelTypeSelect.Options = modelTypeSelectOptions
-
-				newModelTypeDialog.Hide()
-				// Return to main dialog with new model type selected
-				if mainDialog != nil {
-					mainDialog.Show()
-				}
-				modelTypeSelect.SetSelected(newModelTypeName)
-			})
-
-			newModelTypeDialog.SetButtons([]fyne.CanvasObject{cancelBtn, saveBtn})
-
-			// Increase dialog width for new model type
-			parentSize := p.window.Canvas().Size()
-			dialogWidth := parentSize.Width * 0.6
-			if dialogWidth < 700 {
-				dialogWidth = 700
-			}
-			newModelTypeDialog.Resize(fyne.NewSize(dialogWidth, newModelTypeDialog.MinSize().Height))
-
-			currentDialog = newModelTypeDialog
-			newModelTypeDialog.Show()
+		scalePopupManager.ShowPopup(mainDialog, &currentDialog, func(d dialog.Dialog) {
+			currentDialog = d
 		})
-		modelTypeContainer.Add(addNewModelTypeBtn)
-
-		// Create popup dialog
-		popup := dialog.NewCustomWithoutButtons(locale.T("common.select_one"), modelTypeContainer, p.window)
-
-		// Add close button
-		closeBtn := widget.NewButton(locale.T("common.close"), func() {
-			popup.Hide()
-			currentDialog = nil
-			// Return to main dialog
-			if mainDialog != nil {
-				mainDialog.Show()
-			}
-		})
-
-		popup.SetButtons([]fyne.CanvasObject{closeBtn})
-
-		// Resize popup
-		parentSize := p.window.Canvas().Size()
-		popupWidth := parentSize.Width * 0.4
-		if popupWidth < 400 {
-			popupWidth = 400
-		}
-		popup.Resize(fyne.NewSize(popupWidth, popup.MinSize().Height))
-
-		currentDialog = popup
-		popup.Show()
 	}
 
-	// Create a button that shows the model type popup when clicked
-	modelTypeButton := widget.NewButton(locale.T("common.select_one"), func() {
+	// Create a button that shows the scale popup when clicked
+	initialScaleText := locale.T("common.select_one")
+	if model != nil && model.Scale != "" {
+		initialScaleText = model.Scale
+	}
+	scaleButton = widget.NewButton(initialScaleText, func() {
 		if mainDialog != nil {
 			mainDialog.Hide()
 		}
-		showModelTypePopup()
+		showScalePopup()
 	})
 
-	// Store reference for locale updates
-	p.modelTypeSelect = &widget.Select{PlaceHolder: locale.T("common.select_one")}
+	// Use the button as the scale widget
+	var scaleWidget = scaleButton
+
+	// Store reference for locale updates - we'll update the button text via scaleSelect placeholder
+	p.scaleSelect = &widget.Select{PlaceHolder: locale.T("common.select_one")}
+
+	// Create model type popup manager
+	var modelTypePopupManager *ReferencePopupManager
 
 	// Helper function to update model type button text
+	var modelTypeButton *widget.Button
 	updateModelTypeButton := func(selected string) {
+		if modelTypeButton == nil {
+			return
+		}
 		if selected == "" {
 			modelTypeButton.SetText(locale.T("common.select_one"))
 		} else {
@@ -898,14 +634,85 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 		}
 	})
 
-	// Set initial value if editing
-	if model != nil && model.ModelType != "" {
-		modelTypeSelect.SetSelected(model.ModelType)
-		updateModelTypeButton(model.ModelType)
+	var showModelTypePopup func()
+	showModelTypePopup = func() {
+		if modelTypePopupManager == nil {
+			// Convert existingModelTypes to ReferenceItem slice
+			items := make([]ReferenceItem, len(existingModelTypes))
+			for i, t := range existingModelTypes {
+				items[i] = ReferenceItem{Name: t}
+			}
+
+			modelTypePopupManager = NewReferencePopupManager(
+				p.window,
+				ReferencePopupConfig{
+					Title:          "common.select_one",
+					AddTitle:       "dialog.add_model_type.title",
+					AddLabel:       "dialog.add_model_type.label",
+					AddPlaceholder: "dialog.add_model_type.placeholder",
+					DeleteMessage:  "dialog.delete_model_type.message",
+					NewErrorExists: "dialog.new_model_type.error_exists",
+					EnterNameInfo:  "info.enter_model_type_name",
+					GetAllFunc: func() ([]ReferenceItem, error) {
+						allTypes, err := p.modelService.GetAllModelTypes()
+						if err != nil {
+							return nil, err
+						}
+						result := make([]ReferenceItem, len(allTypes))
+						for i, t := range allTypes {
+							result[i] = ReferenceItem{Name: t.Name}
+						}
+						return result, nil
+					},
+					AddFunc: func(name string) error {
+						return p.modelService.AddModelType(name)
+					},
+					DeleteFunc: func(name string) error {
+						return p.modelService.DeleteModelType(name)
+					},
+					OnItemSelected: func(selected string) {
+						modelTypeSelect.SetSelected(selected)
+						updateModelTypeButton(selected)
+					},
+					UpdateOptions: func(opts []string) {
+						modelTypeSelectOptions = opts
+						modelTypeSelect.Options = modelTypeSelectOptions
+					},
+				},
+				existingModelTypes,
+				newModelTypeOption,
+				func(selected string) {
+					modelTypeSelect.SetSelected(selected)
+					updateModelTypeButton(selected)
+				},
+				func(opts []string) {
+					modelTypeSelectOptions = opts
+					modelTypeSelect.Options = modelTypeSelectOptions
+				},
+			)
+		}
+		modelTypePopupManager.ShowPopup(mainDialog, &currentDialog, func(d dialog.Dialog) {
+			currentDialog = d
+		})
 	}
 
+	// Create a button that shows the model type popup when clicked
+	initialModelTypeText := locale.T("common.select_one")
+	if model != nil && model.ModelType != "" {
+		initialModelTypeText = model.ModelType
+	}
+	modelTypeButton = widget.NewButton(initialModelTypeText, func() {
+		if mainDialog != nil {
+			mainDialog.Hide()
+		}
+		showModelTypePopup()
+	})
+
 	// Use the button as the model type widget
-	modelTypeWidget := modelTypeButton
+	var modelTypeWidget = modelTypeButton
+
+	// Store reference for locale updates - we'll update the button text via modelTypeSelect placeholder
+	p.modelTypeSelect = &widget.Select{PlaceHolder: locale.T("common.select_one")}
 
 	motorTypeEntry := widget.NewEntry()
 	motorTypeEntry.SetPlaceHolder(locale.T("form.model.motor_placeholder"))
