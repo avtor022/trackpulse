@@ -353,15 +353,17 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 	titleEntry := widget.NewEntry()
 	titleEntry.SetPlaceHolder(locale.T("form.competition.title_placeholder"))
 
-	// Competition type select with localized options
+	// Competition type select with popup manager (without add/delete buttons)
+	var currentDialog dialog.Dialog
+	var mainDialog dialog.Dialog
+
+	// Competition types - fixed list
 	competitionTypes := []string{
 		locale.T("competition.type.qualifying"),
 		locale.T("competition.type.final"),
 		locale.T("competition.type.practice"),
 		locale.T("competition.type.heat"),
 	}
-	typeSelect := widget.NewSelect(competitionTypes, nil)
-	typeSelect.PlaceHolder = locale.T("common.select_one")
 
 	// Map display names to internal values
 	typeMap := map[string]string{
@@ -371,6 +373,93 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 		locale.T("competition.type.heat"):       "heat",
 	}
 
+	// Helper function to update competition type button text
+	var typeButton *widget.Button
+	updateTypeButton := func(selected string) {
+		if typeButton == nil {
+			return
+		}
+		if selected == "" {
+			typeButton.SetText(locale.T("common.select_one"))
+		} else {
+			typeButton.SetText(selected)
+		}
+	}
+
+	// Create the hidden Select widget to maintain compatibility
+	typeSelect := widget.NewSelect(competitionTypes, func(selected string) {
+		updateTypeButton(selected)
+	})
+	typeSelect.PlaceHolder = locale.T("common.select_one")
+
+	var showTypePopup func()
+	showTypePopup = func() {
+		// Convert competitionTypes to ReferenceItem slice
+		items := make([]ReferenceItem, len(competitionTypes))
+		for i, t := range competitionTypes {
+			items[i] = ReferenceItem{Name: t}
+		}
+
+		typePopupManager := NewReferencePopupManager(
+			p.window,
+			ReferencePopupConfig{
+				Title:          "common.select_one",
+				AddTitle:       "",
+				AddLabel:       "",
+				AddPlaceholder: "",
+				DeleteMessage:  "",
+				NewErrorExists: "",
+				EnterNameInfo:  "",
+				GetAllFunc: func() ([]ReferenceItem, error) {
+					result := make([]ReferenceItem, len(competitionTypes))
+					for i, t := range competitionTypes {
+						result[i] = ReferenceItem{Name: t}
+					}
+					return result, nil
+				},
+				AddFunc:    func(name string) error { return nil },
+				DeleteFunc: func(name string) error { return nil },
+				OnItemSelected: func(selected string) {
+					typeSelect.SetSelected(selected)
+					updateTypeButton(selected)
+				},
+				UpdateOptions: func(opts []string) {
+					typeSelect.Options = opts
+				},
+			},
+			competitionTypes,
+			"",
+			func(selected string) {
+				typeSelect.SetSelected(selected)
+				updateTypeButton(selected)
+			},
+			func(opts []string) {
+				typeSelect.Options = opts
+			},
+		)
+		typePopupManager.ShowPopupWithoutAddDelete(mainDialog, &currentDialog, func(d dialog.Dialog) {
+			currentDialog = d
+		})
+	}
+
+	// Create a button that shows the type popup when clicked
+	initialTypeText := locale.T("common.select_one")
+	if competition != nil && competition.CompetitionType != "" {
+		// Map internal value to localized display
+		if localizedType, ok := reverseMap(typeMap, competition.CompetitionType); ok {
+			initialTypeText = localizedType
+		}
+	}
+	typeButton = widget.NewButton(initialTypeText, func() {
+		if mainDialog != nil {
+			mainDialog.Hide()
+		}
+		showTypePopup()
+	})
+
+	// Use the button as the type widget
+	var typeWidget = typeButton
+
 	// Status select with localized options
 	statuses := []string{
 		locale.T("competition.status.scheduled"),
@@ -378,8 +467,6 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 		locale.T("competition.status.finished"),
 		locale.T("competition.status.cancelled"),
 	}
-	statusSelect := widget.NewSelect(statuses, nil)
-	statusSelect.PlaceHolder = locale.T("common.select_one")
 
 	// Map display names to internal values
 	statusMap := map[string]string{
@@ -389,29 +476,309 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 		locale.T("competition.status.cancelled"): "cancelled",
 	}
 
+	// Helper function to update status button text
+	var statusButton *widget.Button
+	updateStatusButton := func(selected string) {
+		if statusButton == nil {
+			return
+		}
+		if selected == "" {
+			statusButton.SetText(locale.T("common.select_one"))
+		} else {
+			statusButton.SetText(selected)
+		}
+	}
+
+	// Create the hidden Select widget to maintain compatibility
+	statusSelect := widget.NewSelect(statuses, func(selected string) {
+		updateStatusButton(selected)
+	})
+	statusSelect.PlaceHolder = locale.T("common.select_one")
+
+	var showStatusPopup func()
+	showStatusPopup = func() {
+		// Convert statuses to ReferenceItem slice
+		items := make([]ReferenceItem, len(statuses))
+		for i, s := range statuses {
+			items[i] = ReferenceItem{Name: s}
+		}
+
+		statusPopupManager := NewReferencePopupManager(
+			p.window,
+			ReferencePopupConfig{
+				Title:          "common.select_one",
+				AddTitle:       "",
+				AddLabel:       "",
+				AddPlaceholder: "",
+				DeleteMessage:  "",
+				NewErrorExists: "",
+				EnterNameInfo:  "",
+				GetAllFunc: func() ([]ReferenceItem, error) {
+					result := make([]ReferenceItem, len(statuses))
+					for i, s := range statuses {
+						result[i] = ReferenceItem{Name: s}
+					}
+					return result, nil
+				},
+				AddFunc:    func(name string) error { return nil },
+				DeleteFunc: func(name string) error { return nil },
+				OnItemSelected: func(selected string) {
+					statusSelect.SetSelected(selected)
+					updateStatusButton(selected)
+				},
+				UpdateOptions: func(opts []string) {
+					statusSelect.Options = opts
+				},
+			},
+			statuses,
+			"",
+			func(selected string) {
+				statusSelect.SetSelected(selected)
+				updateStatusButton(selected)
+			},
+			func(opts []string) {
+				statusSelect.Options = opts
+			},
+		)
+		statusPopupManager.ShowPopupWithoutAddDelete(mainDialog, &currentDialog, func(d dialog.Dialog) {
+			currentDialog = d
+		})
+	}
+
+	// Create a button that shows the status popup when clicked
+	initialStatusText := locale.T("common.select_one")
+	if competition != nil && competition.Status != "" {
+		// Map internal value to localized display
+		if localizedStatus, ok := reverseMap(statusMap, competition.Status); ok {
+			initialStatusText = localizedStatus
+		}
+	}
+	statusButton = widget.NewButton(initialStatusText, func() {
+		if mainDialog != nil {
+			mainDialog.Hide()
+		}
+		showStatusPopup()
+	})
+
+	// Use the button as the status widget
+	var statusWidget = statusButton
+
 	// Model type select - populate from database with "All Types" option for mass race
+	// Use popup without add/delete buttons
 	modelTypeOptions := []string{locale.T("competition.model_type.all")} // "All types" option first
 	modelTypeNames := []string{"*"}                                      // Internal value for "all types"
 	for _, mt := range p.allModelTypes {
 		modelTypeOptions = append(modelTypeOptions, mt.Name)
 		modelTypeNames = append(modelTypeNames, mt.Name)
 	}
-	modelTypeSelect := widget.NewSelect(modelTypeOptions, nil)
+
+	// Helper function to update model type button text
+	var modelTypeButton *widget.Button
+	updateModelTypeButton := func(selected string) {
+		if modelTypeButton == nil {
+			return
+		}
+		if selected == "" {
+			modelTypeButton.SetText(locale.T("common.select_one"))
+		} else {
+			modelTypeButton.SetText(selected)
+		}
+	}
+
+	// Create the hidden Select widget to maintain compatibility
+	modelTypeSelect := widget.NewSelect(modelTypeOptions, func(selected string) {
+		updateModelTypeButton(selected)
+	})
 	modelTypeSelect.PlaceHolder = locale.T("common.select_one")
 
+	var showModelTypePopup func()
+	showModelTypePopup = func() {
+		// Convert modelTypeOptions to ReferenceItem slice
+		items := make([]ReferenceItem, len(modelTypeOptions))
+		for i, t := range modelTypeOptions {
+			items[i] = ReferenceItem{Name: t}
+		}
+
+		modelTypePopupManager := NewReferencePopupManager(
+			p.window,
+			ReferencePopupConfig{
+				Title:          "common.select_one",
+				AddTitle:       "",
+				AddLabel:       "",
+				AddPlaceholder: "",
+				DeleteMessage:  "",
+				NewErrorExists: "",
+				EnterNameInfo:  "",
+				GetAllFunc: func() ([]ReferenceItem, error) {
+					allTypes, err := p.competitionService.GetAllModelTypes()
+					if err != nil {
+						return nil, err
+					}
+					result := make([]ReferenceItem, len(allTypes)+1)
+					result[0] = ReferenceItem{Name: locale.T("competition.model_type.all")}
+					for i, t := range allTypes {
+						result[i+1] = ReferenceItem{Name: t.Name}
+					}
+					return result, nil
+				},
+				AddFunc:    func(name string) error { return nil },
+				DeleteFunc: func(name string) error { return nil },
+				OnItemSelected: func(selected string) {
+					modelTypeSelect.SetSelected(selected)
+					updateModelTypeButton(selected)
+				},
+				UpdateOptions: func(opts []string) {
+					modelTypeSelect.Options = opts
+				},
+			},
+			modelTypeOptions,
+			"",
+			func(selected string) {
+				modelTypeSelect.SetSelected(selected)
+				updateModelTypeButton(selected)
+			},
+			func(opts []string) {
+				modelTypeSelect.Options = opts
+			},
+		)
+		modelTypePopupManager.ShowPopupWithoutAddDelete(mainDialog, &currentDialog, func(d dialog.Dialog) {
+			currentDialog = d
+		})
+	}
+
+	// Create a button that shows the model type popup when clicked
+	initialModelTypeText := locale.T("common.select_one")
+	if competition != nil && competition.ModelType != "" {
+		if competition.ModelType == "*" {
+			initialModelTypeText = locale.T("competition.model_type.all")
+		} else {
+			for i, name := range modelTypeNames {
+				if name == competition.ModelType {
+					initialModelTypeText = modelTypeOptions[i]
+					break
+				}
+			}
+		}
+	}
+	modelTypeButton = widget.NewButton(initialModelTypeText, func() {
+		if mainDialog != nil {
+			mainDialog.Hide()
+		}
+		showModelTypePopup()
+	})
+
+	// Use the button as the model type widget
+	var modelTypeWidget = modelTypeButton
+
 	// Model scale select - populate from database with "All Scales" option for mass race
+	// Use popup without add/delete buttons
 	scaleOptions := []string{locale.T("competition.model_scale.all")} // "All scales" option first
 	scaleNames := []string{"*"}                                       // Internal value for "all scales"
 	for _, ms := range p.allModelScales {
 		scaleOptions = append(scaleOptions, ms.Name)
 		scaleNames = append(scaleNames, ms.Name)
 	}
-	modelScaleSelect := widget.NewSelect(scaleOptions, nil)
+
+	// Helper function to update model scale button text
+	var modelScaleButton *widget.Button
+	updateModelScaleButton := func(selected string) {
+		if modelScaleButton == nil {
+			return
+		}
+		if selected == "" {
+			modelScaleButton.SetText(locale.T("common.select_one"))
+		} else {
+			modelScaleButton.SetText(selected)
+		}
+	}
+
+	// Create the hidden Select widget to maintain compatibility
+	modelScaleSelect := widget.NewSelect(scaleOptions, func(selected string) {
+		updateModelScaleButton(selected)
+	})
 	modelScaleSelect.PlaceHolder = locale.T("common.select_one")
+
+	var showModelScalePopup func()
+	showModelScalePopup = func() {
+		// Convert scaleOptions to ReferenceItem slice
+		items := make([]ReferenceItem, len(scaleOptions))
+		for i, s := range scaleOptions {
+			items[i] = ReferenceItem{Name: s}
+		}
+
+		modelScalePopupManager := NewReferencePopupManager(
+			p.window,
+			ReferencePopupConfig{
+				Title:          "common.select_one",
+				AddTitle:       "",
+				AddLabel:       "",
+				AddPlaceholder: "",
+				DeleteMessage:  "",
+				NewErrorExists: "",
+				EnterNameInfo:  "",
+				GetAllFunc: func() ([]ReferenceItem, error) {
+					allScales, err := p.competitionService.GetAllModelScales()
+					if err != nil {
+						return nil, err
+					}
+					result := make([]ReferenceItem, len(allScales)+1)
+					result[0] = ReferenceItem{Name: locale.T("competition.model_scale.all")}
+					for i, s := range allScales {
+						result[i+1] = ReferenceItem{Name: s.Name}
+					}
+					return result, nil
+				},
+				AddFunc:    func(name string) error { return nil },
+				DeleteFunc: func(name string) error { return nil },
+				OnItemSelected: func(selected string) {
+					modelScaleSelect.SetSelected(selected)
+					updateModelScaleButton(selected)
+				},
+				UpdateOptions: func(opts []string) {
+					modelScaleSelect.Options = opts
+				},
+			},
+			scaleOptions,
+			"",
+			func(selected string) {
+				modelScaleSelect.SetSelected(selected)
+				updateModelScaleButton(selected)
+			},
+			func(opts []string) {
+				modelScaleSelect.Options = opts
+			},
+		)
+		modelScalePopupManager.ShowPopupWithoutAddDelete(mainDialog, &currentDialog, func(d dialog.Dialog) {
+			currentDialog = d
+		})
+	}
+
+	// Create a button that shows the model scale popup when clicked
+	initialModelScaleText := locale.T("common.select_one")
+	if competition != nil && competition.ModelScale != "" {
+		if competition.ModelScale == "*" {
+			initialModelScaleText = locale.T("competition.model_scale.all")
+		} else {
+			for i, name := range scaleNames {
+				if name == competition.ModelScale {
+					initialModelScaleText = scaleOptions[i]
+					break
+				}
+			}
+		}
+	}
+	modelScaleButton = widget.NewButton(initialModelScaleText, func() {
+		if mainDialog != nil {
+			mainDialog.Hide()
+		}
+		showModelScalePopup()
+	})
+
+	// Use the button as the model scale widget
+	var modelScaleWidget = modelScaleButton
 
 	// Track name select with popup manager (similar to brand/scale/type in rc_model_panel)
 	var trackSelect *widget.Select
-	var currentDialog dialog.Dialog
 
 	// Extract track names
 	var existingTracks []string
@@ -423,7 +790,6 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 	newTrackOption := "+ " + locale.T("common.add") + " " + strings.TrimSuffix(locale.T("form.competition.track"), ":")
 	trackSelectOptions := append(existingTracks, newTrackOption)
 
-	var mainDialog dialog.Dialog
 	var trackPopupManager *ReferencePopupManager
 
 	// Helper function to update track button text
@@ -581,14 +947,14 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 	// Create form with localized labels in the requested order:
 	// 1. Competition Type, 2. Model Type, 3. Model Scale, 4. Title, 5. Track, 6. Lap Count, 7. Time Limit, 8. Status
 	form := widget.NewForm(
-		widget.NewFormItem(locale.T("form.competition.type"), typeSelect),
-		widget.NewFormItem(locale.T("form.competition.model_type"), modelTypeSelect),
-		widget.NewFormItem(locale.T("form.competition.model_scale"), modelScaleSelect),
+		widget.NewFormItem(locale.T("form.competition.type"), typeWidget),
+		widget.NewFormItem(locale.T("form.competition.model_type"), modelTypeWidget),
+		widget.NewFormItem(locale.T("form.competition.model_scale"), modelScaleWidget),
 		widget.NewFormItem(locale.T("form.competition.title"), titleEntry),
 		widget.NewFormItem(locale.T("form.competition.track"), trackWidget),
 		widget.NewFormItem(locale.T("form.competition.lap_count"), lapCountEntry),
 		widget.NewFormItem(locale.T("form.competition.time_limit"), timeLimitEntry),
-		widget.NewFormItem(locale.T("form.competition.status"), statusSelect),
+		widget.NewFormItem(locale.T("form.competition.status"), statusWidget),
 	)
 
 	// Create dialog without buttons first so we can reference it in the callback
@@ -639,14 +1005,26 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 			timeLimitMinutes = &tlm
 		}
 
-		// Map status to internal value
-		statusValue := statusSelect.Selected
+		// Map status to internal value - get from button text
+		statusValue := ""
+		if statusButton != nil {
+			statusValue = statusButton.Text
+			if statusValue == locale.T("common.select_one") {
+				statusValue = ""
+			}
+		}
 		if mappedStatus, ok := statusMap[statusValue]; ok {
 			statusValue = mappedStatus
 		}
 
-		// Map model type selection to internal value
-		modelTypeValue := modelTypeSelect.Selected
+		// Map model type selection to internal value - get from button text
+		modelTypeValue := ""
+		if modelTypeButton != nil {
+			modelTypeValue = modelTypeButton.Text
+			if modelTypeValue == locale.T("common.select_one") {
+				modelTypeValue = ""
+			}
+		}
 		var modelTypeInternal string
 		for i, opt := range modelTypeOptions {
 			if opt == modelTypeValue {
@@ -655,8 +1033,14 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 			}
 		}
 
-		// Map model scale selection to internal value
-		modelScaleValue := modelScaleSelect.Selected
+		// Map model scale selection to internal value - get from button text
+		modelScaleValue := ""
+		if modelScaleButton != nil {
+			modelScaleValue = modelScaleButton.Text
+			if modelScaleValue == locale.T("common.select_one") {
+				modelScaleValue = ""
+			}
+		}
 		var modelScaleInternal string
 		for i, opt := range scaleOptions {
 			if opt == modelScaleValue {
