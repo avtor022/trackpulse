@@ -945,16 +945,16 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 	}
 
 	// Create form with localized labels in the requested order:
-	// 1. Competition Type, 2. Model Type, 3. Model Scale, 4. Title, 5. Track, 6. Lap Count, 7. Time Limit, 8. Status
+	// 1. Status, 2. Competition Type, 3. Track, 4. Model Type, 5. Model Scale, 6. Title, 7. Time Limit, 8. Lap Count
 	form := widget.NewForm(
+		widget.NewFormItem(locale.T("form.competition.status"), statusWidget),
 		widget.NewFormItem(locale.T("form.competition.type"), typeWidget),
+		widget.NewFormItem(locale.T("form.competition.track"), trackWidget),
 		widget.NewFormItem(locale.T("form.competition.model_type"), modelTypeWidget),
 		widget.NewFormItem(locale.T("form.competition.model_scale"), modelScaleWidget),
 		widget.NewFormItem(locale.T("form.competition.title"), titleEntry),
-		widget.NewFormItem(locale.T("form.competition.track"), trackWidget),
-		widget.NewFormItem(locale.T("form.competition.lap_count"), lapCountEntry),
 		widget.NewFormItem(locale.T("form.competition.time_limit"), timeLimitEntry),
-		widget.NewFormItem(locale.T("form.competition.status"), statusWidget),
+		widget.NewFormItem(locale.T("form.competition.lap_count"), lapCountEntry),
 	)
 
 	// Create dialog without buttons first so we can reference it in the callback

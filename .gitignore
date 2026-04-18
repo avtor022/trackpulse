@@ -3,75 +3,41 @@
 *.o
 *.obj
 *.out
-*.a
-*.so
-*.dll
-*.exe
 
 # Dependencies
 vendor/
-node_modules/
-__pycache__/
-*.egg-info/
-.Python
-env/
-venv/
-.venv/
-.tox/
-.coverage
-coverage/
-htmlcov/
 
 # Logs and temp files
 *.log
 *.tmp
-*.swp
-*.swo
 
 # Environment
 .env
 .env.local
-.env.*
+*.env.*
 
 # Editors
 .vscode/
 .idea/
-*.swp
-*.swo
 
-# Build and distribution
-dist/
+# Coverage
+coverage/
+htmlcov/
+.coverage
+
+# Build directories
 build/
+dist/
 target/
-*.pyc
-*.class
-*.jar
-*.war
-*.zip
-*.tar.gz
-*.tgz
-*.bz2
-*.xz
-*.7z
-*.rar
-*.zst
-*.lz4
-*.lzh
-*.cab
-*.arj
-*.rpm
-*.deb
-*.Z
-*.lz
-*.lzo
 
-# OS generated files
+# Virtual environments
+venv/
+.venv/
+__pycache__/
+.mypy_cache/
+.pytest_cache/
+
+# System files
 .DS_Store
 Thumbs.db
-
-# Testing
-*.pytest_cache/
-.mypy_cache/
-.nyc_output/
-coverage.xml
 ```
