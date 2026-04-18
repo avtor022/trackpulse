@@ -123,11 +123,11 @@ func (m *ReferencePopupManager) ShowPopup(mainDialog dialog.Dialog, currentDialo
 		})
 		selectBtn.Alignment = widget.ButtonAlignLeading
 		selectBtn.Importance = widget.LowImportance
-		
+
 		// Create horizontal container with select button and delete button
 		selectBtn.Importance = widget.MediumImportance
 		deleteBtn.Importance = widget.DangerImportance
-		
+
 		// Place both buttons on the same row: select button expands, delete button stays compact
 		itemRow := container.NewBorder(nil, nil, nil, deleteBtn, selectBtn)
 		itemContainer.Add(itemRow)
@@ -263,4 +263,66 @@ func (m *ReferencePopupManager) RefreshItems() error {
 	}
 
 	return nil
+}
+
+// ShowPopupWithoutAddDelete displays the reference selection popup WITHOUT add/delete buttons
+// This is useful for selecting existing items like competitors where modification is not allowed
+func (m *ReferencePopupManager) ShowPopupWithoutAddDelete(mainDialog dialog.Dialog, currentDialog *dialog.Dialog, setCurrentDialog func(dialog.Dialog)) {
+	// Hide current dialog if any
+	if *currentDialog != nil {
+		(*currentDialog).Hide()
+	}
+
+	// Create container for items
+	itemContainer := container.NewVBox()
+
+	// Add existing items as simple select buttons (no delete buttons)
+	for _, item := range m.items {
+		itemName := item
+
+		// Create button with label
+		selectBtn := widget.NewButton(item, func() {
+			// Select this item
+			if m.onSelect != nil {
+				m.onSelect(itemName)
+			}
+			// Hide popup and return to main dialog
+			if *currentDialog != nil {
+				(*currentDialog).Hide()
+			}
+			if mainDialog != nil {
+				mainDialog.Show()
+			}
+		})
+		selectBtn.Alignment = widget.ButtonAlignLeading
+		selectBtn.Importance = widget.MediumImportance
+
+		itemContainer.Add(selectBtn)
+	}
+
+	// Create popup dialog
+	popup := dialog.NewCustomWithoutButtons(locale.T("common.select_one"), itemContainer, m.window)
+
+	// Add close button
+	closeBtn := widget.NewButton(locale.T("common.close"), func() {
+		popup.Hide()
+		setCurrentDialog(nil)
+		// Return to main dialog
+		if mainDialog != nil {
+			mainDialog.Show()
+		}
+	})
+
+	popup.SetButtons([]fyne.CanvasObject{closeBtn})
+
+	// Resize popup
+	parentSize := m.window.Canvas().Size()
+	popupWidth := parentSize.Width * 0.4
+	if popupWidth < 400 {
+		popupWidth = 400
+	}
+	popup.Resize(fyne.NewSize(popupWidth, popup.MinSize().Height))
+
+	setCurrentDialog(popup)
+	popup.Show()
 }

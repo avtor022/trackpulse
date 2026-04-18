@@ -370,40 +370,195 @@ func (p *CompetitorModelPanel) showCompetitorModelDialog(title string, rm *model
 	activeCheck := widget.NewCheck(locale.T("form.transponder.active"), nil)
 	activeCheck.Checked = true
 
-	// Create selects for competitor and model
-	competitorSelect := widget.NewSelect(competitorDisplayNames, nil)
+	// Create selects for competitor and model (hidden, used for data storage)
+	var currentDialog dialog.Dialog // Reference to current popup dialog
+	var mainDialog dialog.Dialog
+
+	// Competitor popup manager
+	var competitorPopupManager *ReferencePopupManager
+	var competitorButton *widget.Button
+	updateCompetitorButton := func(selected string) {
+		if competitorButton == nil {
+			return
+		}
+		if selected == "" {
+			competitorButton.SetText(locale.T("common.select_one"))
+		} else {
+			competitorButton.SetText(selected)
+		}
+	}
+
+	// Hidden select for competitor
+	competitorSelect := widget.NewSelect(competitorDisplayNames, func(selected string) {
+		updateCompetitorButton(selected)
+	})
 	competitorSelect.PlaceHolder = locale.T("common.select_one")
 
-	modelSelect := widget.NewSelect(modelDisplayNames, nil)
-	modelSelect.PlaceHolder = locale.T("common.select_one")
+	var showCompetitorPopup func()
+	showCompetitorPopup = func() {
+		if competitorPopupManager == nil {
+			competitorPopupManager = NewReferencePopupManager(
+				p.window,
+				ReferencePopupConfig{
+					Title:          "common.select_one",
+					AddTitle:       "",
+					AddLabel:       "",
+					AddPlaceholder: "",
+					DeleteMessage:  "",
+					NewErrorExists: "",
+					EnterNameInfo:  "",
+					GetAllFunc: func() ([]ReferenceItem, error) {
+						allComps, err := p.competitorService.GetAllCompetitors()
+						if err != nil {
+							return nil, err
+						}
+						result := make([]ReferenceItem, len(allComps))
+						for i, c := range allComps {
+							result[i] = ReferenceItem{Name: fmt.Sprintf("%s (#%d)", c.FullName, c.CompetitorNumber)}
+						}
+						return result, nil
+					},
+					AddFunc:    nil,
+					DeleteFunc: nil,
+					OnItemSelected: func(selected string) {
+						competitorSelect.SetSelected(selected)
+						updateCompetitorButton(selected)
+					},
+					UpdateOptions: func(opts []string) {
+						competitorSelect.Options = opts
+					},
+				},
+				competitorDisplayNames,
+				"",
+				func(selected string) {
+					competitorSelect.SetSelected(selected)
+					updateCompetitorButton(selected)
+				},
+				func(opts []string) {
+					competitorSelect.Options = opts
+				},
+			)
+		}
+		competitorPopupManager.ShowPopupWithoutAddDelete(mainDialog, &currentDialog, func(d dialog.Dialog) {
+			currentDialog = d
+		})
+	}
 
-	if rm != nil {
-		// Edit mode - populate fields
-		transponderEntry.SetText(rm.TransponderNumber)
-		transponderTypeEntry.SetText(rm.TransponderType)
-		activeCheck.Checked = rm.IsActive
-
-		// Select competitor
+	// Create button for competitor selection
+	initialCompetitorText := locale.T("common.select_one")
+	if rm != nil && rm.CompetitorID != "" {
 		for display, id := range competitorOptions {
 			if id == rm.CompetitorID {
-				competitorSelect.SetSelected(display)
-				break
-			}
-		}
-
-		// Select model
-		for display, id := range modelOptions {
-			if id == rm.RCModelID {
-				modelSelect.SetSelected(display)
+				initialCompetitorText = display
 				break
 			}
 		}
 	}
+	competitorButton = widget.NewButton(initialCompetitorText, func() {
+		if mainDialog != nil {
+			mainDialog.Hide()
+		}
+		showCompetitorPopup()
+	})
 
-	// Create form with localized labels
+	// Model popup manager
+	var modelPopupManager *ReferencePopupManager
+	var modelButton *widget.Button
+	updateModelButton := func(selected string) {
+		if modelButton == nil {
+			return
+		}
+		if selected == "" {
+			modelButton.SetText(locale.T("common.select_one"))
+		} else {
+			modelButton.SetText(selected)
+		}
+	}
+
+	// Hidden select for model
+	modelSelect := widget.NewSelect(modelDisplayNames, func(selected string) {
+		updateModelButton(selected)
+	})
+	modelSelect.PlaceHolder = locale.T("common.select_one")
+
+	var showModelPopup func()
+	showModelPopup = func() {
+		if modelPopupManager == nil {
+			modelPopupManager = NewReferencePopupManager(
+				p.window,
+				ReferencePopupConfig{
+					Title:          "common.select_one",
+					AddTitle:       "",
+					AddLabel:       "",
+					AddPlaceholder: "",
+					DeleteMessage:  "",
+					NewErrorExists: "",
+					EnterNameInfo:  "",
+					GetAllFunc: func() ([]ReferenceItem, error) {
+						allMods, err := p.modelService.GetAllModels()
+						if err != nil {
+							return nil, err
+						}
+						result := make([]ReferenceItem, len(allMods))
+						for i, m := range allMods {
+							result[i] = ReferenceItem{Name: fmt.Sprintf("%s %s (%s)", m.Brand, m.ModelName, m.Scale)}
+						}
+						return result, nil
+					},
+					AddFunc:    nil,
+					DeleteFunc: nil,
+					OnItemSelected: func(selected string) {
+						modelSelect.SetSelected(selected)
+						updateModelButton(selected)
+					},
+					UpdateOptions: func(opts []string) {
+						modelSelect.Options = opts
+					},
+				},
+				modelDisplayNames,
+				"",
+				func(selected string) {
+					modelSelect.SetSelected(selected)
+					updateModelButton(selected)
+				},
+				func(opts []string) {
+					modelSelect.Options = opts
+				},
+			)
+		}
+		modelPopupManager.ShowPopupWithoutAddDelete(mainDialog, &currentDialog, func(d dialog.Dialog) {
+			currentDialog = d
+		})
+	}
+
+	// Create button for model selection
+	initialModelText := locale.T("common.select_one")
+	if rm != nil && rm.RCModelID != "" {
+		for display, id := range modelOptions {
+			if id == rm.RCModelID {
+				initialModelText = display
+				break
+			}
+		}
+	}
+	modelButton = widget.NewButton(initialModelText, func() {
+		if mainDialog != nil {
+			mainDialog.Hide()
+		}
+		showModelPopup()
+	})
+
+	// Set initial values for edit mode
+	if rm != nil {
+		transponderEntry.SetText(rm.TransponderNumber)
+		transponderTypeEntry.SetText(rm.TransponderType)
+		activeCheck.Checked = rm.IsActive
+	}
+
+	// Create form with localized labels using buttons instead of selects
 	form := widget.NewForm(
-		widget.NewFormItem(locale.T("form.transponder.competitor"), competitorSelect),
-		widget.NewFormItem(locale.T("form.transponder.model"), modelSelect),
+		widget.NewFormItem(locale.T("form.transponder.competitor"), competitorButton),
+		widget.NewFormItem(locale.T("form.transponder.model"), modelButton),
 		widget.NewFormItem(locale.T("form.transponder.number"), transponderEntry),
 		widget.NewFormItem(locale.T("form.transponder.type"), transponderTypeEntry),
 		widget.NewFormItem(locale.T("form.transponder.active"), activeCheck),
@@ -411,6 +566,7 @@ func (p *CompetitorModelPanel) showCompetitorModelDialog(title string, rm *model
 
 	// Create dialog without buttons first so we can reference it in the callback
 	d := dialog.NewCustomWithoutButtons(title, form, p.window)
+	mainDialog = d
 
 	// Create save button with callback that has access to 'd'
 	saveBtn := widget.NewButton(locale.T("common.save"), func() {
