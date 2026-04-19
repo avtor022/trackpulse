@@ -17,14 +17,15 @@ type App struct {
 	modelService           *service.RCModelService
 	settingsService        *service.SettingsService
 	competitorModelService *service.CompetitorModelService
-	competitionService 		 *service.CompetitionService
-	config          			 *Config
-	tabs            			 *container.AppTabs
-	competitorPanel      	 *CompetitorPanel
-	modelPanel      			 *ModelPanel
-	competitorModelPanel 	 *CompetitorModelPanel
-	competitionPanel 			 *CompetitionPanel
+	competitionService     *service.CompetitionService
+	config                 *Config
+	tabs                   *container.AppTabs
+	competitorPanel        *CompetitorPanel
+	modelPanel             *ModelPanel
+	competitorModelPanel   *CompetitorModelPanel
+	competitionPanel       *CompetitionPanel
 	settingsPanel          *SettingsPanel
+	logsPanel              *LogsPanel
 }
 
 // GlobalApp holds a reference to the main app for locale change notifications
@@ -48,7 +49,7 @@ func NewApp(competitorService *service.CompetitorService, modelService *service.
 		modelService:           modelService,
 		settingsService:        settingsService,
 		competitorModelService: competitorModelService,
-		competitionService: competitionService,
+		competitionService:     competitionService,
 		config: &Config{
 			Language: language,
 			Title:    "TrackPulse",
@@ -117,9 +118,8 @@ func (a *App) createCompetitionsTab() fyne.CanvasObject {
 
 // createLogsTab creates the Logs viewing tab
 func (a *App) createLogsTab() fyne.CanvasObject {
-	content := widget.NewLabel(locale.T("tab.logs"))
-	content.Alignment = fyne.TextAlignCenter
-	return container.NewCenter(content)
+	a.logsPanel = NewLogsPanel(a.mainWindow)
+	return a.logsPanel.content
 }
 
 // createSettingsTab creates the Settings tab
@@ -167,6 +167,9 @@ func (a *App) refreshUI() {
 	}
 	if a.settingsPanel != nil {
 		a.settingsPanel.Refresh()
+	}
+	if a.logsPanel != nil {
+		a.logsPanel.Refresh()
 	}
 	// Also update settings tab content
 	a.tabs.Refresh()

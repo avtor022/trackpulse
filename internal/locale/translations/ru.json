@@ -235,5 +235,19 @@
     "competition.status.scheduled": "Запланировано",
     "competition.status.running": "Идёт",
     "competition.status.finished": "Завершено",
-    "competition.status.cancelled": "Отменено"
+    "competition.status.cancelled": "Отменено",
+    "logs.port": "Порт",
+    "logs.baud_rate": "Скорость (бод)",
+    "logs.connect": "Подключиться",
+    "logs.disconnect": "Отключиться",
+    "logs.connected": "Подключено",
+    "logs.disconnected": "Отключено",
+    "logs.status_disconnected": "Статус: Отключено",
+    "logs.device_log": "Лог сообщений от устройства:",
+    "logs.select_port": "Выберите порт из списка",
+    "logs.connect_error": "Ошибка подключения: %v",
+    "logs.read_error": "Ошибка чтения: %v",
+    "logs.clear": "Очистить",
+    "logs.no_ports": "Порты не найдены",
+    "logs.error_scanning": "Ошибка сканирования портов"
 }
