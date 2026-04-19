@@ -14,12 +14,12 @@ import (
 
 // MonitoringPanel represents the monitoring panel UI
 type MonitoringPanel struct {
-	content            *fyne.Container
-	mainWindow         fyne.Window
-	competitionService *service.CompetitionService
-	competitionSelect  *widget.Select
-	statusLabel        *widget.Label
-	allCompetitions    []models.Competition
+	content             *fyne.Container
+	mainWindow          fyne.Window
+	competitionService  *service.CompetitionService
+	selectedCompetition string
+	statusLabel         *widget.Label
+	allCompetitions     []models.Competition
 }
 
 // NewMonitoringPanel creates a new monitoring panel
@@ -38,14 +38,8 @@ func (p *MonitoringPanel) createContent() *fyne.Container {
 	// Status label
 	p.statusLabel = widget.NewLabel(locale.T("status.ready"))
 
-	// Competition selector
-	p.competitionSelect = widget.NewSelect([]string{}, func(selected string) {
-		p.onCompetitionSelected(selected)
-	})
-	p.competitionSelect.PlaceHolder = locale.T("form.competition.type_placeholder")
-
-	// Button to open competition selection popup
-	selectBtn := widget.NewButton(locale.T("common.select_one"), func() {
+	// Button to open competition selection popup using reference_popup.go without add/delete buttons
+	selectBtn := widget.NewButton(locale.T("form.competition.title"), func() {
 		p.showCompetitionPopup()
 	})
 
@@ -56,7 +50,7 @@ func (p *MonitoringPanel) createContent() *fyne.Container {
 	// Selector container
 	selectorContainer := container.NewVBox(
 		widget.NewLabel(locale.T("form.competition.title")),
-		container.NewHBox(selectBtn, p.competitionSelect),
+		selectBtn,
 		infoLabel,
 	)
 
@@ -97,14 +91,6 @@ func (p *MonitoringPanel) refreshCompetitions() {
 		return
 	}
 
-	// Update select options
-	options := make([]string, len(p.allCompetitions))
-	for i, comp := range p.allCompetitions {
-		options[i] = comp.CompetitionTitle
-	}
-	p.competitionSelect.Options = options
-	p.competitionSelect.Refresh()
-
 	if len(p.allCompetitions) == 0 {
 		p.statusLabel.SetText(locale.T("status.no_competitions"))
 	} else {
@@ -126,7 +112,7 @@ func (p *MonitoringPanel) showCompetitionPopup() {
 	popupManager := NewReferencePopupManager(
 		p.mainWindow,
 		ReferencePopupConfig{
-			Title:          "common.select_one",
+			Title:          "form.competition.title",
 			AddTitle:       "",
 			AddLabel:       "",
 			AddPlaceholder: "",
@@ -143,22 +129,18 @@ func (p *MonitoringPanel) showCompetitionPopup() {
 			AddFunc:    func(name string) error { return nil },
 			DeleteFunc: func(name string) error { return nil },
 			OnItemSelected: func(selected string) {
-				p.competitionSelect.SetSelected(selected)
+				p.selectedCompetition = selected
 				p.onCompetitionSelected(selected)
 			},
-			UpdateOptions: func(opts []string) {
-				p.competitionSelect.Options = opts
-			},
+			UpdateOptions: func(opts []string) {},
 		},
 		p.getCompetitionTitles(),
 		"",
 		func(selected string) {
-			p.competitionSelect.SetSelected(selected)
+			p.selectedCompetition = selected
 			p.onCompetitionSelected(selected)
 		},
-		func(opts []string) {
-			p.competitionSelect.Options = opts
-		},
+		func(opts []string) {},
 	)
 	popupManager.ShowPopupWithoutAddDelete(mainDialog, &currentDialog, func(d dialog.Dialog) {
 		currentDialog = d

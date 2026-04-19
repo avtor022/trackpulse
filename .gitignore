@@ -4,73 +4,19 @@
 __pycache__/
 *.o
 *.obj
-*.class
 *.exe
 *.dll
 *.so
 *.a
 *.out
-
-# Dependencies
-node_modules/
-venv/
-.venv/
-.env
-.env.local
-*.env.*
-
-# Build directories
-dist/
-build/
-target/
-.gradle/
-
-# Python specific
-*.pyc
-__pycache__/
-*.pyo
-*.pyd
-.Python
-*.so
-.Python
-*.egg-info/
-.eggs/
-.mypy_cache/
-.pytest_cache/
-.coverage
-coverage/
-
-# Go specific
-*.o
-*.a
-*.so
-*.exe
-*.dll
-*.dylib
-*.test
-*.prof
-cover.out
-coverage.html
-
-# Editors
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
-*.tmp
-
-# Compressed files
+*.class
+*.jar
+*.war
 *.zip
+*.tar.gz
+*.tar.bz2
+*.tar.xz
 *.gz
-*.tar
-*.tgz
 *.bz2
 *.xz
 *.7z
@@ -85,8 +31,43 @@ Thumbs.db
 *.Z
 *.lz
 *.lzo
-*.tar.gz
-*.tar.bz2
-*.tar.xz
-*.tar.zst
+
+# Dependencies
+node_modules/
+venv/
+.venv/
+.env
+.env.local
+.env.*
+.target/
+target/
+.gradle/
+.mypy_cache/
+.pytest_cache/
+.coverage
+coverage/
+htmlcov/
+
+# Build and distribution
+dist/
+build/
+out/
+bin/
+lib/
+tmp/
+temp/
+
+# Editors and IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*.tmp
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
 ```
