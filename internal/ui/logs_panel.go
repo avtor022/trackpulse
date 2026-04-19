@@ -1,6 +1,9 @@
 package ui
 
 import (
+	"fmt"
+	"time"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
@@ -59,6 +62,27 @@ func (p *LogsPanel) createContent() *fyne.Container {
 	)
 
 	return content
+}
+
+// AddLog adds a new log entry with timestamp
+func (p *LogsPanel) AddLog(message string) {
+	if p.logText == nil {
+		return
+	}
+
+	timestamp := time.Now().Format("15:04:05")
+	logEntry := fmt.Sprintf("[%s] %s\n", timestamp, message)
+
+	p.logText.Segments = append(p.logText.Segments, &widget.TextSegment{
+		Text: logEntry,
+		Style: widget.RichTextStyle{
+			Inline: true,
+		},
+	})
+
+	// Auto-scroll to bottom
+	p.logScroll.Offset = fyne.NewPos(0, p.logText.MinSize().Height)
+	p.logText.Refresh()
 }
 
 // clearLog clears the log display

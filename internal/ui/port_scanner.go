@@ -24,6 +24,7 @@ type PortScanner struct {
 	baudEntry    *widget.Entry
 	refreshBtn   *widget.Button
 	settingsForm *widget.Form
+	logsPanel    *LogsPanel
 }
 
 // scanPorts scans for available serial ports
@@ -91,9 +92,10 @@ func extractPortName(selected string) string {
 }
 
 // NewPortScanner creates a new PortScanner instance
-func NewPortScanner() *PortScanner {
+func NewPortScanner(logsPanel *LogsPanel) *PortScanner {
 	return &PortScanner{
 		isConnected: false,
+		logsPanel:   logsPanel,
 	}
 }
 
@@ -160,6 +162,11 @@ func (p *PortScanner) connect() {
 		},
 	}
 	p.statusText.Refresh()
+
+	// Log connection event
+	if p.logsPanel != nil {
+		p.logsPanel.AddLog(fmt.Sprintf("Connected to %s at %d baud", portName, baudRate))
+	}
 }
 
 // disconnect handles disconnection from the serial port
@@ -180,6 +187,11 @@ func (p *PortScanner) disconnect() {
 		},
 	}
 	p.statusText.Refresh()
+
+	// Log disconnection event
+	if p.logsPanel != nil {
+		p.logsPanel.AddLog("Disconnected from device")
+	}
 }
 
 // BuildUI creates the port scanner UI components
