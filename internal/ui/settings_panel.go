@@ -100,8 +100,12 @@ func (p *SettingsPanel) buildUI() *fyne.Container {
 		}
 	}
 
-	// Create port scanner
-	p.portScanner = NewPortScanner()
+	// Create port scanner with reference to logs panel
+	var logsPanel *LogsPanel
+	if GlobalApp != nil && GlobalApp.logsPanel != nil {
+		logsPanel = GlobalApp.logsPanel
+	}
+	p.portScanner = NewPortScanner(logsPanel)
 	portScannerUI := p.portScanner.BuildUI()
 
 	// Create language form with same style as port settings
