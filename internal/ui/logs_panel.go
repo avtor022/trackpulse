@@ -12,7 +12,6 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/jacobsa/go-serial/serial"
-	"go.bug.st/serial/enumerator"
 	"trackpulse/internal/locale"
 )
 
