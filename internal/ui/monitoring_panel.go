@@ -46,7 +46,6 @@ func (p *MonitoringPanel) createContent() *fyne.Container {
 
 	// Selector container
 	selectorContainer := container.NewVBox(
-		widget.NewLabel(locale.T("form.competition.title")),
 		p.competitionButton,
 	)
 
