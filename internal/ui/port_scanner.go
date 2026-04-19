@@ -25,6 +25,7 @@ type PortScanner struct {
 	refreshBtn   *widget.Button
 	settingsForm *widget.Form
 	logsPanel    *LogsPanel
+	stopReading  chan bool
 }
 
 // scanPorts scans for available serial ports
@@ -96,6 +97,7 @@ func NewPortScanner(logsPanel *LogsPanel) *PortScanner {
 	return &PortScanner{
 		isConnected: false,
 		logsPanel:   logsPanel,
+		stopReading: make(chan bool),
 	}
 }
 
@@ -167,10 +169,21 @@ func (p *PortScanner) connect() {
 	if p.logsPanel != nil {
 		p.logsPanel.AddLog(fmt.Sprintf("Connected to %s at %d baud", portName, baudRate))
 	}
+
+	// Start reading from serial port in background
+	go p.readFromPort()
 }
 
 // disconnect handles disconnection from the serial port
 func (p *PortScanner) disconnect() {
+	// Stop reading goroutine
+	if p.stopReading != nil {
+		select {
+		case p.stopReading <- true:
+		default:
+		}
+	}
+
 	if p.port != nil {
 		p.port.Close()
 		p.port = nil
@@ -298,5 +311,34 @@ func (p *PortScanner) RefreshLabels() {
 
 		p.settingsForm.Refresh()
 		p.statusText.Refresh()
+	}
+}
+
+// readFromPort continuously reads data from the serial port and logs RFID tags
+func (p *PortScanner) readFromPort() {
+	if p.port == nil {
+		return
+	}
+
+	buf := make([]byte, 1024)
+	for {
+		select {
+		case <-p.stopReading:
+			return
+		default:
+			n, err := p.port.Read(buf)
+			if err != nil {
+				if err != io.EOF {
+					fmt.Printf("Error reading from port: %v\n", err)
+				}
+				return
+			}
+			if n > 0 {
+				data := strings.TrimSpace(string(buf[:n]))
+				if data != "" && p.logsPanel != nil {
+					p.logsPanel.AddLog(fmt.Sprintf("RFID tag detected: %s", data))
+				}
+			}
+		}
 	}
 }
