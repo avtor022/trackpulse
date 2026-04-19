@@ -20,6 +20,7 @@ type MonitoringPanel struct {
 	selectedCompetition string
 	statusLabel         *widget.Label
 	allCompetitions     []models.Competition
+	competitionButton   *widget.Button
 }
 
 // NewMonitoringPanel creates a new monitoring panel
@@ -39,19 +40,14 @@ func (p *MonitoringPanel) createContent() *fyne.Container {
 	p.statusLabel = widget.NewLabel(locale.T("status.ready"))
 
 	// Button to open competition selection popup using reference_popup.go without add/delete buttons
-	selectBtn := widget.NewButton(locale.T("form.competition.title"), func() {
+	p.competitionButton = widget.NewButton(locale.T("form.competition.select"), func() {
 		p.showCompetitionPopup()
 	})
-
-	// Competition info display
-	infoLabel := widget.NewLabel("")
-	infoLabel.Wrapping = fyne.TextWrapWord
 
 	// Selector container
 	selectorContainer := container.NewVBox(
 		widget.NewLabel(locale.T("form.competition.title")),
-		selectBtn,
-		infoLabel,
+		p.competitionButton,
 	)
 
 	// Main content area (placeholder for future monitoring widgets)
@@ -160,6 +156,9 @@ func (p *MonitoringPanel) getCompetitionTitles() []string {
 func (p *MonitoringPanel) onCompetitionSelected(selected string) {
 	if selected == "" {
 		p.statusLabel.SetText(locale.T("status.ready"))
+		if p.competitionButton != nil {
+			p.competitionButton.SetText(locale.T("form.competition.select"))
+		}
 		return
 	}
 
@@ -167,6 +166,9 @@ func (p *MonitoringPanel) onCompetitionSelected(selected string) {
 	for _, comp := range p.allCompetitions {
 		if comp.CompetitionTitle == selected {
 			p.statusLabel.SetText(fmt.Sprintf("%s: %s (%s)", locale.T("common.selected"), comp.CompetitionTitle, comp.Status))
+			if p.competitionButton != nil {
+				p.competitionButton.SetText(comp.CompetitionTitle)
+			}
 			return
 		}
 	}
