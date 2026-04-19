@@ -1,43 +1,67 @@
 ```
+# Dependencies
+ardlogger/
+
 # Compiled and build artifacts
+*.pyc
+__pycache__/
 *.o
 *.obj
+*.class
+*.exe
+*.dll
+*.so
+*.a
 *.out
 
-# Dependencies
-vendor/
+# Build directories
+dist/
+build/
+target/
+coverage/
+htmlcov/
+.mypy_cache/
+.pytest_cache/
 
-# Logs and temp files
-*.log
-*.tmp
-
-# Environment
+# Virtual environments
+.venv/
+venv/
+env/
 .env
 .env.local
 *.env.*
 
-# Editors
+# Editors and IDEs
 .vscode/
 .idea/
+*.swp
+*.swo
+*.tmp
 
-# Coverage
-coverage/
-htmlcov/
-.coverage
+# Logs
+*.log
 
-# Build directories
-build/
-dist/
-target/
-
-# Virtual environments
-venv/
-.venv/
-__pycache__/
-.mypy_cache/
-.pytest_cache/
-
-# System files
+# OS specific
 .DS_Store
 Thumbs.db
+
+# Archives
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
 ```

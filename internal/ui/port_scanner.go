@@ -1,9 +1,11 @@
 package ui
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"strings"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -24,6 +26,8 @@ type PortScanner struct {
 	baudEntry    *widget.Entry
 	refreshBtn   *widget.Button
 	settingsForm *widget.Form
+	logText      *widget.RichText
+	logScroll    *container.Scroll
 }
 
 // scanPorts scans for available serial ports
@@ -160,6 +164,9 @@ func (p *PortScanner) connect() {
 		},
 	}
 	p.statusText.Refresh()
+
+	// Запуск чтения данных в горутине
+	go p.readData()
 }
 
 // disconnect handles disconnection from the serial port
@@ -182,7 +189,44 @@ func (p *PortScanner) disconnect() {
 	p.statusText.Refresh()
 }
 
-// BuildUI creates the port scanner UI components
+// readData reads data from the serial port and displays it in the log
+func (p *PortScanner) readData() {
+	scanner := bufio.NewScanner(p.port)
+	for scanner.Scan() {
+		line := scanner.Text()
+		timestamp := time.Now().Format("15:04:05")
+
+		// Добавляем новую строку в лог
+		p.logText.Segments = append(p.logText.Segments, &widget.TextSegment{
+			Text:  fmt.Sprintf("[%s] %s\n", timestamp, line),
+			Style: widget.RichTextStyleInline,
+		})
+		p.logText.Refresh()
+
+		// Прокрутка вниз
+		p.logScroll.ScrollToBottom()
+
+		// Ограничиваем количество строк в логе
+		if len(p.logText.Segments) > 200 {
+			p.logText.Segments = p.logText.Segments[len(p.logText.Segments)-200:]
+		}
+	}
+
+	if err := scanner.Err(); err != nil && p.isConnected {
+		p.statusText.Segments = []widget.RichTextSegment{
+			&widget.TextSegment{
+				Text: fmt.Sprintf("Ошибка чтения: %v", err),
+				Style: widget.RichTextStyle{
+					ColorName: theme.ColorNameError,
+					Inline:    true,
+				},
+			},
+		}
+		p.statusText.Refresh()
+	}
+}
+
+// BuildUI creates the port scanner UI components with log output
 func (p *PortScanner) BuildUI() fyne.CanvasObject {
 	// Сканирование доступных портов при запуске
 	portList, defaultPort := scanPorts()
@@ -238,7 +282,29 @@ func (p *PortScanner) BuildUI() fyne.CanvasObject {
 		widget.NewFormItem("", container.NewHBox(p.connectBtn, p.statusText)),
 	)
 
-	return p.settingsForm
+	// Создаем лог вывода данных с устройства
+	p.logText = widget.NewRichText()
+	p.logScroll = container.NewVScroll(p.logText)
+
+	// Заголовок лога
+	logHeader := widget.NewLabel(locale.T("device.log.title"))
+	logHeader.TextStyle = fyne.TextStyle{Bold: true}
+
+	// Основная компоновка: настройки сверху, лог снизу
+	content := container.NewBorder(
+		container.NewVBox(
+			widget.NewSeparator(),
+			p.settingsForm,
+			widget.NewSeparator(),
+			logHeader,
+		),
+		nil,
+		nil,
+		nil,
+		p.logScroll,
+	)
+
+	return content
 }
 
 // RefreshPorts refreshes the list of available ports
@@ -286,5 +352,13 @@ func (p *PortScanner) RefreshLabels() {
 
 		p.settingsForm.Refresh()
 		p.statusText.Refresh()
+	}
+}
+
+// ClearLog clears the device log output
+func (p *PortScanner) ClearLog() {
+	if p.logText != nil {
+		p.logText.Segments = []widget.RichTextSegment{}
+		p.logText.Refresh()
 	}
 }

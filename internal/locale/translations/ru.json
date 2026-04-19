@@ -235,5 +235,6 @@
     "competition.status.scheduled": "Запланировано",
     "competition.status.running": "Идёт",
     "competition.status.finished": "Завершено",
-    "competition.status.cancelled": "Отменено"
+    "competition.status.cancelled": "Отменено",
+    "device.log.title": "Лог сообщений от устройства:"
 }

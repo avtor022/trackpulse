@@ -235,5 +235,6 @@
     "competition.status.scheduled": "Scheduled",
     "competition.status.running": "Running",
     "competition.status.finished": "Finished",
-    "competition.status.cancelled": "Cancelled"
+    "competition.status.cancelled": "Cancelled",
+    "device.log.title": "Device Log Output:"
 }
