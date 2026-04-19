@@ -3,6 +3,7 @@ package ui
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"trackpulse/internal/locale"
@@ -40,7 +41,7 @@ func (p *LogsPanel) createContent() *fyne.Container {
 	// Заголовок лога
 	logHeader := container.NewHBox(
 		widget.NewLabel(locale.T("logs.device_log")),
-		container.NewSpacer(),
+		layout.NewSpacer(),
 		clearBtn,
 	)
 	logHeader.Objects[0].(*widget.Label).TextStyle = fyne.TextStyle{Bold: true}
