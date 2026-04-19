@@ -41,68 +41,6 @@ func NewLogsPanel(mainWindow fyne.Window) *LogsPanel {
 	return p
 }
 
-// scanPorts scans for available serial ports
-func scanPorts() ([]string, string) {
-	ports, err := enumerator.GetDetailedPortsList()
-	if err != nil {
-		fmt.Println("Ошибка сканирования портов:", err)
-		return []string{locale.T("logs.error_scanning")}, ""
-	}
-
-	var portNames []string
-	var arduinoPort string
-	var firstPort string
-
-	for _, port := range ports {
-		name := port.Name
-		if firstPort == "" {
-			firstPort = name
-		}
-		if port.IsUSB {
-			info := []string{}
-			if port.Product != "" {
-				info = append(info, port.Product)
-			}
-			if len(info) > 0 {
-				name += fmt.Sprintf(" (%s)", strings.Join(info, " - "))
-			}
-			// Проверяем, является ли порт Arduino или подобным устройством
-			productLower := strings.ToLower(port.Product)
-			if strings.Contains(productLower, "arduino") ||
-				strings.Contains(productLower, "ch340") ||
-				strings.Contains(productLower, "ftdi") ||
-				strings.Contains(productLower, "cp210") {
-				if arduinoPort == "" {
-					arduinoPort = port.Name
-				}
-			}
-		}
-		portNames = append(portNames, name)
-	}
-
-	if len(portNames) == 0 {
-		return []string{locale.T("logs.no_ports")}, ""
-	}
-
-	// Если Arduino не найден, используем первый порт
-	if arduinoPort == "" && firstPort != "" {
-		arduinoPort = firstPort
-	}
-
-	return portNames, arduinoPort
-}
-
-// extractPortName extracts the port name from the select option
-func extractPortName(selected string) string {
-	if idx := strings.Index(selected, " ("); idx != -1 {
-		return selected[:idx]
-	}
-	if selected == locale.T("logs.no_ports") || selected == locale.T("logs.error_scanning") {
-		return ""
-	}
-	return selected
-}
-
 // createContent builds the logs panel content
 func (p *LogsPanel) createContent() fyne.CanvasObject {
 	// Сканирование доступных портов при запуске
