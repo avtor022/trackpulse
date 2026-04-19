@@ -4,7 +4,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/widget"
 	"trackpulse/internal/locale"
 	"trackpulse/internal/service"
 )
@@ -20,6 +19,7 @@ type App struct {
 	competitionService     *service.CompetitionService
 	config                 *Config
 	tabs                   *container.AppTabs
+	monitoringPanel        *MonitoringPanel
 	competitorPanel        *CompetitorPanel
 	modelPanel             *ModelPanel
 	competitorModelPanel   *CompetitorModelPanel
@@ -87,9 +87,8 @@ func (a *App) createMainContent() *container.AppTabs {
 
 // createMonitoringTab creates the Live Monitoring tab
 func (a *App) createMonitoringTab() fyne.CanvasObject {
-	content := widget.NewLabel(locale.T("app.welcome"))
-	content.Alignment = fyne.TextAlignCenter
-	return container.NewCenter(content)
+	a.monitoringPanel = NewMonitoringPanel(a.competitionService, a.mainWindow)
+	return a.monitoringPanel.content
 }
 
 // createCompetitorsTab creates the Competitors management tab
@@ -153,6 +152,9 @@ func (a *App) refreshUI() {
 	a.tabs.Refresh()
 
 	// Refresh panels only if they have been created
+	if a.monitoringPanel != nil {
+		a.monitoringPanel.Refresh()
+	}
 	if a.competitorPanel != nil {
 		a.competitorPanel.Refresh()
 	}
