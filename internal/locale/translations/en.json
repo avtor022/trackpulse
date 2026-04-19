@@ -235,5 +235,19 @@
     "competition.status.scheduled": "Scheduled",
     "competition.status.running": "Running",
     "competition.status.finished": "Finished",
-    "competition.status.cancelled": "Cancelled"
+    "competition.status.cancelled": "Cancelled",
+    "logs.port": "Port",
+    "logs.baud_rate": "Baud Rate",
+    "logs.connect": "Connect",
+    "logs.disconnect": "Disconnect",
+    "logs.connected": "Connected",
+    "logs.disconnected": "Disconnected",
+    "logs.status_disconnected": "Status: Disconnected",
+    "logs.device_log": "Device Log:",
+    "logs.select_port": "Please select a port",
+    "logs.connect_error": "Connection error: %v",
+    "logs.read_error": "Read error: %v",
+    "logs.clear": "Clear",
+    "logs.no_ports": "No ports found",
+    "logs.error_scanning": "Error scanning ports"
 }
