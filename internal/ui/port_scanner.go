@@ -12,6 +12,7 @@ import (
 	"github.com/jacobsa/go-serial/serial"
 	"go.bug.st/serial/enumerator"
 	"trackpulse/internal/locale"
+	"trackpulse/internal/logger"
 )
 
 // PortScanner handles serial port scanning and connection UI
@@ -24,6 +25,7 @@ type PortScanner struct {
 	baudEntry    *widget.Entry
 	refreshBtn   *widget.Button
 	settingsForm *widget.Form
+	rfidLogger   *logger.RFIDLogger
 }
 
 // scanPorts scans for available serial ports
@@ -94,6 +96,7 @@ func extractPortName(selected string) string {
 func NewPortScanner() *PortScanner {
 	return &PortScanner{
 		isConnected: false,
+		rfidLogger:  logger.NewRFIDLogger(),
 	}
 }
 
@@ -124,15 +127,8 @@ func (p *PortScanner) connect() {
 		fmt.Sscanf(p.baudEntry.Text, "%d", &baudRate)
 	}
 
-	options := serial.OpenOptions{
-		PortName:        portName,
-		BaudRate:        baudRate,
-		DataBits:        8,
-		StopBits:        1,
-		MinimumReadSize: 4,
-	}
-
-	port, err := serial.Open(options)
+	// Connect using RFIDLogger which handles both serial connection and logging
+	err := p.rfidLogger.Connect(portName, baudRate)
 	if err != nil {
 		p.statusText.Segments = []widget.RichTextSegment{
 			&widget.TextSegment{
@@ -147,12 +143,11 @@ func (p *PortScanner) connect() {
 		return
 	}
 
-	p.port = port
 	p.isConnected = true
 	p.connectBtn.SetText(locale.T("settings.disconnect"))
 	p.statusText.Segments = []widget.RichTextSegment{
 		&widget.TextSegment{
-			Text: fmt.Sprintf("%s: %s", locale.T("status.label"), locale.T("status.connected")),
+			Text: fmt.Sprintf("%s: %s (лог: %s)", locale.T("status.label"), locale.T("status.connected"), p.rfidLogger.GetLogFile()),
 			Style: widget.RichTextStyle{
 				ColorName: theme.ColorNameSuccess,
 				Inline:    true,
@@ -164,6 +159,9 @@ func (p *PortScanner) connect() {
 
 // disconnect handles disconnection from the serial port
 func (p *PortScanner) disconnect() {
+	if p.rfidLogger != nil {
+		p.rfidLogger.Disconnect()
+	}
 	if p.port != nil {
 		p.port.Close()
 		p.port = nil

@@ -3,41 +3,46 @@
 *.o
 *.obj
 *.out
+*.a
+*.so
+*.dll
+*.exe
 
 # Dependencies
 vendor/
+node_modules/
+__pycache__/
+*.egg-info/
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+coverage/
+htmlcov/
+.nox/
 
 # Logs and temp files
 *.log
 *.tmp
+*.swp
+*.swo
 
 # Environment
 .env
 .env.local
-*.env.*
+.env.*
 
 # Editors
 .vscode/
 .idea/
-
-# Coverage
-coverage/
-htmlcov/
-.coverage
+*.swp
+*~
+.DS_Store
+Thumbs.db
 
 # Build directories
 build/
 dist/
 target/
-
-# Virtual environments
-venv/
-.venv/
-__pycache__/
-.mypy_cache/
-.pytest_cache/
-
-# System files
-.DS_Store
-Thumbs.db
 ```
