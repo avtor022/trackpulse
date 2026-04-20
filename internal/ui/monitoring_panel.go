@@ -21,6 +21,7 @@ type MonitoringPanel struct {
 	statusLabel         *widget.Label
 	allCompetitions     []models.Competition
 	competitionButton   *widget.Button
+	yearFilterSelect    *widget.Select
 }
 
 // NewMonitoringPanel creates a new monitoring panel
@@ -44,8 +45,23 @@ func (p *MonitoringPanel) createContent() *fyne.Container {
 		p.showCompetitionPopup()
 	})
 
+	// Year filter dropdown
+	years := p.getAvailableYears()
+	yearOptions := append([]string{locale.T("common.all_years")}, years...)
+	p.yearFilterSelect = widget.NewSelect(yearOptions, func(selected string) {
+		p.onYearFilterChanged(selected)
+	})
+	if len(years) == 0 {
+		p.yearFilterSelect.SetSelected(locale.T("common.all_years"))
+	} else {
+		p.yearFilterSelect.SetSelected(locale.T("common.all_years"))
+	}
+
 	// Selector container
 	selectorContainer := container.NewVBox(
+		widget.NewForm(
+			widget.NewFormItem(locale.T("common.filter_year"), p.yearFilterSelect),
+		),
 		p.competitionButton,
 	)
 
@@ -98,9 +114,13 @@ func (p *MonitoringPanel) showCompetitionPopup() {
 	var currentDialog dialog.Dialog
 	var mainDialog dialog.Dialog
 
+	// Apply year filter to get filtered competitions
+	selectedYear := p.yearFilterSelect.Selected
+	filteredCompetitions := p.filterCompetitionsByYear(selectedYear)
+
 	// Convert competitions to ReferenceItem slice
-	items := make([]ReferenceItem, len(p.allCompetitions))
-	for i, comp := range p.allCompetitions {
+	items := make([]ReferenceItem, len(filteredCompetitions))
+	for i, comp := range filteredCompetitions {
 		items[i] = ReferenceItem{Name: comp.CompetitionTitle}
 	}
 
@@ -115,8 +135,8 @@ func (p *MonitoringPanel) showCompetitionPopup() {
 			NewErrorExists: "",
 			EnterNameInfo:  "",
 			GetAllFunc: func() ([]ReferenceItem, error) {
-				result := make([]ReferenceItem, len(p.allCompetitions))
-				for i, comp := range p.allCompetitions {
+				result := make([]ReferenceItem, len(filteredCompetitions))
+				for i, comp := range filteredCompetitions {
 					result[i] = ReferenceItem{Name: comp.CompetitionTitle}
 				}
 				return result, nil
@@ -129,7 +149,7 @@ func (p *MonitoringPanel) showCompetitionPopup() {
 			},
 			UpdateOptions: func(opts []string) {},
 		},
-		p.getCompetitionTitles(),
+		p.getFilteredCompetitionTitles(filteredCompetitions),
 		"",
 		func(selected string) {
 			p.selectedCompetition = selected
@@ -142,6 +162,15 @@ func (p *MonitoringPanel) showCompetitionPopup() {
 	})
 }
 
+// getFilteredCompetitionTitles returns a slice of competition titles from filtered list
+func (p *MonitoringPanel) getFilteredCompetitionTitles(competitions []models.Competition) []string {
+	titles := make([]string, len(competitions))
+	for i, comp := range competitions {
+		titles[i] = comp.CompetitionTitle
+	}
+	return titles
+}
+
 // getCompetitionTitles returns a slice of competition titles
 func (p *MonitoringPanel) getCompetitionTitles() []string {
 	titles := make([]string, len(p.allCompetitions))
@@ -149,6 +178,58 @@ func (p *MonitoringPanel) getCompetitionTitles() []string {
 		titles[i] = comp.CompetitionTitle
 	}
 	return titles
+}
+
+// getAvailableYears extracts unique years from competitions
+func (p *MonitoringPanel) getAvailableYears() []string {
+	yearMap := make(map[string]bool)
+	for _, comp := range p.allCompetitions {
+		if comp.TimeStart != nil {
+			year := fmt.Sprintf("%d", comp.TimeStart.Year())
+			yearMap[year] = true
+		}
+	}
+
+	years := make([]string, 0, len(yearMap))
+	for year := range yearMap {
+		years = append(years, year)
+	}
+
+	// Sort years in descending order
+	for i := 0; i < len(years); i++ {
+		for j := i + 1; j < len(years); j++ {
+			if years[i] < years[j] {
+				years[i], years[j] = years[j], years[i]
+			}
+		}
+	}
+
+	return years
+}
+
+// filterCompetitionsByYear filters competitions by selected year
+func (p *MonitoringPanel) filterCompetitionsByYear(year string) []models.Competition {
+	if year == locale.T("common.all_years") || year == "" {
+		return p.allCompetitions
+	}
+
+	var filtered []models.Competition
+	for _, comp := range p.allCompetitions {
+		if comp.TimeStart != nil {
+			compYear := fmt.Sprintf("%d", comp.TimeStart.Year())
+			if compYear == year {
+				filtered = append(filtered, comp)
+			}
+		}
+	}
+	return filtered
+}
+
+// onYearFilterChanged handles year filter selection change
+func (p *MonitoringPanel) onYearFilterChanged(selected string) {
+	// Refresh the popup with filtered competitions if it's open
+	// The actual filtering will be applied when showCompetitionPopup is called
+	p.refreshCompetitions()
 }
 
 // onCompetitionSelected handles competition selection

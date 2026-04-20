@@ -135,7 +135,7 @@
     "error.required.brand": "Бренд обязателен",
     "error.required.name": "Название модели обязательно",
     "error.required.scale": "Масштаб обязателен",
-    "error.required.type": "Тип модели обязателен",
+    "error.required.type": "Тип соревнования обязателен",
     "error.required.number": "Номер участника обязателен",
     "error.required.competitor_name": "Полное имя обязательно",
     "error.invalid.number": "Неверный номер участника",
@@ -226,7 +226,6 @@
     "status.no_competitions": "Соревнования не найдены",
     "status.loaded_competitions": "Загружено соревнований: %d",
     "error.required.title": "Название соревнования обязательно",
-    "error.required.type": "Тип соревнования обязателен",
     "competition.type.qualifying": "Квалификация",
     "competition.type.final": "Финал",
     "competition.type.practice": "Практика",
@@ -250,5 +249,7 @@
     "logs.read_error": "Ошибка чтения: %v",
     "logs.clear": "Очистить",
     "logs.no_ports": "Порты не найдены",
-    "logs.error_scanning": "Ошибка сканирования портов"
+    "logs.error_scanning": "Ошибка сканирования портов",
+    "common.all_years": "Все годы",
+    "common.filter_year": "Год"
 }

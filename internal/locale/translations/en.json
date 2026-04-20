@@ -135,7 +135,7 @@
     "error.required.brand": "Brand is required",
     "error.required.name": "Model name is required",
     "error.required.scale": "Scale is required",
-    "error.required.type": "Model type is required",
+    "error.required.type": "Competition type is required",
     "error.required.number": "Competitor number is required",
     "error.required.competitor_name": "Full name is required",
     "error.invalid.number": "Invalid competitor number",
@@ -226,7 +226,6 @@
     "status.no_competitions": "No competitions found",
     "status.loaded_competitions": "Loaded %d competitions",
     "error.required.title": "Competition title is required",
-    "error.required.type": "Competition type is required",
     "competition.type.qualifying": "Qualifying",
     "competition.type.final": "Final",
     "competition.type.practice": "Practice",
@@ -250,5 +249,7 @@
     "logs.read_error": "Read error: %v",
     "logs.clear": "Clear",
     "logs.no_ports": "No ports found",
-    "logs.error_scanning": "Error scanning ports"
+    "logs.error_scanning": "Error scanning ports",
+    "common.all_years": "All Years",
+    "common.filter_year": "Year"
 }
