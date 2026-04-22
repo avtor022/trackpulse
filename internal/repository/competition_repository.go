@@ -21,8 +21,8 @@ func NewCompetitionRepository(db *sql.DB) *CompetitionRepository {
 // GetAll returns all competitions
 func (r *CompetitionRepository) GetAll() ([]models.Competition, error) {
 	rows, err := r.db.Query(`
-		SELECT id, competition_title, competition_type, model_type, model_scale, track_name, 
-		       lap_count_target, time_limit_minutes, time_start, time_finish, status, 
+		SELECT id, competition_title, competition_type, model_type, model_scale, track_name,
+		       season_name, season_year, lap_count_target, time_limit_minutes, time_start, time_finish, status, 
 		       created_at, updated_at
 		FROM competitions
 		ORDER BY time_start DESC
@@ -45,6 +45,8 @@ func (r *CompetitionRepository) GetAll() ([]models.Competition, error) {
 			&c.ModelType,
 			&c.ModelScale,
 			&c.TrackName,
+			&c.SeasonName,
+			&c.SeasonYear,
 			&lapCountTarget,
 			&timeLimitMinutes,
 			&timeStartStr,
@@ -92,7 +94,7 @@ func (r *CompetitionRepository) GetAll() ([]models.Competition, error) {
 func (r *CompetitionRepository) GetByID(id string) (*models.Competition, error) {
 	row := r.db.QueryRow(`
 		SELECT id, competition_title, competition_type, model_type, model_scale, track_name, 
-		       lap_count_target, time_limit_minutes, time_start, time_finish, status, 
+		       season_name, season_year, lap_count_target, time_limit_minutes, time_start, time_finish, status, 
 		       created_at, updated_at
 		FROM competitions
 		WHERE id = ?
@@ -109,6 +111,8 @@ func (r *CompetitionRepository) GetByID(id string) (*models.Competition, error) 
 		&c.ModelType,
 		&c.ModelScale,
 		&c.TrackName,
+		&c.SeasonName,
+		&c.SeasonYear,
 		&lapCountTarget,
 		&timeLimitMinutes,
 		&timeStartStr,
@@ -176,9 +180,9 @@ func (r *CompetitionRepository) Create(competition *models.Competition) error {
 
 	result, err := r.db.Exec(`
 		INSERT INTO competitions (id, competition_title, competition_type, model_type, model_scale, 
-		                          track_name, lap_count_target, time_limit_minutes, time_start, 
+		                          track_name, season_name, season_year, lap_count_target, time_limit_minutes, time_start, 
 		                          time_finish, status, created_at, updated_at)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`,
 		competition.ID,
 		competition.CompetitionTitle,
@@ -186,6 +190,8 @@ func (r *CompetitionRepository) Create(competition *models.Competition) error {
 		competition.ModelType,
 		competition.ModelScale,
 		competition.TrackName,
+		competition.SeasonName,
+		competition.SeasonYear,
 		lapCountTarget,
 		timeLimitMinutes,
 		timeStartStr,
@@ -235,7 +241,7 @@ func (r *CompetitionRepository) Update(competition *models.Competition) error {
 	result, err := r.db.Exec(`
 		UPDATE competitions
 		SET competition_title = ?, competition_type = ?, model_type = ?, model_scale = ?, 
-		    track_name = ?, lap_count_target = ?, time_limit_minutes = ?, time_start = ?, 
+		    track_name = ?, season_name = ?, season_year = ?, lap_count_target = ?, time_limit_minutes = ?, time_start = ?, 
 		    time_finish = ?, status = ?, updated_at = ?
 		WHERE id = ?
 	`,
@@ -244,6 +250,8 @@ func (r *CompetitionRepository) Update(competition *models.Competition) error {
 		competition.ModelType,
 		competition.ModelScale,
 		competition.TrackName,
+		competition.SeasonName,
+		competition.SeasonYear,
 		lapCountTarget,
 		timeLimitMinutes,
 		timeStartStr,
@@ -300,7 +308,7 @@ func (r *CompetitionRepository) Count() (int, error) {
 func (r *CompetitionRepository) GetByStatus(status string) ([]models.Competition, error) {
 	rows, err := r.db.Query(`
 		SELECT id, competition_title, competition_type, model_type, model_scale, track_name, 
-		       lap_count_target, time_limit_minutes, time_start, time_finish, status, 
+		       season_name, season_year, lap_count_target, time_limit_minutes, time_start, time_finish, status, 
 		       created_at, updated_at
 		FROM competitions
 		WHERE status = ?
@@ -324,6 +332,8 @@ func (r *CompetitionRepository) GetByStatus(status string) ([]models.Competition
 			&c.ModelType,
 			&c.ModelScale,
 			&c.TrackName,
+			&c.SeasonName,
+			&c.SeasonYear,
 			&lapCountTarget,
 			&timeLimitMinutes,
 			&timeStartStr,

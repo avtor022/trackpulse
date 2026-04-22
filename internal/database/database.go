@@ -130,6 +130,8 @@ func (db *DB) Initialize() error {
 		model_type TEXT,
 		model_scale TEXT,
 		track_name TEXT,
+		season_name TEXT,
+		season_year INTEGER,
 		lap_count_target INTEGER,
 		time_limit_minutes INTEGER,
 		time_start TEXT,

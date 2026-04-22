@@ -44,6 +44,8 @@ func (p *CompetitionPanel) updateLocale() {
 		locale.T("model.header.type"),
 		locale.T("model.header.scale"),
 		locale.T("competition.header.track"),
+		locale.T("competition.header.season_name"),
+		locale.T("competition.header.season_year"),
 		locale.T("competition.header.laps"),
 		locale.T("competition.header.time_limit"),
 		locale.T("competition.header.start"),
@@ -129,7 +131,7 @@ func (p *CompetitionPanel) createCompetitionTable() *widget.Table {
 			if len(p.allCompetitions) == 0 {
 				return 0, 0
 			}
-			return len(p.allCompetitions), 12 // rows, columns
+			return len(p.allCompetitions), 14 // rows, columns
 		},
 		func() fyne.CanvasObject {
 			label := widget.NewLabel("Template")

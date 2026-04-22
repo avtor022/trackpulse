@@ -48,6 +48,8 @@ type Competition struct {
 	ModelType         string     `json:"model_type" db:"model_type"`
 	ModelScale        string     `json:"model_scale" db:"model_scale"`
 	TrackName         string     `json:"track_name" db:"track_name"`
+	SeasonName        string     `json:"season_name" db:"season_name"`
+	SeasonYear        int        `json:"season_year" db:"season_year"`
 	LapCountTarget    *int       `json:"lap_count_target,omitempty" db:"lap_count_target"`
 	TimeLimitMinutes  *int       `json:"time_limit_minutes,omitempty" db:"time_limit_minutes"`
 	TimeStart         *time.Time `json:"time_start,omitempty" db:"time_start"`
