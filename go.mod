@@ -1,18 +1,15 @@
 module trackpulse
 
-go 1.21
+go 1.24.0
 
 require (
 	github.com/google/uuid v1.6.0
+	github.com/jacobsa/go-serial v0.0.0-20180131005756-15cf729a72d4
 	github.com/mattn/go-sqlite3 v1.14.34
+	go.bug.st/serial v1.6.4
 )
 
-require (
-	github.com/creack/goselect v0.1.2 // indirect
-	github.com/golang-migrate/migrate/v4 v4.19.1 // indirect
-	github.com/jacobsa/go-serial v0.0.0-20180131005756-15cf729a72d4 // indirect
-	go.bug.st/serial v1.6.4 // indirect
-)
+require github.com/creack/goselect v0.1.2 // indirect
 
 require (
 	fyne.io/fyne/v2 v2.7.3
