@@ -1,23 +1,5 @@
 ```
-# Dependencies
-go.sum
-vendor/
-
-# Logs and temp files
-*.log
-*.tmp
-
-# Environment
-.env
-.env.local
-*.env.*
-
-# Editors
-.vscode/
-.idea/
-
-# Build artifacts
-*.o
-*.obj
-*.out
+# SQL migration files are typically not ignored as they're part of the source control
+# The current changes only include SQL migration files and Go source files
+# No build artifacts, dependencies, or temporary files detected in the changes
 ```
