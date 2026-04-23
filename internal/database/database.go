@@ -3,6 +3,11 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"io/fs"
+	"os"
+	"path/filepath"
+	"sort"
+	"strings"
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -39,6 +44,11 @@ func NewDB(dbPath string) (*DB, error) {
 
 // Initialize creates all required tables if they don't exist
 func (db *DB) Initialize() error {
+	// Run all migrations first
+	if err := db.runMigrations(); err != nil {
+		return fmt.Errorf("failed to run migrations: %w", err)
+	}
+
 	schema := `
 	-- Competitors table
 	CREATE TABLE IF NOT EXISTS competitors (
@@ -270,6 +280,104 @@ func (db *DB) Initialize() error {
 			setting.key, setting.value, setting.valueType, setting.description, now)
 		if err != nil {
 			return fmt.Errorf("failed to insert default setting %s: %w", setting.key, err)
+		}
+	}
+
+	return nil
+}
+
+// runMigrations executes all migration files in order
+func (db *DB) runMigrations() error {
+	// Create migrations tracking table if not exists
+	_, err := db.Exec(`
+		CREATE TABLE IF NOT EXISTS schema_migrations (
+			version TEXT PRIMARY KEY NOT NULL,
+			applied_at TEXT NOT NULL
+		)
+	`)
+	if err != nil {
+		return fmt.Errorf("failed to create migrations table: %w", err)
+	}
+
+	// Find the migrations directory relative to executable
+	exePath, err := os.Executable()
+	if err != nil {
+		return fmt.Errorf("failed to get executable path: %w", err)
+	}
+	exeDir := filepath.Dir(exePath)
+	
+	// Try multiple possible locations for migrations
+	migrationsDirs := []string{
+		filepath.Join(exeDir, "db", "migrations"),
+		filepath.Join(exeDir, "..", "db", "migrations"),
+		filepath.Join(exeDir, "..", "..", "db", "migrations"),
+		"db/migrations",
+		"/workspace/db/migrations",
+	}
+	
+	var migrationsDir string
+	for _, dir := range migrationsDirs {
+		if _, err := os.Stat(dir); err == nil {
+			migrationsDir = dir
+			break
+		}
+	}
+	
+	if migrationsDir == "" {
+		return fmt.Errorf("migrations directory not found")
+	}
+
+	// Get list of migration files
+	var migrationFilesList []string
+	err = filepath.Walk(migrationsDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() && strings.HasSuffix(path, ".up.sql") {
+			migrationFilesList = append(migrationFilesList, path)
+		}
+		return nil
+	})
+	if err != nil {
+		return fmt.Errorf("failed to read migration files: %w", err)
+	}
+
+	// Sort migration files by version number
+	sort.Strings(migrationFilesList)
+
+	// Apply each migration
+	for _, migrationPath := range migrationFilesList {
+		// Extract version from filename (e.g., "000001_init_schema.up.sql" -> "000001")
+		filename := filepath.Base(migrationPath)
+		version := strings.Split(filename, "_")[0]
+
+		// Check if migration was already applied
+		var exists int
+		err = db.QueryRow("SELECT COUNT(*) FROM schema_migrations WHERE version = ?", version).Scan(&exists)
+		if err != nil {
+			return fmt.Errorf("failed to check migration status: %w", err)
+		}
+		if exists > 0 {
+			continue // Skip already applied migrations
+		}
+
+		// Read migration file content
+		content, err := os.ReadFile(migrationPath)
+		if err != nil {
+			return fmt.Errorf("failed to read migration file %s: %w", migrationPath, err)
+		}
+
+		// Execute migration
+		_, err = db.Exec(string(content))
+		if err != nil {
+			return fmt.Errorf("failed to execute migration %s: %w", migrationPath, err)
+		}
+
+		// Record migration as applied
+		now := time.Now().Format(time.RFC3339)
+		_, err = db.Exec("INSERT INTO schema_migrations (version, applied_at) VALUES (?, ?)", version, now)
+		if err != nil {
+			return fmt.Errorf("failed to record migration %s: %w", migrationPath, err)
 		}
 	}
 

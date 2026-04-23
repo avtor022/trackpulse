@@ -1,25 +1,29 @@
 ```
-# Dependencies
-go.sum
-vendor/
-
-# Build artifacts
+# Go build artifacts
 *.o
-*.so
 *.a
+*.so
 *.dylib
 *.dll
 *.exe
 *.out
 
-# Logs and temp files
+# Go cache and build directories
+go/pkg/
+go/build/
+*.test
+*.prof
+
+# Dependencies
+vendor/
+
+# Logs
 *.log
-*.tmp
 
 # Environment
 .env
 .env.local
-*.env.*
+.env.*
 
 # Editors
 .vscode/
@@ -27,12 +31,15 @@ vendor/
 *.swp
 *.swo
 
+# OS
+.DS_Store
+Thumbs.db
+
 # Coverage
 coverage/
 htmlcov/
 .coverage
 
-# OS
-.DS_Store
-Thumbs.db
+# Temporary files
+*.tmp
 ```
