@@ -349,7 +349,7 @@ func (r *CompetitionRepository) GetByStatus(status string) ([]models.Competition
 	rows, err := r.db.Query(`
 		SELECT id, competition_title, competition_type, model_type, model_scale, track_name, 
 		       lap_count_target, time_limit_minutes, time_start, time_finish, status, 
-		       created_at, updated_at
+		       season_name, competition_year, created_at, updated_at
 		FROM competitions
 		WHERE status = ?
 		ORDER BY time_start DESC
@@ -364,6 +364,8 @@ func (r *CompetitionRepository) GetByStatus(status string) ([]models.Competition
 		var c models.Competition
 		var lapCountTarget, timeLimitMinutes sql.NullInt64
 		var timeStartStr, timeFinishStr sql.NullString
+		var seasonName sql.NullString
+		var competitionYear sql.NullInt64
 		var createdAtStr, updatedAtStr string
 		err := rows.Scan(
 			&c.ID,
@@ -377,6 +379,8 @@ func (r *CompetitionRepository) GetByStatus(status string) ([]models.Competition
 			&timeStartStr,
 			&timeFinishStr,
 			&c.Status,
+			&seasonName,
+			&competitionYear,
 			&createdAtStr,
 			&updatedAtStr,
 		)
@@ -401,6 +405,14 @@ func (r *CompetitionRepository) GetByStatus(status string) ([]models.Competition
 			if t, err := time.Parse(time.RFC3339, timeFinishStr.String); err == nil {
 				c.TimeFinish = &t
 			}
+		}
+		if seasonName.Valid {
+			sn := seasonName.String
+			c.SeasonName = &sn
+		}
+		if competitionYear.Valid {
+			cy := int(competitionYear.Int64)
+			c.CompetitionYear = &cy
 		}
 		if t, err := time.Parse(time.RFC3339, createdAtStr); err == nil {
 			c.CreatedAt = t
