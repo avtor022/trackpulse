@@ -1,3 +1,4 @@
+```
 # Compiled and build artifacts
 *.o
 *.obj
@@ -10,11 +11,16 @@ vendor/
 *.log
 *.tmp
 
-# Environment
-.env
-.env.local
-*.env.*
-
 # Editors
 .vscode/
 .idea/
+
+# Coverage
+coverage/
+htmlcov/
+.coverage
+
+# Go-specific
+*.test
+*.prof
+```

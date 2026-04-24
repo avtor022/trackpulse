@@ -1,13 +1,10 @@
 package main
 
 import (
-	"fmt"
-	"os"
-	"path/filepath"
-
 	"trackpulse/internal/config"
 	"trackpulse/internal/database"
 	"trackpulse/internal/locale"
+	"trackpulse/internal/migrate"
 	"trackpulse/internal/repository"
 	"trackpulse/internal/service"
 	"trackpulse/internal/ui"
@@ -50,7 +47,15 @@ func main() {
 	defer db.Close()
 	log.Info("Database opened: %s", cfg.DBPath)
 
-	// Initialize schema
+	// Run all pending migrations
+	migrator := migrate.NewMigrator(db.DB)
+	if err := migrator.Migrate(); err != nil {
+		log.Error("Failed to run migrations: %v", err)
+		os.Exit(1)
+	}
+	log.Info("Database migrations completed")
+
+	// Initialize schema (for new databases without migrations)
 	if err := db.Initialize(); err != nil {
 		log.Error("Failed to initialize database schema: %v", err)
 		os.Exit(1)
