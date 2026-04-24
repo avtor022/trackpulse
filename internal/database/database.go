@@ -135,6 +135,8 @@ func (db *DB) Initialize() error {
 		time_start TEXT,
 		time_finish TEXT,
 		status TEXT DEFAULT 'scheduled',
+		season_name TEXT,
+		competition_year INTEGER,
 		created_at TEXT NOT NULL,
 		updated_at TEXT NOT NULL
 	);
