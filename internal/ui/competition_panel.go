@@ -899,6 +899,14 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 	timeLimitEntry := widget.NewEntry()
 	timeLimitEntry.SetPlaceHolder(locale.T("form.competition.time_limit_placeholder"))
 
+	// Season name entry
+	seasonNameEntry := widget.NewEntry()
+	seasonNameEntry.SetPlaceHolder(locale.T("form.competition.season_name_placeholder"))
+
+	// Competition year entry
+	competitionYearEntry := widget.NewEntry()
+	competitionYearEntry.SetPlaceHolder(locale.T("form.competition.competition_year_placeholder"))
+
 	if competition != nil {
 		// Edit mode - populate fields
 		titleEntry.SetText(competition.CompetitionTitle)
@@ -938,6 +946,14 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 		if competition.TimeLimitMinutes != nil {
 			timeLimitEntry.SetText(strconv.Itoa(*competition.TimeLimitMinutes))
 		}
+		// Set season name for edit mode
+		if competition.SeasonName != nil {
+			seasonNameEntry.SetText(*competition.SeasonName)
+		}
+		// Set competition year for edit mode
+		if competition.CompetitionYear != nil {
+			competitionYearEntry.SetText(strconv.Itoa(*competition.CompetitionYear))
+		}
 		// Map internal status to localized display
 		if localizedStatus, ok := reverseMap(statusMap, competition.Status); ok {
 			statusSelect.SetSelected(localizedStatus)
@@ -945,7 +961,7 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 	}
 
 	// Create form with localized labels in the requested order:
-	// 1. Status, 2. Competition Type, 3. Track, 4. Model Type, 5. Model Scale, 6. Title, 7. Time Limit, 8. Lap Count
+	// 1. Status, 2. Competition Type, 3. Track, 4. Model Type, 5. Model Scale, 6. Title, 7. Time Limit, 8. Lap Count, 9. Season Name, 10. Year
 	form := widget.NewForm(
 		widget.NewFormItem(locale.T("form.competition.status"), statusWidget),
 		widget.NewFormItem(locale.T("form.competition.type"), typeWidget),
@@ -955,6 +971,8 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 		widget.NewFormItem(locale.T("form.competition.title"), titleEntry),
 		widget.NewFormItem(locale.T("form.competition.time_limit"), timeLimitEntry),
 		widget.NewFormItem(locale.T("form.competition.lap_count"), lapCountEntry),
+		widget.NewFormItem(locale.T("form.competition.season_name"), seasonNameEntry),
+		widget.NewFormItem(locale.T("form.competition.competition_year"), competitionYearEntry),
 	)
 
 	// Create dialog without buttons first so we can reference it in the callback
@@ -1058,6 +1076,24 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 			}
 		}
 
+		// Parse season name
+		var seasonName *string
+		if seasonNameEntry.Text != "" {
+			sn := strings.TrimSpace(seasonNameEntry.Text)
+			seasonName = &sn
+		}
+
+		// Parse competition year
+		var competitionYear *int
+		if competitionYearEntry.Text != "" {
+			cy, err := strconv.Atoi(strings.TrimSpace(competitionYearEntry.Text))
+			if err != nil {
+				dialog.ShowError(fmt.Errorf("invalid competition year: %v", err), p.window)
+				return
+			}
+			competitionYear = &cy
+		}
+
 		var newC *models.Competition
 		if competition != nil {
 			// Update existing
@@ -1070,6 +1106,8 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 			newC.LapCountTarget = lapCountTarget
 			newC.TimeLimitMinutes = timeLimitMinutes
 			newC.Status = statusValue
+			newC.SeasonName = seasonName
+			newC.CompetitionYear = competitionYear
 
 			if err := p.competitionService.UpdateCompetition(newC); err != nil {
 				fmt.Println("ERROR updating competition:", err)
@@ -1094,6 +1132,8 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 				LapCountTarget:   lapCountTarget,
 				TimeLimitMinutes: timeLimitMinutes,
 				Status:           statusValue,
+				SeasonName:       seasonName,
+				CompetitionYear:  competitionYear,
 			}
 
 			if err := p.competitionService.CreateCompetition(newC); err != nil {

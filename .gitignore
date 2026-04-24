@@ -3,6 +3,15 @@
 go.sum
 vendor/
 
+# Build artifacts
+*.o
+*.so
+*.a
+*.dylib
+*.dll
+*.exe
+*.out
+
 # Logs and temp files
 *.log
 *.tmp
@@ -15,9 +24,15 @@ vendor/
 # Editors
 .vscode/
 .idea/
+*.swp
+*.swo
 
-# Build artifacts
-*.o
-*.obj
-*.out
+# Coverage
+coverage/
+htmlcov/
+.coverage
+
+# OS
+.DS_Store
+Thumbs.db
 ```
