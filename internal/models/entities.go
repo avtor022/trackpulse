@@ -53,6 +53,8 @@ type Competition struct {
 	TimeStart         *time.Time `json:"time_start,omitempty" db:"time_start"`
 	TimeFinish        *time.Time `json:"time_finish,omitempty" db:"time_finish"`
 	Status            string     `json:"status" db:"status"`
+	CompetitionYear   *int       `json:"competition_year,omitempty" db:"competition_year"`
+	Season            string     `json:"season" db:"season"`
 	CreatedAt         time.Time  `json:"created_at" db:"created_at"`
 	UpdatedAt         time.Time  `json:"updated_at" db:"updated_at"`
 }
