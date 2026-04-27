@@ -57,6 +57,13 @@ func main() {
 	}
 	log.Info("Database schema initialized")
 
+	// Run migrations for existing databases
+	if err := db.Migrate(); err != nil {
+		log.Error("Failed to run database migrations: %v", err)
+		os.Exit(1)
+	}
+	log.Info("Database migrations completed")
+
 	// Initialize repositories
 	competitorRepo := repository.NewCompetitorRepository(db.DB)
 	modelRepo := repository.NewRCModelRepository(db.DB)

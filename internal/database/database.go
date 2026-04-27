@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -135,11 +136,15 @@ func (db *DB) Initialize() error {
 		time_start TEXT,
 		time_finish TEXT,
 		status TEXT DEFAULT 'scheduled',
+		competition_year INTEGER,
+		season TEXT,
 		created_at TEXT NOT NULL,
 		updated_at TEXT NOT NULL
 	);
 	CREATE INDEX IF NOT EXISTS idx_competitions_status ON competitions(status);
 	CREATE INDEX IF NOT EXISTS idx_competitions_time_start ON competitions(time_start);
+	CREATE INDEX IF NOT EXISTS idx_competitions_year ON competitions(competition_year);
+	CREATE INDEX IF NOT EXISTS idx_competitions_season ON competitions(season);
 
 	-- Competition Participants table
 	CREATE TABLE IF NOT EXISTS competition_participants (
@@ -270,6 +275,40 @@ func (db *DB) Initialize() error {
 			setting.key, setting.value, setting.valueType, setting.description, now)
 		if err != nil {
 			return fmt.Errorf("failed to insert default setting %s: %w", setting.key, err)
+		}
+	}
+
+	return nil
+}
+
+// Migrate adds new columns to existing tables if they don't exist
+func (db *DB) Migrate() error {
+	// Add competition_year and season columns to competitions table if they don't exist
+	migrations := []string{
+		`ALTER TABLE competitions ADD COLUMN competition_year INTEGER`,
+		`ALTER TABLE competitions ADD COLUMN season TEXT`,
+	}
+
+	for _, migration := range migrations {
+		_, err := db.Exec(migration)
+		if err != nil {
+			// Ignore "duplicate column" errors - column already exists
+			if !strings.Contains(err.Error(), "duplicate column name") {
+				return fmt.Errorf("migration failed: %w", err)
+			}
+		}
+	}
+
+	// Create indexes for new columns if they don't exist
+	indexMigrations := []string{
+		`CREATE INDEX IF NOT EXISTS idx_competitions_year ON competitions(competition_year)`,
+		`CREATE INDEX IF NOT EXISTS idx_competitions_season ON competitions(season)`,
+	}
+
+	for _, migration := range indexMigrations {
+		_, err := db.Exec(migration)
+		if err != nil {
+			return fmt.Errorf("index migration failed: %w", err)
 		}
 	}
 
