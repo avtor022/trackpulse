@@ -46,6 +46,8 @@ func (p *CompetitionPanel) updateLocale() {
 		locale.T("competition.header.track"),
 		locale.T("competition.header.laps"),
 		locale.T("competition.header.time_limit"),
+		locale.T("competition.header.year"),
+		locale.T("competition.header.season"),
 		locale.T("competition.header.start"),
 		locale.T("competition.header.finish"),
 		locale.T("competition.header.status"),
@@ -129,7 +131,7 @@ func (p *CompetitionPanel) createCompetitionTable() *widget.Table {
 			if len(p.allCompetitions) == 0 {
 				return 0, 0
 			}
-			return len(p.allCompetitions), 12 // rows, columns
+			return len(p.allCompetitions), 15 // rows, columns
 		},
 		func() fyne.CanvasObject {
 			label := widget.NewLabel("Template")
@@ -169,26 +171,38 @@ func (p *CompetitionPanel) createCompetitionTable() *widget.Table {
 					o.(*widget.Label).SetText("-")
 				}
 			case 8:
+				if c.CompetitionYear != nil {
+					o.(*widget.Label).SetText(strconv.Itoa(*c.CompetitionYear))
+				} else {
+					o.(*widget.Label).SetText("-")
+				}
+			case 9:
+				if c.Season != "" {
+					o.(*widget.Label).SetText(c.Season)
+				} else {
+					o.(*widget.Label).SetText("-")
+				}
+			case 10:
 				if c.TimeStart != nil {
 					o.(*widget.Label).SetText(c.TimeStart.Format("2006-01-02 15:04"))
 				} else {
 					o.(*widget.Label).SetText("-")
 				}
-			case 9:
+			case 11:
 				if c.TimeFinish != nil {
 					o.(*widget.Label).SetText(c.TimeFinish.Format("2006-01-02 15:04"))
 				} else {
 					o.(*widget.Label).SetText("-")
 				}
-			case 10:
+			case 12:
 				o.(*widget.Label).SetText(c.Status)
-			case 11:
+			case 13:
 				if !c.CreatedAt.IsZero() {
 					o.(*widget.Label).SetText(c.CreatedAt.Format("2006-01-02 15:04:05"))
 				} else {
 					o.(*widget.Label).SetText("-")
 				}
-			case 12:
+			case 14:
 				if !c.UpdatedAt.IsZero() {
 					o.(*widget.Label).SetText(c.UpdatedAt.Format("2006-01-02 15:04:05"))
 				} else {
@@ -227,11 +241,13 @@ func (p *CompetitionPanel) createCompetitionTable() *widget.Table {
 	table.SetColumnWidth(5, 150)  // Track Name
 	table.SetColumnWidth(6, 60)   // Laps
 	table.SetColumnWidth(7, 80)   // Time Limit
-	table.SetColumnWidth(8, 150)  // Start
-	table.SetColumnWidth(9, 150)  // Finish
-	table.SetColumnWidth(10, 100) // Status
-	table.SetColumnWidth(11, 150) // Created At
-	table.SetColumnWidth(12, 150) // Updated At
+	table.SetColumnWidth(8, 80)   // Year
+	table.SetColumnWidth(9, 120)  // Season
+	table.SetColumnWidth(10, 150) // Start
+	table.SetColumnWidth(11, 150) // Finish
+	table.SetColumnWidth(12, 100) // Status
+	table.SetColumnWidth(13, 150) // Created At
+	table.SetColumnWidth(14, 150) // Updated At
 
 	table.OnSelected = func(id widget.TableCellID) {
 		if id.Row >= 0 && id.Row < len(p.allCompetitions) {
@@ -899,6 +915,14 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 	timeLimitEntry := widget.NewEntry()
 	timeLimitEntry.SetPlaceHolder(locale.T("form.competition.time_limit_placeholder"))
 
+	// Competition year entry
+	competitionYearEntry := widget.NewEntry()
+	competitionYearEntry.SetPlaceHolder(locale.T("form.competition.year_placeholder"))
+
+	// Season entry
+	seasonEntry := widget.NewEntry()
+	seasonEntry.SetPlaceHolder(locale.T("form.competition.season_placeholder"))
+
 	if competition != nil {
 		// Edit mode - populate fields
 		titleEntry.SetText(competition.CompetitionTitle)
@@ -938,6 +962,12 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 		if competition.TimeLimitMinutes != nil {
 			timeLimitEntry.SetText(strconv.Itoa(*competition.TimeLimitMinutes))
 		}
+		if competition.CompetitionYear != nil {
+			competitionYearEntry.SetText(strconv.Itoa(*competition.CompetitionYear))
+		}
+		if competition.Season != "" {
+			seasonEntry.SetText(competition.Season)
+		}
 		// Map internal status to localized display
 		if localizedStatus, ok := reverseMap(statusMap, competition.Status); ok {
 			statusSelect.SetSelected(localizedStatus)
@@ -945,7 +975,7 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 	}
 
 	// Create form with localized labels in the requested order:
-	// 1. Status, 2. Competition Type, 3. Track, 4. Model Type, 5. Model Scale, 6. Title, 7. Time Limit, 8. Lap Count
+	// 1. Status, 2. Competition Type, 3. Track, 4. Model Type, 5. Model Scale, 6. Title, 7. Year, 8. Season, 9. Time Limit, 10. Lap Count
 	form := widget.NewForm(
 		widget.NewFormItem(locale.T("form.competition.status"), statusWidget),
 		widget.NewFormItem(locale.T("form.competition.type"), typeWidget),
@@ -953,6 +983,8 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 		widget.NewFormItem(locale.T("form.competition.model_type"), modelTypeWidget),
 		widget.NewFormItem(locale.T("form.competition.model_scale"), modelScaleWidget),
 		widget.NewFormItem(locale.T("form.competition.title"), titleEntry),
+		widget.NewFormItem(locale.T("form.competition.year"), competitionYearEntry),
+		widget.NewFormItem(locale.T("form.competition.season"), seasonEntry),
 		widget.NewFormItem(locale.T("form.competition.time_limit"), timeLimitEntry),
 		widget.NewFormItem(locale.T("form.competition.lap_count"), lapCountEntry),
 	)
@@ -1058,6 +1090,20 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 			}
 		}
 
+		// Parse competition year
+		var competitionYear *int
+		if competitionYearEntry.Text != "" {
+			cy, err := strconv.Atoi(strings.TrimSpace(competitionYearEntry.Text))
+			if err != nil {
+				dialog.ShowError(fmt.Errorf("invalid competition year: %v", err), p.window)
+				return
+			}
+			competitionYear = &cy
+		}
+
+		// Get season value
+		seasonValue := strings.TrimSpace(seasonEntry.Text)
+
 		var newC *models.Competition
 		if competition != nil {
 			// Update existing
@@ -1070,6 +1116,8 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 			newC.LapCountTarget = lapCountTarget
 			newC.TimeLimitMinutes = timeLimitMinutes
 			newC.Status = statusValue
+			newC.CompetitionYear = competitionYear
+			newC.Season = seasonValue
 
 			if err := p.competitionService.UpdateCompetition(newC); err != nil {
 				fmt.Println("ERROR updating competition:", err)
@@ -1094,6 +1142,8 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 				LapCountTarget:   lapCountTarget,
 				TimeLimitMinutes: timeLimitMinutes,
 				Status:           statusValue,
+				CompetitionYear:  competitionYear,
+				Season:           seasonValue,
 			}
 
 			if err := p.competitionService.CreateCompetition(newC); err != nil {
