@@ -142,6 +142,8 @@ func (db *DB) Initialize() error {
 	);
 	CREATE INDEX IF NOT EXISTS idx_competitions_status ON competitions(status);
 	CREATE INDEX IF NOT EXISTS idx_competitions_time_start ON competitions(time_start);
+	CREATE INDEX IF NOT EXISTS idx_competitions_year ON competitions(competition_year);
+	CREATE UNIQUE INDEX IF NOT EXISTS idx_competitions_year_season_unique ON competitions(competition_year, season);
 
 	-- Competition Participants table
 	CREATE TABLE IF NOT EXISTS competition_participants (
