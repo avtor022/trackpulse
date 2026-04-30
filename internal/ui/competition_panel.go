@@ -20,14 +20,16 @@ type CompetitionPanel struct {
 	competitionService   *service.CompetitionService
 	content              *fyne.Container
 	table                *widget.Table
-	statusLabel          *widget.Label
-	window               fyne.Window               // Reference to window for dialogs
-	selectedID           string                    // ID of selected competition
-	allCompetitions      []models.Competition      // Cache of all competitions
-	headers              []string                  // Localized table headers
-	allModelTypes        []models.RCModelType      // Cache of all model types
-	allModelScales       []models.RCModelScale     // Cache of all model scales
-	allCompetitionTracks []models.CompetitionTrack // Cache of all competition tracks
+	statusLabel          *widget.Label               // Reference to window for dialogs
+	window               fyne.Window                 // Reference to window for dialogs
+	selectedID           string                      // ID of selected competition
+	allCompetitions      []models.Competition        // Cache of all competitions
+	headers              []string                    // Localized table headers
+	allModelTypes        []models.RCModelType        // Cache of all model types
+	allModelScales       []models.RCModelScale       // Cache of all model scales
+	allCompetitionTracks []models.CompetitionTrack   // Cache of all competition tracks
+	allCompetitionYears  []models.CompetitionYear    // Cache of all competition years
+	allCompetitionSeasons []models.CompetitionSeason // Cache of all competition seasons
 }
 
 // updateLocale updates all localized text in the panel
@@ -271,6 +273,18 @@ func (p *CompetitionPanel) refreshData() {
 		p.allCompetitionTracks, err = p.competitionService.GetAllCompetitionTracks()
 		if err != nil {
 			fmt.Println("ERROR loading competition tracks:", err)
+		}
+
+		// Load competition years for dropdown
+		p.allCompetitionYears, err = p.competitionService.GetAllCompetitionYears()
+		if err != nil {
+			fmt.Println("ERROR loading competition years:", err)
+		}
+
+		// Load competition seasons for dropdown
+		p.allCompetitionSeasons, err = p.competitionService.GetAllCompetitionSeasons()
+		if err != nil {
+			fmt.Println("ERROR loading competition seasons:", err)
 		}
 
 		// Force table to recalculate rows count and update cell contents

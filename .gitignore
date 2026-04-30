@@ -1,22 +1,65 @@
 ```
-# Compiled and binary files
+# Compiled and build artifacts
 *.o
 *.obj
 *.out
+*.a
+*.so
+*.dll
+*.exe
 
 # Dependencies
 vendor/
+*.mod
+*.sum
 
 # Logs and temp files
 *.log
 *.tmp
-
-# Editors
-.vscode/
-.idea/
+*.swp
 
 # Environment
 .env
 .env.local
 *.env.*
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Coverage
+coverage/
+htmlcov/
+.coverage
+
+# Build outputs
+dist/
+build/
+target/
+bin/
+
+# Python specific (if applicable)
+__pycache__/
+*.pyc
+*.pyo
+.Python
+*.so
+*.egg-info/
+.eggs/
+.mypy_cache/
+.pytest_cache/
+
+# Node specific (if applicable)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Go specific
+*.test
+*.prof
+cover.out
+
 ```
