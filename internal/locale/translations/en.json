@@ -205,6 +205,8 @@
     "competition.header.start": "Start Time",
     "competition.header.finish": "Finish Time",
     "competition.header.status": "Status",
+    "competition.header.year": "Year",
+    "competition.header.season": "Season",
     "form.competition.title": "Competition Title",
     "form.competition.select": "Select Competition",
     "form.competition.title_placeholder": "Enter competition title",

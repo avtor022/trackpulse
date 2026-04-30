@@ -205,6 +205,8 @@
     "competition.header.start": "Время начала",
     "competition.header.finish": "Время окончания",
     "competition.header.status": "Статус",
+    "competition.header.year": "Год",
+    "competition.header.season": "Сезон",
     "form.competition.title": "Название соревнования",
     "form.competition.select": "Выбрать соревнование",
     "form.competition.title_placeholder": "Введите название соревнования",
