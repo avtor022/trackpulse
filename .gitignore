@@ -1,20 +1,14 @@
 ```
-# Compiled and binary files
+# Compiled and build artifacts
 *.o
 *.obj
 *.out
-
 # Dependencies
 vendor/
-
 # Logs and temp files
 *.log
 *.tmp
-
-# Editors
-.vscode/
-.idea/
-
+*.swp
 # Environment
 .env
 .env.local

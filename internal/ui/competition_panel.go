@@ -17,17 +17,19 @@ import (
 
 // CompetitionPanel represents the Competitions management panel
 type CompetitionPanel struct {
-	competitionService   *service.CompetitionService
-	content              *fyne.Container
-	table                *widget.Table
-	statusLabel          *widget.Label
-	window               fyne.Window               // Reference to window for dialogs
-	selectedID           string                    // ID of selected competition
-	allCompetitions      []models.Competition      // Cache of all competitions
-	headers              []string                  // Localized table headers
-	allModelTypes        []models.RCModelType      // Cache of all model types
-	allModelScales       []models.RCModelScale     // Cache of all model scales
-	allCompetitionTracks []models.CompetitionTrack // Cache of all competition tracks
+	competitionService    *service.CompetitionService
+	content               *fyne.Container
+	table                 *widget.Table
+	statusLabel           *widget.Label
+	window                fyne.Window                // Reference to window for dialogs
+	selectedID            string                     // ID of selected competition
+	allCompetitions       []models.Competition       // Cache of all competitions
+	headers               []string                   // Localized table headers
+	allModelTypes         []models.RCModelType       // Cache of all model types
+	allModelScales        []models.RCModelScale      // Cache of all model scales
+	allCompetitionTracks  []models.CompetitionTrack  // Cache of all competition tracks
+	allCompetitionYears   []models.CompetitionYear   // Cache of all competition years
+	allCompetitionSeasons []models.CompetitionSeason // Cache of all competition seasons
 }
 
 // updateLocale updates all localized text in the panel
@@ -271,6 +273,18 @@ func (p *CompetitionPanel) refreshData() {
 		p.allCompetitionTracks, err = p.competitionService.GetAllCompetitionTracks()
 		if err != nil {
 			fmt.Println("ERROR loading competition tracks:", err)
+		}
+
+		// Load competition years for dropdown
+		p.allCompetitionYears, err = p.competitionService.GetAllCompetitionYears()
+		if err != nil {
+			fmt.Println("ERROR loading competition years:", err)
+		}
+
+		// Load competition seasons for dropdown
+		p.allCompetitionSeasons, err = p.competitionService.GetAllCompetitionSeasons()
+		if err != nil {
+			fmt.Println("ERROR loading competition seasons:", err)
 		}
 
 		// Force table to recalculate rows count and update cell contents
@@ -891,6 +905,224 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 	// Use the button as the track widget
 	var trackWidget = trackButton
 
+	// Competition year select with popup manager (with add/delete buttons)
+	var yearSelect *widget.Select
+	existingYears := []string{}
+	for _, y := range p.allCompetitionYears {
+		existingYears = append(existingYears, fmt.Sprintf("%d", y.Year))
+	}
+
+	newYearOption := "+ " + locale.T("common.add") + " " + strings.TrimSuffix(locale.T("form.competition.year"), ":")
+	yearSelectOptions := append(existingYears, newYearOption)
+
+	var yearPopupManager *ReferencePopupManager
+
+	var yearButton *widget.Button
+	updateYearButton := func(selected string) {
+		if yearButton == nil {
+			return
+		}
+		if selected == "" {
+			yearButton.SetText(locale.T("common.select_one"))
+		} else {
+			yearButton.SetText(selected)
+		}
+	}
+
+	yearSelect = widget.NewSelect(yearSelectOptions, func(selected string) {
+		updateYearButton(selected)
+		if selected == newYearOption {
+			yearSelect.SetSelected("")
+		}
+	})
+
+	var showYearPopup func()
+	showYearPopup = func() {
+		if yearPopupManager == nil {
+			items := make([]ReferenceItem, len(existingYears))
+			for i, y := range existingYears {
+				items[i] = ReferenceItem{Name: y}
+			}
+
+			yearPopupManager = NewReferencePopupManager(
+				p.window,
+				ReferencePopupConfig{
+					Title:          "common.select_one",
+					AddTitle:       "dialog.add_year.title",
+					AddLabel:       "dialog.add_year.label",
+					AddPlaceholder: "dialog.add_year.placeholder",
+					DeleteMessage:  "dialog.delete_year.message",
+					NewErrorExists: "dialog.new_year.error_exists",
+					EnterNameInfo:  "info.enter_year_name",
+					GetAllFunc: func() ([]ReferenceItem, error) {
+						allYears, err := p.competitionService.GetAllCompetitionYears()
+						if err != nil {
+							return nil, err
+						}
+						result := make([]ReferenceItem, len(allYears))
+						for i, y := range allYears {
+							result[i] = ReferenceItem{Name: fmt.Sprintf("%d", y.Year)}
+						}
+						return result, nil
+					},
+					AddFunc: func(name string) error {
+						yearVal, err := strconv.Atoi(name)
+						if err != nil {
+							return fmt.Errorf("invalid year: %v", err)
+						}
+						return p.competitionService.AddCompetitionYear(yearVal)
+					},
+					DeleteFunc: func(name string) error {
+						yearVal, err := strconv.Atoi(name)
+						if err != nil {
+							return err
+						}
+						return p.competitionService.DeleteCompetitionYear(yearVal)
+					},
+					OnItemSelected: func(selected string) {
+						yearSelect.SetSelected(selected)
+						updateYearButton(selected)
+					},
+					UpdateOptions: func(opts []string) {
+						yearSelectOptions = opts
+						yearSelect.Options = yearSelectOptions
+					},
+				},
+				existingYears,
+				newYearOption,
+				func(selected string) {
+					yearSelect.SetSelected(selected)
+					updateYearButton(selected)
+				},
+				func(opts []string) {
+					yearSelectOptions = opts
+					yearSelect.Options = yearSelectOptions
+				},
+			)
+		}
+		yearPopupManager.ShowPopup(mainDialog, &currentDialog, func(d dialog.Dialog) {
+			currentDialog = d
+		})
+	}
+
+	initialYearText := locale.T("common.select_one")
+	if competition != nil && competition.CompetitionYear != nil {
+		initialYearText = fmt.Sprintf("%d", *competition.CompetitionYear)
+	}
+	yearButton = widget.NewButton(initialYearText, func() {
+		if mainDialog != nil {
+			mainDialog.Hide()
+		}
+		showYearPopup()
+	})
+
+	var yearWidget = yearButton
+
+	// Competition season select with popup manager (with add/delete buttons)
+	var seasonSelect *widget.Select
+	existingSeasons := []string{}
+	for _, s := range p.allCompetitionSeasons {
+		existingSeasons = append(existingSeasons, s.Season)
+	}
+
+	newSeasonOption := "+ " + locale.T("common.add") + " " + strings.TrimSuffix(locale.T("form.competition.season"), ":")
+	seasonSelectOptions := append(existingSeasons, newSeasonOption)
+
+	var seasonPopupManager *ReferencePopupManager
+
+	var seasonButton *widget.Button
+	updateSeasonButton := func(selected string) {
+		if seasonButton == nil {
+			return
+		}
+		if selected == "" {
+			seasonButton.SetText(locale.T("common.select_one"))
+		} else {
+			seasonButton.SetText(selected)
+		}
+	}
+
+	seasonSelect = widget.NewSelect(seasonSelectOptions, func(selected string) {
+		updateSeasonButton(selected)
+		if selected == newSeasonOption {
+			seasonSelect.SetSelected("")
+		}
+	})
+
+	var showSeasonPopup func()
+	showSeasonPopup = func() {
+		if seasonPopupManager == nil {
+			items := make([]ReferenceItem, len(existingSeasons))
+			for i, s := range existingSeasons {
+				items[i] = ReferenceItem{Name: s}
+			}
+
+			seasonPopupManager = NewReferencePopupManager(
+				p.window,
+				ReferencePopupConfig{
+					Title:          "common.select_one",
+					AddTitle:       "dialog.add_season.title",
+					AddLabel:       "dialog.add_season.label",
+					AddPlaceholder: "dialog.add_season.placeholder",
+					DeleteMessage:  "dialog.delete_season.message",
+					NewErrorExists: "dialog.new_season.error_exists",
+					EnterNameInfo:  "info.enter_season_name",
+					GetAllFunc: func() ([]ReferenceItem, error) {
+						allSeasons, err := p.competitionService.GetAllCompetitionSeasons()
+						if err != nil {
+							return nil, err
+						}
+						result := make([]ReferenceItem, len(allSeasons))
+						for i, s := range allSeasons {
+							result[i] = ReferenceItem{Name: s.Season}
+						}
+						return result, nil
+					},
+					AddFunc: func(name string) error {
+						return p.competitionService.AddCompetitionSeason(name)
+					},
+					DeleteFunc: func(name string) error {
+						return p.competitionService.DeleteCompetitionSeason(name)
+					},
+					OnItemSelected: func(selected string) {
+						seasonSelect.SetSelected(selected)
+						updateSeasonButton(selected)
+					},
+					UpdateOptions: func(opts []string) {
+						seasonSelectOptions = opts
+						seasonSelect.Options = seasonSelectOptions
+					},
+				},
+				existingSeasons,
+				newSeasonOption,
+				func(selected string) {
+					seasonSelect.SetSelected(selected)
+					updateSeasonButton(selected)
+				},
+				func(opts []string) {
+					seasonSelectOptions = opts
+					seasonSelect.Options = seasonSelectOptions
+				},
+			)
+		}
+		seasonPopupManager.ShowPopup(mainDialog, &currentDialog, func(d dialog.Dialog) {
+			currentDialog = d
+		})
+	}
+
+	initialSeasonText := locale.T("common.select_one")
+	if competition != nil && competition.Season != "" {
+		initialSeasonText = competition.Season
+	}
+	seasonButton = widget.NewButton(initialSeasonText, func() {
+		if mainDialog != nil {
+			mainDialog.Hide()
+		}
+		showSeasonPopup()
+	})
+
+	var seasonWidget = seasonButton
+
 	// Lap count target entry
 	lapCountEntry := widget.NewEntry()
 	lapCountEntry.SetPlaceHolder(locale.T("form.competition.lap_count_placeholder"))
@@ -932,6 +1164,14 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 		if competition.TrackName != "" {
 			updateTrackButton(competition.TrackName)
 		}
+		// Set year button text for edit mode
+		if competition.CompetitionYear != nil {
+			updateYearButton(fmt.Sprintf("%d", *competition.CompetitionYear))
+		}
+		// Set season button text for edit mode
+		if competition.Season != "" {
+			updateSeasonButton(competition.Season)
+		}
 		if competition.LapCountTarget != nil {
 			lapCountEntry.SetText(strconv.Itoa(*competition.LapCountTarget))
 		}
@@ -945,13 +1185,15 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 	}
 
 	// Create form with localized labels in the requested order:
-	// 1. Status, 2. Competition Type, 3. Track, 4. Model Type, 5. Model Scale, 6. Title, 7. Time Limit, 8. Lap Count
+	// 1. Status, 2. Competition Type, 3. Track, 4. Model Type, 5. Model Scale, 6. Year, 7. Season, 8. Title, 9. Time Limit, 10. Lap Count
 	form := widget.NewForm(
 		widget.NewFormItem(locale.T("form.competition.status"), statusWidget),
 		widget.NewFormItem(locale.T("form.competition.type"), typeWidget),
 		widget.NewFormItem(locale.T("form.competition.track"), trackWidget),
 		widget.NewFormItem(locale.T("form.competition.model_type"), modelTypeWidget),
 		widget.NewFormItem(locale.T("form.competition.model_scale"), modelScaleWidget),
+		widget.NewFormItem(locale.T("form.competition.year"), yearWidget),
+		widget.NewFormItem(locale.T("form.competition.season"), seasonWidget),
 		widget.NewFormItem(locale.T("form.competition.title"), titleEntry),
 		widget.NewFormItem(locale.T("form.competition.time_limit"), timeLimitEntry),
 		widget.NewFormItem(locale.T("form.competition.lap_count"), lapCountEntry),

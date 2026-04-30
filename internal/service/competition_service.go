@@ -42,6 +42,8 @@ type CompetitionService struct {
 	modelTypes RCModelTypeRepositoryInterface
 	scales     RCModelScaleRepositoryInterface
 	tracks     CompetitionTrackRepositoryInterface
+	years      CompetitionYearRepositoryInterface
+	seasons    CompetitionSeasonRepositoryInterface
 }
 
 // CompetitionTrackRepositoryInterface defines the interface for competition track data access
@@ -53,9 +55,27 @@ type CompetitionTrackRepositoryInterface interface {
 	Delete(name string) error
 }
 
+// CompetitionYearRepositoryInterface defines the interface for competition year data access
+type CompetitionYearRepositoryInterface interface {
+	GetAll() ([]models.CompetitionYear, error)
+	GetByYear(year int) (*models.CompetitionYear, error)
+	Create(year int) (*models.CompetitionYear, error)
+	GetOrCreate(year int) (*models.CompetitionYear, error)
+	Delete(year int) error
+}
+
+// CompetitionSeasonRepositoryInterface defines the interface for competition season data access
+type CompetitionSeasonRepositoryInterface interface {
+	GetAll() ([]models.CompetitionSeason, error)
+	GetBySeason(season string) (*models.CompetitionSeason, error)
+	Create(season string) (*models.CompetitionSeason, error)
+	GetOrCreate(season string) (*models.CompetitionSeason, error)
+	Delete(season string) error
+}
+
 // NewCompetitionService creates a new competition service
-func NewCompetitionService(repo CompetitionRepositoryInterface, modelTypes RCModelTypeRepositoryInterface, scales RCModelScaleRepositoryInterface, tracks CompetitionTrackRepositoryInterface) *CompetitionService {
-	return &CompetitionService{repo: repo, modelTypes: modelTypes, scales: scales, tracks: tracks}
+func NewCompetitionService(repo CompetitionRepositoryInterface, modelTypes RCModelTypeRepositoryInterface, scales RCModelScaleRepositoryInterface, tracks CompetitionTrackRepositoryInterface, years CompetitionYearRepositoryInterface, seasons CompetitionSeasonRepositoryInterface) *CompetitionService {
+	return &CompetitionService{repo: repo, modelTypes: modelTypes, scales: scales, tracks: tracks, years: years, seasons: seasons}
 }
 
 // GetAllCompetitions returns all competitions
@@ -92,6 +112,38 @@ func (s *CompetitionService) AddCompetitionTrack(name string) error {
 // DeleteCompetitionTrack deletes a competition track by name
 func (s *CompetitionService) DeleteCompetitionTrack(name string) error {
 	return s.tracks.Delete(name)
+}
+
+// GetAllCompetitionYears returns all competition years for competition selection
+func (s *CompetitionService) GetAllCompetitionYears() ([]models.CompetitionYear, error) {
+	return s.years.GetAll()
+}
+
+// AddCompetitionYear adds a new competition year
+func (s *CompetitionService) AddCompetitionYear(year int) error {
+	_, err := s.years.Create(year)
+	return err
+}
+
+// DeleteCompetitionYear deletes a competition year by value
+func (s *CompetitionService) DeleteCompetitionYear(year int) error {
+	return s.years.Delete(year)
+}
+
+// GetAllCompetitionSeasons returns all competition seasons for competition selection
+func (s *CompetitionService) GetAllCompetitionSeasons() ([]models.CompetitionSeason, error) {
+	return s.seasons.GetAll()
+}
+
+// AddCompetitionSeason adds a new competition season
+func (s *CompetitionService) AddCompetitionSeason(season string) error {
+	_, err := s.seasons.Create(season)
+	return err
+}
+
+// DeleteCompetitionSeason deletes a competition season by value
+func (s *CompetitionService) DeleteCompetitionSeason(season string) error {
+	return s.seasons.Delete(season)
 }
 
 // CreateCompetition creates a new competition with validation
