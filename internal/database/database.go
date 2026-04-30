@@ -135,8 +135,8 @@ func (db *DB) Initialize() error {
 		time_start TEXT,
 		time_finish TEXT,
 		status TEXT DEFAULT 'scheduled',
-		competition_year INTEGER,
-		season TEXT,
+		competition_year INTEGER REFERENCES competition_years(year) ON DELETE RESTRICT,
+		season TEXT REFERENCES competition_seasons(season) ON DELETE RESTRICT,
 		created_at TEXT NOT NULL,
 		updated_at TEXT NOT NULL
 	);
@@ -144,6 +144,24 @@ func (db *DB) Initialize() error {
 	CREATE INDEX IF NOT EXISTS idx_competitions_time_start ON competitions(time_start);
 	CREATE INDEX IF NOT EXISTS idx_competitions_year ON competitions(competition_year);
 	CREATE UNIQUE INDEX IF NOT EXISTS idx_competitions_year_season_unique ON competitions(competition_year, season);
+
+	-- Competition Years dictionary table
+	CREATE TABLE IF NOT EXISTS competition_years (
+		id TEXT PRIMARY KEY NOT NULL,
+		year INTEGER UNIQUE NOT NULL,
+		created_at TEXT NOT NULL,
+		updated_at TEXT NOT NULL
+	);
+	CREATE INDEX IF NOT EXISTS idx_competition_years_year ON competition_years(year);
+
+	-- Competition Seasons dictionary table
+	CREATE TABLE IF NOT EXISTS competition_seasons (
+		id TEXT PRIMARY KEY NOT NULL,
+		season TEXT UNIQUE NOT NULL,
+		created_at TEXT NOT NULL,
+		updated_at TEXT NOT NULL
+	);
+	CREATE INDEX IF NOT EXISTS idx_competition_seasons_season ON competition_seasons(season);
 
 	-- Competition Participants table
 	CREATE TABLE IF NOT EXISTS competition_participants (
