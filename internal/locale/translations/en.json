@@ -254,5 +254,15 @@
     "logs.read_error": "Read error: %v",
     "logs.clear": "Clear",
     "logs.no_ports": "No ports found",
-    "logs.error_scanning": "Error scanning ports"
+    "logs.error_scanning": "Error scanning ports",
+    "filter.all_years": "All Years",
+    "filter.all_seasons": "All Seasons",
+    "filter.all_tracks": "All Tracks",
+    "filter.all_model_types": "All Model Types",
+    "common.year": "Year",
+    "common.season": "Season",
+    "common.track": "Track",
+    "common.model_type": "Model Type",
+    "monitoring.placeholder": "Select a competition to view monitoring data",
+    "status.error_loading": "Error loading data"
 }

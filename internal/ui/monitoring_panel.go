@@ -14,13 +14,26 @@ import (
 
 // MonitoringPanel represents the monitoring panel UI
 type MonitoringPanel struct {
-	content             *fyne.Container
-	mainWindow          fyne.Window
-	competitionService  *service.CompetitionService
-	selectedCompetition string
-	statusLabel         *widget.Label
-	allCompetitions     []models.Competition
-	competitionButton   *widget.Button
+	content              *fyne.Container
+	mainWindow           fyne.Window
+	competitionService   *service.CompetitionService
+	selectedCompetition  string
+	statusLabel          *widget.Label
+	allCompetitions      []models.Competition
+	competitionButton    *widget.Button
+	filteredCompetitions []models.Competition
+	filteredYears        []string
+	filteredSeasons      []string
+	filteredTracks       []string
+	filteredModelTypes   []string
+	yearButton           *widget.Button
+	seasonButton         *widget.Button
+	trackButton          *widget.Button
+	modelTypeButton      *widget.Button
+	selectedYear         string
+	selectedSeason       string
+	selectedTrack        string
+	selectedModelType    string
 }
 
 // NewMonitoringPanel creates a new monitoring panel
@@ -44,9 +57,42 @@ func (p *MonitoringPanel) createContent() *fyne.Container {
 		p.showCompetitionPopup()
 	})
 
+	// Filter buttons using reference_popup.go without add/delete functionality
+	p.yearButton = widget.NewButton(locale.T("filter.all_years"), func() {
+		p.showYearFilterPopup()
+	})
+	p.seasonButton = widget.NewButton(locale.T("filter.all_seasons"), func() {
+		p.showSeasonFilterPopup()
+	})
+	p.trackButton = widget.NewButton(locale.T("filter.all_tracks"), func() {
+		p.showTrackFilterPopup()
+	})
+	p.modelTypeButton = widget.NewButton(locale.T("filter.all_model_types"), func() {
+		p.showModelTypeFilterPopup()
+	})
+
+	// Populate filter options
+	p.populateFilterOptions()
+
+	// Filter container
+	filterContainer := container.NewGridWithColumns(4,
+		widget.NewLabel(locale.T("common.year")),
+		widget.NewLabel(locale.T("common.season")),
+		widget.NewLabel(locale.T("common.track")),
+		widget.NewLabel(locale.T("common.model_type")),
+		p.yearButton,
+		p.seasonButton,
+		p.trackButton,
+		p.modelTypeButton,
+	)
+
 	// Selector container
 	selectorContainer := container.NewVBox(
-		p.competitionButton,
+		widget.NewSeparator(),
+		filterContainer,
+		widget.NewSeparator(),
+		container.NewHBox(p.competitionButton),
+		widget.NewSeparator(),
 	)
 
 	// Main content area (placeholder for future monitoring widgets)
@@ -55,11 +101,7 @@ func (p *MonitoringPanel) createContent() *fyne.Container {
 
 	// Layout
 	content := container.NewBorder(
-		container.NewVBox(
-			widget.NewSeparator(),
-			selectorContainer,
-			widget.NewSeparator(),
-		),
+		selectorContainer,
 		nil,
 		nil,
 		nil,
@@ -91,18 +133,107 @@ func (p *MonitoringPanel) refreshCompetitions() {
 	} else {
 		p.statusLabel.SetText(fmt.Sprintf(locale.T("status.loaded_competitions"), len(p.allCompetitions)))
 	}
+
+	// Apply filters and update filtered list
+	p.applyFilters()
+}
+
+// populateFilterOptions populates filter dropdown options from competitions
+func (p *MonitoringPanel) populateFilterOptions() {
+	yearSet := make(map[string]bool)
+	seasonSet := make(map[string]bool)
+	trackSet := make(map[string]bool)
+	modelTypeSet := make(map[string]bool)
+
+	for _, comp := range p.allCompetitions {
+		if comp.CompetitionYear != nil {
+			yearStr := fmt.Sprintf("%d", *comp.CompetitionYear)
+			yearSet[yearStr] = true
+		}
+		if comp.Season != "" {
+			seasonSet[comp.Season] = true
+		}
+		if comp.TrackName != "" {
+			trackSet[comp.TrackName] = true
+		}
+		if comp.ModelType != "" {
+			modelTypeSet[comp.ModelType] = true
+		}
+	}
+
+	p.filteredYears = []string{locale.T("filter.all_years")}
+	for year := range yearSet {
+		p.filteredYears = append(p.filteredYears, year)
+	}
+
+	p.filteredSeasons = []string{locale.T("filter.all_seasons")}
+	for season := range seasonSet {
+		p.filteredSeasons = append(p.filteredSeasons, season)
+	}
+
+	p.filteredTracks = []string{locale.T("filter.all_tracks")}
+	for track := range trackSet {
+		p.filteredTracks = append(p.filteredTracks, track)
+	}
+
+	p.filteredModelTypes = []string{locale.T("filter.all_model_types")}
+	for modelType := range modelTypeSet {
+		p.filteredModelTypes = append(p.filteredModelTypes, modelType)
+	}
+}
+
+// applyFilters applies selected filters to the competition list
+func (p *MonitoringPanel) applyFilters() {
+	p.filteredCompetitions = []models.Competition{}
+
+	for _, comp := range p.allCompetitions {
+		if p.matchesFilters(comp) {
+			p.filteredCompetitions = append(p.filteredCompetitions, comp)
+		}
+	}
+}
+
+// matchesFilters checks if a competition matches the current filter selections
+func (p *MonitoringPanel) matchesFilters(comp models.Competition) bool {
+	// Check year filter
+	if p.selectedYear != "" && p.selectedYear != locale.T("filter.all_years") {
+		if comp.CompetitionYear == nil {
+			return false
+		}
+		yearStr := fmt.Sprintf("%d", *comp.CompetitionYear)
+		if yearStr != p.selectedYear {
+			return false
+		}
+	}
+
+	// Check season filter
+	if p.selectedSeason != "" && p.selectedSeason != locale.T("filter.all_seasons") {
+		if comp.Season != p.selectedSeason {
+			return false
+		}
+	}
+
+	// Check track filter
+	if p.selectedTrack != "" && p.selectedTrack != locale.T("filter.all_tracks") {
+		if comp.TrackName != p.selectedTrack {
+			return false
+		}
+	}
+
+	// Check model type filter
+	if p.selectedModelType != "" && p.selectedModelType != locale.T("filter.all_model_types") {
+		if comp.ModelType != p.selectedModelType {
+			return false
+		}
+	}
+
+	return true
 }
 
 // showCompetitionPopup shows the competition selection popup without add/delete buttons
 func (p *MonitoringPanel) showCompetitionPopup() {
 	var currentDialog dialog.Dialog
 	var mainDialog dialog.Dialog
-
-	// Convert competitions to ReferenceItem slice
-	items := make([]ReferenceItem, len(p.allCompetitions))
-	for i, comp := range p.allCompetitions {
-		items[i] = ReferenceItem{Name: comp.CompetitionTitle}
-	}
 
 	popupManager := NewReferencePopupManager(
 		p.mainWindow,
@@ -115,8 +246,8 @@ func (p *MonitoringPanel) showCompetitionPopup() {
 			NewErrorExists: "",
 			EnterNameInfo:  "",
 			GetAllFunc: func() ([]ReferenceItem, error) {
-				result := make([]ReferenceItem, len(p.allCompetitions))
-				for i, comp := range p.allCompetitions {
+				result := make([]ReferenceItem, len(p.filteredCompetitions))
+				for i, comp := range p.filteredCompetitions {
 					result[i] = ReferenceItem{Name: comp.CompetitionTitle}
 				}
 				return result, nil
@@ -129,7 +260,7 @@ func (p *MonitoringPanel) showCompetitionPopup() {
 			},
 			UpdateOptions: func(opts []string) {},
 		},
-		p.getCompetitionTitles(),
+		p.getFilteredCompetitionTitles(),
 		"",
 		func(selected string) {
 			p.selectedCompetition = selected
@@ -140,6 +271,207 @@ func (p *MonitoringPanel) showCompetitionPopup() {
 	popupManager.ShowPopupWithoutAddDelete(mainDialog, &currentDialog, func(d dialog.Dialog) {
 		currentDialog = d
 	})
+}
+
+// showYearFilterPopup shows the year filter popup using reference_popup.go without add/delete
+func (p *MonitoringPanel) showYearFilterPopup() {
+	var currentDialog dialog.Dialog
+	var mainDialog dialog.Dialog
+
+	items := make([]string, len(p.filteredYears))
+	copy(items, p.filteredYears)
+
+	popupManager := NewReferencePopupManager(
+		p.mainWindow,
+		ReferencePopupConfig{
+			Title:          "common.year",
+			AddTitle:       "",
+			AddLabel:       "",
+			AddPlaceholder: "",
+			DeleteMessage:  "",
+			NewErrorExists: "",
+			EnterNameInfo:  "",
+			GetAllFunc: func() ([]ReferenceItem, error) {
+				result := make([]ReferenceItem, len(items))
+				for i, item := range items {
+					result[i] = ReferenceItem{Name: item}
+				}
+				return result, nil
+			},
+			AddFunc:    func(name string) error { return nil },
+			DeleteFunc: func(name string) error { return nil },
+			OnItemSelected: func(selected string) {
+				p.selectedYear = selected
+				p.yearButton.SetText(selected)
+				p.applyFilters()
+			},
+			UpdateOptions: func(opts []string) {},
+		},
+		items,
+		"",
+		func(selected string) {
+			p.selectedYear = selected
+			p.yearButton.SetText(selected)
+			p.applyFilters()
+		},
+		func(opts []string) {},
+	)
+	popupManager.ShowPopupWithoutAddDelete(mainDialog, &currentDialog, func(d dialog.Dialog) {
+		currentDialog = d
+	})
+}
+
+// showSeasonFilterPopup shows the season filter popup using reference_popup.go without add/delete
+func (p *MonitoringPanel) showSeasonFilterPopup() {
+	var currentDialog dialog.Dialog
+	var mainDialog dialog.Dialog
+
+	items := make([]string, len(p.filteredSeasons))
+	copy(items, p.filteredSeasons)
+
+	popupManager := NewReferencePopupManager(
+		p.mainWindow,
+		ReferencePopupConfig{
+			Title:          "common.season",
+			AddTitle:       "",
+			AddLabel:       "",
+			AddPlaceholder: "",
+			DeleteMessage:  "",
+			NewErrorExists: "",
+			EnterNameInfo:  "",
+			GetAllFunc: func() ([]ReferenceItem, error) {
+				result := make([]ReferenceItem, len(items))
+				for i, item := range items {
+					result[i] = ReferenceItem{Name: item}
+				}
+				return result, nil
+			},
+			AddFunc:    func(name string) error { return nil },
+			DeleteFunc: func(name string) error { return nil },
+			OnItemSelected: func(selected string) {
+				p.selectedSeason = selected
+				p.seasonButton.SetText(selected)
+				p.applyFilters()
+			},
+			UpdateOptions: func(opts []string) {},
+		},
+		items,
+		"",
+		func(selected string) {
+			p.selectedSeason = selected
+			p.seasonButton.SetText(selected)
+			p.applyFilters()
+		},
+		func(opts []string) {},
+	)
+	popupManager.ShowPopupWithoutAddDelete(mainDialog, &currentDialog, func(d dialog.Dialog) {
+		currentDialog = d
+	})
+}
+
+// showTrackFilterPopup shows the track filter popup using reference_popup.go without add/delete
+func (p *MonitoringPanel) showTrackFilterPopup() {
+	var currentDialog dialog.Dialog
+	var mainDialog dialog.Dialog
+
+	items := make([]string, len(p.filteredTracks))
+	copy(items, p.filteredTracks)
+
+	popupManager := NewReferencePopupManager(
+		p.mainWindow,
+		ReferencePopupConfig{
+			Title:          "common.track",
+			AddTitle:       "",
+			AddLabel:       "",
+			AddPlaceholder: "",
+			DeleteMessage:  "",
+			NewErrorExists: "",
+			EnterNameInfo:  "",
+			GetAllFunc: func() ([]ReferenceItem, error) {
+				result := make([]ReferenceItem, len(items))
+				for i, item := range items {
+					result[i] = ReferenceItem{Name: item}
+				}
+				return result, nil
+			},
+			AddFunc:    func(name string) error { return nil },
+			DeleteFunc: func(name string) error { return nil },
+			OnItemSelected: func(selected string) {
+				p.selectedTrack = selected
+				p.trackButton.SetText(selected)
+				p.applyFilters()
+			},
+			UpdateOptions: func(opts []string) {},
+		},
+		items,
+		"",
+		func(selected string) {
+			p.selectedTrack = selected
+			p.trackButton.SetText(selected)
+			p.applyFilters()
+		},
+		func(opts []string) {},
+	)
+	popupManager.ShowPopupWithoutAddDelete(mainDialog, &currentDialog, func(d dialog.Dialog) {
+		currentDialog = d
+	})
+}
+
+// showModelTypeFilterPopup shows the model type filter popup using reference_popup.go without add/delete
+func (p *MonitoringPanel) showModelTypeFilterPopup() {
+	var currentDialog dialog.Dialog
+	var mainDialog dialog.Dialog
+
+	items := make([]string, len(p.filteredModelTypes))
+	copy(items, p.filteredModelTypes)
+
+	popupManager := NewReferencePopupManager(
+		p.mainWindow,
+		ReferencePopupConfig{
+			Title:          "common.model_type",
+			AddTitle:       "",
+			AddLabel:       "",
+			AddPlaceholder: "",
+			DeleteMessage:  "",
+			NewErrorExists: "",
+			EnterNameInfo:  "",
+			GetAllFunc: func() ([]ReferenceItem, error) {
+				result := make([]ReferenceItem, len(items))
+				for i, item := range items {
+					result[i] = ReferenceItem{Name: item}
+				}
+				return result, nil
+			},
+			AddFunc:    func(name string) error { return nil },
+			DeleteFunc: func(name string) error { return nil },
+			OnItemSelected: func(selected string) {
+				p.selectedModelType = selected
+				p.modelTypeButton.SetText(selected)
+				p.applyFilters()
+			},
+			UpdateOptions: func(opts []string) {},
+		},
+		items,
+		"",
+		func(selected string) {
+			p.selectedModelType = selected
+			p.modelTypeButton.SetText(selected)
+			p.applyFilters()
+		},
+		func(opts []string) {},
+	)
+	popupManager.ShowPopupWithoutAddDelete(mainDialog, &currentDialog, func(d dialog.Dialog) {
+		currentDialog = d
+	})
+}
+
+// getFilteredCompetitionTitles returns a slice of filtered competition titles
+func (p *MonitoringPanel) getFilteredCompetitionTitles() []string {
+	titles := make([]string, len(p.filteredCompetitions))
+	for i, comp := range p.filteredCompetitions {
+		titles[i] = comp.CompetitionTitle
+	}
+	return titles
 }
 
 // getCompetitionTitles returns a slice of competition titles
