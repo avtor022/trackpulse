@@ -224,6 +224,8 @@
     "form.competition.time_limit_placeholder": "Minutes",
     "form.competition.status": "Status",
     "form.competition.status_placeholder": "Select status",
+    "form.competition.year": "Year",
+    "form.competition.season": "Season",
     "dialog.new_competition.title": "New Competition",
     "status.no_competitions": "No competitions found",
     "status.loaded_competitions": "Loaded %d competitions",

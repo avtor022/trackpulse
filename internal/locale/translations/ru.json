@@ -224,6 +224,8 @@
     "form.competition.time_limit_placeholder": "Минуты",
     "form.competition.status": "Статус",
     "form.competition.status_placeholder": "Выберите статус",
+    "form.competition.year": "Год",
+    "form.competition.season": "Сезон",
     "dialog.new_competition.title": "Новое соревнование",
     "status.no_competitions": "Соревнования не найдены",
     "status.loaded_competitions": "Загружено соревнований: %d",
