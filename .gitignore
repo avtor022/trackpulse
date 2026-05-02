@@ -1,1 +1,1 @@
-Nothing should be ignored based on the provided file changes, as only a Go source file was modified without any build artifacts, dependencies, or temporary files present in the change list.
+Nothing should be ignored based on the provided file changes. The only modified file is a Go source file (`internal/ui/monitoring_panel.go`), which is not a build artifact, dependency, or temporary file.
