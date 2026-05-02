@@ -211,11 +211,107 @@ func (m *MockCompetitionTrackRepository) Delete(name string) error {
 	return nil
 }
 
+// MockCompetitionYearRepository is a mock implementation of CompetitionYearRepository for testing
+type MockCompetitionYearRepository struct {
+	years map[int]*models.CompetitionYear
+}
+
+func NewMockCompetitionYearRepository() *MockCompetitionYearRepository {
+	return &MockCompetitionYearRepository{
+		years: make(map[int]*models.CompetitionYear),
+	}
+}
+
+func (m *MockCompetitionYearRepository) GetAll() ([]models.CompetitionYear, error) {
+	result := make([]models.CompetitionYear, 0, len(m.years))
+	for _, y := range m.years {
+		result = append(result, *y)
+	}
+	return result, nil
+}
+
+func (m *MockCompetitionYearRepository) GetByYear(year int) (*models.CompetitionYear, error) {
+	if y, ok := m.years[year]; ok {
+		return y, nil
+	}
+	return nil, nil
+}
+
+func (m *MockCompetitionYearRepository) Create(year int) (*models.CompetitionYear, error) {
+	id := uuid.New().String()
+	y := &models.CompetitionYear{
+		ID:   id,
+		Year: year,
+	}
+	m.years[year] = y
+	return y, nil
+}
+
+func (m *MockCompetitionYearRepository) GetOrCreate(year int) (*models.CompetitionYear, error) {
+	if y, ok := m.years[year]; ok {
+		return y, nil
+	}
+	return m.Create(year)
+}
+
+func (m *MockCompetitionYearRepository) Delete(year int) error {
+	delete(m.years, year)
+	return nil
+}
+
+// MockCompetitionSeasonRepository is a mock implementation of CompetitionSeasonRepository for testing
+type MockCompetitionSeasonRepository struct {
+	seasons map[string]*models.CompetitionSeason
+}
+
+func NewMockCompetitionSeasonRepository() *MockCompetitionSeasonRepository {
+	return &MockCompetitionSeasonRepository{
+		seasons: make(map[string]*models.CompetitionSeason),
+	}
+}
+
+func (m *MockCompetitionSeasonRepository) GetAll() ([]models.CompetitionSeason, error) {
+	result := make([]models.CompetitionSeason, 0, len(m.seasons))
+	for _, s := range m.seasons {
+		result = append(result, *s)
+	}
+	return result, nil
+}
+
+func (m *MockCompetitionSeasonRepository) GetBySeason(season string) (*models.CompetitionSeason, error) {
+	if s, ok := m.seasons[season]; ok {
+		return s, nil
+	}
+	return nil, nil
+}
+
+func (m *MockCompetitionSeasonRepository) Create(season string) (*models.CompetitionSeason, error) {
+	id := uuid.New().String()
+	s := &models.CompetitionSeason{
+		ID:     id,
+		Season: season,
+	}
+	m.seasons[season] = s
+	return s, nil
+}
+
+func (m *MockCompetitionSeasonRepository) GetOrCreate(season string) (*models.CompetitionSeason, error) {
+	if s, ok := m.seasons[season]; ok {
+		return s, nil
+	}
+	return m.Create(season)
+}
+
+func (m *MockCompetitionSeasonRepository) Delete(season string) error {
+	delete(m.seasons, season)
+	return nil
+}
+
 // TestCompetitionService_GetAllCompetitions tests the GetAllCompetitions method
 func TestCompetitionService_GetAllCompetitions(t *testing.T) {
 	mockCompRepo := NewMockCompetitionRepository()
 	mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
-	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository())
+	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository(), NewMockCompetitionYearRepository(), NewMockCompetitionSeasonRepository())
 
 	// Add some test data
 	timeStart := time.Now().Add(time.Hour)
@@ -254,7 +350,7 @@ func TestCompetitionService_GetAllCompetitions(t *testing.T) {
 func TestCompetitionService_GetCompetitionByID_Success(t *testing.T) {
 	mockCompRepo := NewMockCompetitionRepository()
 	mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
-	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository())
+	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository(), NewMockCompetitionYearRepository(), NewMockCompetitionSeasonRepository())
 
 	compID := uuid.New().String()
 	competition := &models.Competition{
@@ -281,7 +377,7 @@ func TestCompetitionService_GetCompetitionByID_Success(t *testing.T) {
 func TestCompetitionService_GetCompetitionByID_NotFound(t *testing.T) {
 	mockCompRepo := NewMockCompetitionRepository()
 	mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
-	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository())
+	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository(), NewMockCompetitionYearRepository(), NewMockCompetitionSeasonRepository())
 
 	retrieved, err := svc.GetCompetitionByID(uuid.New().String())
 	if err != nil {
@@ -296,7 +392,7 @@ func TestCompetitionService_GetCompetitionByID_NotFound(t *testing.T) {
 func TestCompetitionService_CreateCompetition_Success(t *testing.T) {
 	mockCompRepo := NewMockCompetitionRepository()
 	mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
-	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository())
+	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository(), NewMockCompetitionYearRepository(), NewMockCompetitionSeasonRepository())
 
 	competition := &models.Competition{
 		CompetitionTitle: "New Competition",
@@ -328,7 +424,7 @@ func TestCompetitionService_CreateCompetition_Success(t *testing.T) {
 func TestCompetitionService_CreateCompetition_EmptyTitle(t *testing.T) {
 	mockCompRepo := NewMockCompetitionRepository()
 	mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
-	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository())
+	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository(), NewMockCompetitionYearRepository(), NewMockCompetitionSeasonRepository())
 
 	competition := &models.Competition{
 		CompetitionTitle: "",
@@ -345,7 +441,7 @@ func TestCompetitionService_CreateCompetition_EmptyTitle(t *testing.T) {
 func TestCompetitionService_CreateCompetition_EmptyType(t *testing.T) {
 	mockCompRepo := NewMockCompetitionRepository()
 	mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
-	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository())
+	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository(), NewMockCompetitionYearRepository(), NewMockCompetitionSeasonRepository())
 
 	competition := &models.Competition{
 		CompetitionTitle: "Valid Title",
@@ -362,7 +458,7 @@ func TestCompetitionService_CreateCompetition_EmptyType(t *testing.T) {
 func TestCompetitionService_UpdateCompetition_Success(t *testing.T) {
 	mockCompRepo := NewMockCompetitionRepository()
 	mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
-	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository())
+	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository(), NewMockCompetitionYearRepository(), NewMockCompetitionSeasonRepository())
 
 	// Create initial competition
 	compID := uuid.New().String()
@@ -400,7 +496,7 @@ func TestCompetitionService_UpdateCompetition_Success(t *testing.T) {
 func TestCompetitionService_UpdateCompetition_EmptyID(t *testing.T) {
 	mockCompRepo := NewMockCompetitionRepository()
 	mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
-	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository())
+	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository(), NewMockCompetitionYearRepository(), NewMockCompetitionSeasonRepository())
 
 	c := &models.Competition{
 		ID:               "",
@@ -418,7 +514,7 @@ func TestCompetitionService_UpdateCompetition_EmptyID(t *testing.T) {
 func TestCompetitionService_UpdateCompetition_EmptyTitle(t *testing.T) {
 	mockCompRepo := NewMockCompetitionRepository()
 	mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
-	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository())
+	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository(), NewMockCompetitionYearRepository(), NewMockCompetitionSeasonRepository())
 
 	c := &models.Competition{
 		ID:               uuid.New().String(),
@@ -437,7 +533,7 @@ func TestCompetitionService_UpdateCompetition_EmptyTitle(t *testing.T) {
 func TestCompetitionService_UpdateCompetition_EmptyType(t *testing.T) {
 	mockCompRepo := NewMockCompetitionRepository()
 	mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
-	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository())
+	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository(), NewMockCompetitionYearRepository(), NewMockCompetitionSeasonRepository())
 
 	c := &models.Competition{
 		ID:               uuid.New().String(),
@@ -456,7 +552,7 @@ func TestCompetitionService_UpdateCompetition_EmptyType(t *testing.T) {
 func TestCompetitionService_UpdateCompetition_NotFound(t *testing.T) {
 	mockCompRepo := NewMockCompetitionRepository()
 	mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
-	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository())
+	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository(), NewMockCompetitionYearRepository(), NewMockCompetitionSeasonRepository())
 
 	c := &models.Competition{
 		ID:               uuid.New().String(),
@@ -474,7 +570,7 @@ func TestCompetitionService_UpdateCompetition_NotFound(t *testing.T) {
 func TestCompetitionService_DeleteCompetition_Success(t *testing.T) {
 	mockCompRepo := NewMockCompetitionRepository()
 	mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
-	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository())
+	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository(), NewMockCompetitionYearRepository(), NewMockCompetitionSeasonRepository())
 
 	// Create competition
 	c := &models.Competition{
@@ -501,7 +597,7 @@ func TestCompetitionService_DeleteCompetition_Success(t *testing.T) {
 func TestCompetitionService_DeleteCompetition_EmptyID(t *testing.T) {
 	mockCompRepo := NewMockCompetitionRepository()
 	mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
-	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository())
+	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository(), NewMockCompetitionYearRepository(), NewMockCompetitionSeasonRepository())
 
 	err := svc.DeleteCompetition("")
 	if err == nil {
@@ -513,7 +609,7 @@ func TestCompetitionService_DeleteCompetition_EmptyID(t *testing.T) {
 func TestCompetitionService_GetCompetitionCount(t *testing.T) {
 	mockCompRepo := NewMockCompetitionRepository()
 	mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
-	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository())
+	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository(), NewMockCompetitionYearRepository(), NewMockCompetitionSeasonRepository())
 
 	// Empty count
 	count, err := svc.GetCompetitionCount()
@@ -547,7 +643,7 @@ func TestCompetitionService_GetCompetitionCount(t *testing.T) {
 func TestCompetitionService_GetCompetitionsByStatus(t *testing.T) {
 	mockCompRepo := NewMockCompetitionRepository()
 	mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
-	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository())
+	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository(), NewMockCompetitionYearRepository(), NewMockCompetitionSeasonRepository())
 
 	// Add competitions with different statuses
 	c1 := &models.Competition{
@@ -611,7 +707,7 @@ func TestCompetitionService_GetCompetitionsByStatus(t *testing.T) {
 func TestCompetitionService_GetAllModelTypes(t *testing.T) {
 	mockCompRepo := NewMockCompetitionRepository()
 	mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
-	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository())
+	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository(), NewMockCompetitionYearRepository(), NewMockCompetitionSeasonRepository())
 
 	// Add some model types
 	mockTypeRepo.Create("Buggy")
