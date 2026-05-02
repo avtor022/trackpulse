@@ -71,9 +71,6 @@ func (p *MonitoringPanel) createContent() *fyne.Container {
 		p.showModelTypeFilterPopup()
 	})
 
-	// Populate filter options
-	p.populateFilterOptions()
-
 	// Filter container
 	filterContainer := container.NewGridWithColumns(4,
 		widget.NewLabel(locale.T("common.year")),
@@ -133,6 +130,9 @@ func (p *MonitoringPanel) refreshCompetitions() {
 	} else {
 		p.statusLabel.SetText(fmt.Sprintf(locale.T("status.loaded_competitions"), len(p.allCompetitions)))
 	}
+
+	// Populate filter options from loaded competitions
+	p.populateFilterOptions()
 
 	// Apply filters and update filtered list
 	p.applyFilters()
@@ -278,6 +278,9 @@ func (p *MonitoringPanel) showYearFilterPopup() {
 	var currentDialog dialog.Dialog
 	var mainDialog dialog.Dialog
 
+	// Refresh filter options from competitions before showing popup
+	p.populateFilterOptions()
+
 	items := make([]string, len(p.filteredYears))
 	copy(items, p.filteredYears)
 
@@ -325,6 +328,9 @@ func (p *MonitoringPanel) showYearFilterPopup() {
 func (p *MonitoringPanel) showSeasonFilterPopup() {
 	var currentDialog dialog.Dialog
 	var mainDialog dialog.Dialog
+
+	// Refresh filter options from competitions before showing popup
+	p.populateFilterOptions()
 
 	items := make([]string, len(p.filteredSeasons))
 	copy(items, p.filteredSeasons)
@@ -374,6 +380,9 @@ func (p *MonitoringPanel) showTrackFilterPopup() {
 	var currentDialog dialog.Dialog
 	var mainDialog dialog.Dialog
 
+	// Refresh filter options from competitions before showing popup
+	p.populateFilterOptions()
+
 	items := make([]string, len(p.filteredTracks))
 	copy(items, p.filteredTracks)
 
@@ -421,6 +430,9 @@ func (p *MonitoringPanel) showTrackFilterPopup() {
 func (p *MonitoringPanel) showModelTypeFilterPopup() {
 	var currentDialog dialog.Dialog
 	var mainDialog dialog.Dialog
+
+	// Refresh filter options from competitions before showing popup
+	p.populateFilterOptions()
 
 	items := make([]string, len(p.filteredModelTypes))
 	copy(items, p.filteredModelTypes)
@@ -508,4 +520,9 @@ func (p *MonitoringPanel) onCompetitionSelected(selected string) {
 // Refresh updates the panel with new locale strings
 func (p *MonitoringPanel) Refresh() {
 	p.content = p.createContent()
+}
+
+// UpdateData reloads competition data and refreshes filter options
+func (p *MonitoringPanel) UpdateData() {
+	p.refreshCompetitions()
 }

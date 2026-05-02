@@ -82,6 +82,15 @@ func (a *App) createMainContent() *container.AppTabs {
 	)
 
 	a.tabs.SetTabLocation(container.TabLocationTop)
+
+	// Set up tab change listener to refresh monitoring panel when switching to it
+	a.tabs.OnSelected = func(ti *container.TabItem) {
+		if ti == a.tabs.Items[0] && a.monitoringPanel != nil {
+			// Refresh monitoring panel data when switching to monitoring tab
+			a.monitoringPanel.UpdateData()
+		}
+	}
+
 	return a.tabs
 }
 
