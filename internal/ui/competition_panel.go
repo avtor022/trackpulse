@@ -1300,6 +1300,24 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 			}
 		}
 
+		// Get competition year from button text
+		var competitionYear *int
+		if yearButton != nil && yearButton.Text != "" && yearButton.Text != locale.T("common.select_one") {
+			yearVal, err := strconv.Atoi(yearButton.Text)
+			if err == nil {
+				competitionYear = &yearVal
+			}
+		}
+
+		// Get season from button text
+		seasonValue := ""
+		if seasonButton != nil {
+			seasonValue = seasonButton.Text
+			if seasonValue == locale.T("common.select_one") {
+				seasonValue = ""
+			}
+		}
+
 		var newC *models.Competition
 		if competition != nil {
 			// Update existing
@@ -1312,6 +1330,8 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 			newC.LapCountTarget = lapCountTarget
 			newC.TimeLimitMinutes = timeLimitMinutes
 			newC.Status = statusValue
+			newC.CompetitionYear = competitionYear
+			newC.Season = seasonValue
 
 			if err := p.competitionService.UpdateCompetition(newC); err != nil {
 				fmt.Println("ERROR updating competition:", err)
@@ -1336,6 +1356,8 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 				LapCountTarget:   lapCountTarget,
 				TimeLimitMinutes: timeLimitMinutes,
 				Status:           statusValue,
+				CompetitionYear:  competitionYear,
+				Season:           seasonValue,
 			}
 
 			if err := p.competitionService.CreateCompetition(newC); err != nil {
