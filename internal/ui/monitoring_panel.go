@@ -521,3 +521,8 @@ func (p *MonitoringPanel) onCompetitionSelected(selected string) {
 func (p *MonitoringPanel) Refresh() {
 	p.content = p.createContent()
 }
+
+// UpdateData reloads competition data and refreshes filter options
+func (p *MonitoringPanel) UpdateData() {
+	p.refreshCompetitions()
+}
