@@ -73,8 +73,8 @@ func main() {
 	modelService := service.NewRCModelService(modelRepo, brandRepo, scaleRepo, typeRepo)
 	settingsService := service.NewSettingsService(settingsRepo)
 	competitorModelService := service.NewCompetitorModelService(competitorModelRepo, competitorRepo, modelRepo)
-	yearRepo := repository.NewCompetitionYearRepository(db)
-	seasonRepo := repository.NewCompetitionSeasonRepository(db)
+	yearRepo := repository.NewCompetitionYearRepository(db.DB)
+	seasonRepo := repository.NewCompetitionSeasonRepository(db.DB)
 	competitionService := service.NewCompetitionService(competitionRepo, typeRepo, scaleRepo, trackRepo, yearRepo, seasonRepo)
 
 	// Load locale from settings
