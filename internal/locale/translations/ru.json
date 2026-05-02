@@ -254,5 +254,15 @@
     "logs.read_error": "Ошибка чтения: %v",
     "logs.clear": "Очистить",
     "logs.no_ports": "Порты не найдены",
-    "logs.error_scanning": "Ошибка сканирования портов"
+    "logs.error_scanning": "Ошибка сканирования портов",
+    "filter.all_years": "Все годы",
+    "filter.all_seasons": "Все сезоны",
+    "filter.all_tracks": "Все трассы",
+    "filter.all_model_types": "Все типы моделей",
+    "common.year": "Год",
+    "common.season": "Сезон",
+    "common.track": "Трасса",
+    "common.model_type": "Тип модели",
+    "monitoring.placeholder": "Выберите соревнование для просмотра данных мониторинга",
+    "status.error_loading": "Ошибка загрузки данных"
 }
