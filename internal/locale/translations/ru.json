@@ -276,5 +276,10 @@
     "common.track": "Трасса",
     "common.model_type": "Тип модели",
     "monitoring.placeholder": "Выберите соревнование для просмотра данных мониторинга",
-    "status.error_loading": "Ошибка загрузки данных"
+    "button.start": "Старт",
+    "status.error_loading": "Ошибка загрузки данных",
+    "status.in_progress": "Идет",
+    "error.no_competition_selected": "Соревнование не выбрано",
+    "dialog.success": "Успешно",
+    "dialog.competition_started": "Соревнование успешно запущено"
 }

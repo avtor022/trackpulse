@@ -18,9 +18,11 @@ type MonitoringPanel struct {
 	mainWindow           fyne.Window
 	competitionService   *service.CompetitionService
 	selectedCompetition  string
+	selectedCompetitionID string
 	statusLabel          *widget.Label
 	allCompetitions      []models.Competition
 	competitionButton    *widget.Button
+	startButton          *widget.Button
 	filteredCompetitions []models.Competition
 	filteredYears        []string
 	filteredSeasons      []string
@@ -57,6 +59,12 @@ func (p *MonitoringPanel) createContent() *fyne.Container {
 		p.showCompetitionPopup()
 	})
 
+	// Start button - disabled until competition is selected
+	p.startButton = widget.NewButton(locale.T("button.start"), func() {
+		p.startMonitoring()
+	})
+	p.startButton.Disable()
+
 	// Filter buttons using reference_popup.go without add/delete functionality
 	p.yearButton = widget.NewButton(locale.T("filter.all_years"), func() {
 		p.showYearFilterPopup()
@@ -88,7 +96,7 @@ func (p *MonitoringPanel) createContent() *fyne.Container {
 		widget.NewSeparator(),
 		filterContainer,
 		widget.NewSeparator(),
-		container.NewHBox(p.competitionButton),
+		container.NewHBox(p.competitionButton, p.startButton),
 		widget.NewSeparator(),
 	)
 
@@ -502,15 +510,23 @@ func (p *MonitoringPanel) onCompetitionSelected(selected string) {
 		if p.competitionButton != nil {
 			p.competitionButton.SetText(locale.T("form.competition.select"))
 		}
+		if p.startButton != nil {
+			p.startButton.Disable()
+		}
+		p.selectedCompetitionID = ""
 		return
 	}
 
 	// Find the selected competition
 	for _, comp := range p.allCompetitions {
 		if comp.CompetitionTitle == selected {
+			p.selectedCompetitionID = comp.ID
 			p.statusLabel.SetText(fmt.Sprintf("%s: %s (%s)", locale.T("common.selected"), comp.CompetitionTitle, comp.Status))
 			if p.competitionButton != nil {
 				p.competitionButton.SetText(comp.CompetitionTitle)
+			}
+			if p.startButton != nil {
+				p.startButton.Enable()
 			}
 			return
 		}
@@ -525,4 +541,27 @@ func (p *MonitoringPanel) Refresh() {
 // UpdateData reloads competition data and refreshes filter options
 func (p *MonitoringPanel) UpdateData() {
 	p.refreshCompetitions()
+}
+
+// startMonitoring starts monitoring for the selected competition
+func (p *MonitoringPanel) startMonitoring() {
+	if p.selectedCompetitionID == "" {
+		dialog.ShowError(fmt.Errorf(locale.T("error.no_competition_selected")), p.mainWindow)
+		return
+	}
+
+	err := p.competitionService.StartCompetition(p.selectedCompetitionID)
+	if err != nil {
+		dialog.ShowError(err, p.mainWindow)
+		return
+	}
+
+	// Update status label to show the new status
+	p.statusLabel.SetText(fmt.Sprintf("%s: %s (%s)", locale.T("common.selected"), p.selectedCompetition, locale.T("status.in_progress")))
+	
+	// Refresh competitions list to get updated status
+	p.refreshCompetitions()
+	
+	// Show success message
+	dialog.ShowInformation(locale.T("dialog.success"), locale.T("dialog.competition_started"), p.mainWindow)
 }
