@@ -276,5 +276,6 @@
     "common.track": "Track",
     "common.model_type": "Model Type",
     "monitoring.placeholder": "Select a competition to view monitoring data",
+    "button.start": "Start",
     "status.error_loading": "Error loading data"
 }

@@ -276,5 +276,6 @@
     "common.track": "Трасса",
     "common.model_type": "Тип модели",
     "monitoring.placeholder": "Выберите соревнование для просмотра данных мониторинга",
+    "button.start": "Старт",
     "status.error_loading": "Ошибка загрузки данных"
 }

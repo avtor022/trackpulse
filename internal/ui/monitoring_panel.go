@@ -21,6 +21,7 @@ type MonitoringPanel struct {
 	statusLabel          *widget.Label
 	allCompetitions      []models.Competition
 	competitionButton    *widget.Button
+	startButton          *widget.Button
 	filteredCompetitions []models.Competition
 	filteredYears        []string
 	filteredSeasons      []string
@@ -57,6 +58,13 @@ func (p *MonitoringPanel) createContent() *fyne.Container {
 		p.showCompetitionPopup()
 	})
 
+	// Start button - disabled until competition is selected
+	p.startButton = widget.NewButton(locale.T("button.start"), func() {
+		// TODO: Implement start functionality
+		fmt.Println("Start monitoring for:", p.selectedCompetition)
+	})
+	p.startButton.Disable()
+
 	// Filter buttons using reference_popup.go without add/delete functionality
 	p.yearButton = widget.NewButton(locale.T("filter.all_years"), func() {
 		p.showYearFilterPopup()
@@ -88,7 +96,7 @@ func (p *MonitoringPanel) createContent() *fyne.Container {
 		widget.NewSeparator(),
 		filterContainer,
 		widget.NewSeparator(),
-		container.NewHBox(p.competitionButton),
+		container.NewHBox(p.competitionButton, p.startButton),
 		widget.NewSeparator(),
 	)
 
@@ -502,6 +510,9 @@ func (p *MonitoringPanel) onCompetitionSelected(selected string) {
 		if p.competitionButton != nil {
 			p.competitionButton.SetText(locale.T("form.competition.select"))
 		}
+		if p.startButton != nil {
+			p.startButton.Disable()
+		}
 		return
 	}
 
@@ -511,6 +522,9 @@ func (p *MonitoringPanel) onCompetitionSelected(selected string) {
 			p.statusLabel.SetText(fmt.Sprintf("%s: %s (%s)", locale.T("common.selected"), comp.CompetitionTitle, comp.Status))
 			if p.competitionButton != nil {
 				p.competitionButton.SetText(comp.CompetitionTitle)
+			}
+			if p.startButton != nil {
+				p.startButton.Enable()
 			}
 			return
 		}
