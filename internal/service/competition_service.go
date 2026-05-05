@@ -209,3 +209,23 @@ func (s *CompetitionService) GetCompetitionCount() (int, error) {
 func (s *CompetitionService) GetCompetitionsByStatus(status string) ([]models.Competition, error) {
 	return s.repo.GetByStatus(status)
 }
+
+// StartCompetition updates the competition status to "in_progress"
+func (s *CompetitionService) StartCompetition(id string) error {
+	if id == "" {
+		return fmt.Errorf("competition ID is required")
+	}
+
+	// Get existing competition
+	existing, err := s.repo.GetByID(id)
+	if err != nil {
+		return fmt.Errorf("failed to get competition: %w", err)
+	}
+	if existing == nil {
+		return fmt.Errorf("competition not found")
+	}
+
+	// Update status to "in_progress"
+	existing.Status = "in_progress"
+	return s.repo.Update(existing)
+}
