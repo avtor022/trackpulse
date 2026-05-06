@@ -20,7 +20,7 @@ type CompetitionPanel struct {
 	competitionService    *service.CompetitionService
 	content               *fyne.Container
 	table                 *widget.Table
-	statusLabel           *widget.Label
+	statusLabel           *widget.Label              // Reference to window for dialogs
 	window                fyne.Window                // Reference to window for dialogs
 	selectedID            string                     // ID of selected competition
 	allCompetitions       []models.Competition       // Cache of all competitions
@@ -30,6 +30,7 @@ type CompetitionPanel struct {
 	allCompetitionTracks  []models.CompetitionTrack  // Cache of all competition tracks
 	allCompetitionYears   []models.CompetitionYear   // Cache of all competition years
 	allCompetitionSeasons []models.CompetitionSeason // Cache of all competition seasons
+	dataLoaded            bool                       // Flag to track if data has been loaded
 }
 
 // updateLocale updates all localized text in the panel
@@ -61,9 +62,11 @@ func (p *CompetitionPanel) updateLocale() {
 	}
 }
 
-// Refresh refreshes the panel UI with current locale
+// Refresh refreshes the panel UI with current locale and loads data if not already loaded
 func (p *CompetitionPanel) Refresh() {
 	p.updateLocale()
+	// Load data when tab is first accessed
+	p.refreshData()
 }
 
 // NewCompetitionPanel creates a new competition management panel
@@ -97,7 +100,7 @@ func (p *CompetitionPanel) buildUI() *fyne.Container {
 	)
 
 	p.content = content
-	p.refreshData()
+	// Do not load data on startup - data will be loaded when tab is selected
 
 	return content
 }
@@ -123,8 +126,7 @@ func (p *CompetitionPanel) createToolbar() *widget.Toolbar {
 
 // createCompetitionTable creates the data table for competitions
 func (p *CompetitionPanel) createCompetitionTable() *widget.Table {
-	// First load data
-	p.refreshData()
+	// Do not load data here - it will be loaded when tab is selected
 
 	table := widget.NewTable(
 		func() (int, int) {
@@ -247,7 +249,7 @@ func (p *CompetitionPanel) createCompetitionTable() *widget.Table {
 
 // refreshData reloads the competition data
 func (p *CompetitionPanel) refreshData() {
-	if p.table != nil {
+	if p.table != nil && !p.dataLoaded {
 		// Update data cache
 		var err error
 		p.allCompetitions, err = p.competitionService.GetAllCompetitions()
@@ -294,6 +296,7 @@ func (p *CompetitionPanel) refreshData() {
 		} else {
 			p.statusLabel.SetText(fmt.Sprintf(locale.T("status.loaded_competitions"), len(p.allCompetitions)))
 		}
+		p.dataLoaded = true
 	}
 }
 
