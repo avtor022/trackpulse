@@ -723,6 +723,116 @@ func TestCompetitionService_GetAllModelTypes(t *testing.T) {
 	}
 }
 
+// TestCompetitionService_StartCompetition_Success tests successful start of competition with time limit
+func TestCompetitionService_StartCompetition_Success(t *testing.T) {
+	mockCompRepo := NewMockCompetitionRepository()
+	mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
+	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository(), NewMockCompetitionYearRepository(), NewMockCompetitionSeasonRepository())
+
+	// Create competition with time limit
+	timeLimit := 10 // 10 minutes
+	c := &models.Competition{
+		ID:               uuid.New().String(),
+		CompetitionTitle: "Test Race",
+		CompetitionType:  "Race",
+		Status:           "scheduled",
+		TimeLimitMinutes: &timeLimit,
+	}
+	mockCompRepo.Create(c)
+
+	// Start competition
+	err := svc.StartCompetition(c.ID)
+	if err != nil {
+		t.Fatalf("StartCompetition() error = %v", err)
+	}
+
+	// Verify status and times
+	retrieved, _ := mockCompRepo.GetByID(c.ID)
+	if retrieved == nil {
+		t.Fatal("StartCompetition() failed to update competition")
+	}
+	if retrieved.Status != "in_progress" {
+		t.Errorf("StartCompetition() expected status 'in_progress', got '%s'", retrieved.Status)
+	}
+	if retrieved.TimeStart == nil {
+		t.Error("StartCompetition() should set TimeStart")
+	}
+	if retrieved.TimeFinish == nil {
+		t.Error("StartCompetition() should set TimeFinish when TimeLimitMinutes is set")
+	}
+
+	// Verify finish time is approximately 10 minutes after start
+	if retrieved.TimeStart != nil && retrieved.TimeFinish != nil {
+		expectedFinish := retrieved.TimeStart.Add(time.Duration(timeLimit) * time.Minute)
+		timeDiff := retrieved.TimeFinish.Sub(expectedFinish)
+		if timeDiff < -time.Second || timeDiff > time.Second {
+			t.Errorf("StartCompetition() TimeFinish should be ~%d minutes after TimeStart, got difference: %v", timeLimit, timeDiff)
+		}
+	}
+}
+
+// TestCompetitionService_StartCompetition_NoTimeLimit tests start without time limit
+func TestCompetitionService_StartCompetition_NoTimeLimit(t *testing.T) {
+	mockCompRepo := NewMockCompetitionRepository()
+	mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
+	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository(), NewMockCompetitionYearRepository(), NewMockCompetitionSeasonRepository())
+
+	// Create competition without time limit
+	c := &models.Competition{
+		ID:               uuid.New().String(),
+		CompetitionTitle: "Test Race No Limit",
+		CompetitionType:  "Race",
+		Status:           "scheduled",
+		TimeLimitMinutes: nil,
+	}
+	mockCompRepo.Create(c)
+
+	// Start competition
+	err := svc.StartCompetition(c.ID)
+	if err != nil {
+		t.Fatalf("StartCompetition() error = %v", err)
+	}
+
+	// Verify status and times
+	retrieved, _ := mockCompRepo.GetByID(c.ID)
+	if retrieved == nil {
+		t.Fatal("StartCompetition() failed to update competition")
+	}
+	if retrieved.Status != "in_progress" {
+		t.Errorf("StartCompetition() expected status 'in_progress', got '%s'", retrieved.Status)
+	}
+	if retrieved.TimeStart == nil {
+		t.Error("StartCompetition() should set TimeStart")
+	}
+	if retrieved.TimeFinish != nil {
+		t.Error("StartCompetition() should NOT set TimeFinish when TimeLimitMinutes is nil")
+	}
+}
+
+// TestCompetitionService_StartCompetition_EmptyID tests validation for empty ID
+func TestCompetitionService_StartCompetition_EmptyID(t *testing.T) {
+	mockCompRepo := NewMockCompetitionRepository()
+	mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
+	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository(), NewMockCompetitionYearRepository(), NewMockCompetitionSeasonRepository())
+
+	err := svc.StartCompetition("")
+	if err == nil {
+		t.Error("StartCompetition() expected error for empty ID, got nil")
+	}
+}
+
+// TestCompetitionService_StartCompetition_NotFound tests start of non-existent competition
+func TestCompetitionService_StartCompetition_NotFound(t *testing.T) {
+	mockCompRepo := NewMockCompetitionRepository()
+	mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
+	svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository(), NewMockCompetitionYearRepository(), NewMockCompetitionSeasonRepository())
+
+	err := svc.StartCompetition(uuid.New().String())
+	if err == nil {
+		t.Error("StartCompetition() expected error for non-existent competition, got nil")
+	}
+}
+
 // Helper function to create int pointer
 func intPtr(i int) *int {
 	return &i
