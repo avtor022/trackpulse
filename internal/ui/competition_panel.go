@@ -1143,6 +1143,7 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 		// Map internal value to localized display
 		if localizedType, ok := reverseMap(typeMap, competition.CompetitionType); ok {
 			typeSelect.SetSelected(localizedType)
+			updateTypeButton(localizedType)
 		}
 		// Map internal model type to display value
 		if competition.ModelType == "*" {
@@ -1187,6 +1188,7 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 		// Map internal status to localized display
 		if localizedStatus, ok := reverseMap(statusMap, competition.Status); ok {
 			statusSelect.SetSelected(localizedStatus)
+			updateStatusButton(localizedStatus)
 		}
 	}
 
