@@ -495,10 +495,10 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 
 	// Map display names to internal values
 	statusMap := map[string]string{
-		locale.T("competition.status.scheduled"): "scheduled",
-		locale.T("competition.status.running"):   "running",
-		locale.T("competition.status.finished"):  "finished",
-		locale.T("competition.status.cancelled"): "cancelled",
+		locale.T("competition.status.scheduled"):  "scheduled",
+		locale.T("competition.status.running"):    "in_progress",
+		locale.T("competition.status.finished"):   "finished",
+		locale.T("competition.status.cancelled"):  "cancelled",
 	}
 
 	// Helper function to update status button text
