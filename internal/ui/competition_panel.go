@@ -249,7 +249,10 @@ func (p *CompetitionPanel) createCompetitionTable() *widget.Table {
 
 // refreshData reloads the competition data
 func (p *CompetitionPanel) refreshData() {
-	if p.table != nil && !p.dataLoaded {
+	if p.table != nil {
+		// Reset the dataLoaded flag to allow reloading data on each tab switch
+		p.dataLoaded = false
+
 		// Update data cache
 		var err error
 		p.allCompetitions, err = p.competitionService.GetAllCompetitions()
