@@ -250,7 +250,7 @@ func (p *CompetitionPanel) createCompetitionTable() *widget.Table {
 // refreshData reloads the competition data
 func (p *CompetitionPanel) refreshData() {
 	if p.table != nil {
-		// Reset the dataLoaded flag to allow reloading data on each tab switch
+		// Always reset the dataLoaded flag to ensure fresh data is loaded
 		p.dataLoaded = false
 
 		// Update data cache
