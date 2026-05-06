@@ -315,15 +315,20 @@ func (p *CompetitionPanel) showEditDialog() {
 		return
 	}
 
-	// Look for selected competition in cache
-	for _, c := range p.allCompetitions {
-		if c.ID == p.selectedID {
-			p.showCompetitionDialog(locale.T("dialog.edit.title"), &c)
-			return
-		}
+	// Load fresh data from DB for the selected competition
+	competition, err := p.competitionService.GetCompetitionByID(p.selectedID)
+	if err != nil {
+		fmt.Println("ERROR loading competition:", err)
+		dialog.ShowInformation(locale.T("common.info"), locale.T("info.not_found"), p.window)
+		return
 	}
 
-	dialog.ShowInformation(locale.T("common.info"), locale.T("info.not_found"), p.window)
+	if competition == nil {
+		dialog.ShowInformation(locale.T("common.info"), locale.T("info.not_found"), p.window)
+		return
+	}
+
+	p.showCompetitionDialog(locale.T("dialog.edit.title"), competition)
 }
 
 // deleteSelected deletes the selected competition
