@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 	"trackpulse/internal/models"
@@ -210,7 +211,7 @@ func (s *CompetitionService) GetCompetitionsByStatus(status string) ([]models.Co
 	return s.repo.GetByStatus(status)
 }
 
-// StartCompetition updates the competition status to "in_progress"
+// StartCompetition updates the competition status to "in_progress" and sets start/finish times
 func (s *CompetitionService) StartCompetition(id string) error {
 	if id == "" {
 		return fmt.Errorf("competition ID is required")
@@ -227,5 +228,16 @@ func (s *CompetitionService) StartCompetition(id string) error {
 
 	// Update status to "in_progress"
 	existing.Status = "in_progress"
+
+	// Set start time
+	now := time.Now()
+	existing.TimeStart = &now
+
+	// Set finish time if time limit is configured
+	if existing.TimeLimitMinutes != nil && *existing.TimeLimitMinutes > 0 {
+		finishTime := now.Add(time.Duration(*existing.TimeLimitMinutes) * time.Minute)
+		existing.TimeFinish = &finishTime
+	}
+
 	return s.repo.Update(existing)
 }
