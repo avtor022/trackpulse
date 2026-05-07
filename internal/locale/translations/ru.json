@@ -277,9 +277,12 @@
     "common.model_type": "Тип модели",
     "monitoring.placeholder": "Выберите соревнование для просмотра данных мониторинга",
     "button.start": "Старт",
+    "button.stop": "Стоп",
     "status.error_loading": "Ошибка загрузки данных",
     "status.in_progress": "Идет",
+    "status.finished": "Завершено",
     "error.no_competition_selected": "Соревнование не выбрано",
     "dialog.success": "Успешно",
-    "dialog.competition_started": "Соревнование успешно запущено"
+    "dialog.competition_started": "Соревнование успешно запущено",
+    "dialog.competition_stopped": "Соревнование успешно завершено"
 }

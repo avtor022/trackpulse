@@ -10,37 +10,24 @@ vendor/
 # Logs and temp files
 *.log
 *.tmp
+*.swp
 
 # Environment
 .env
 .env.local
-*.env.*
-
-# Coverage
-coverage/
-.coverage
-htmlcov/
+.env.*
 
 # Editors
 .vscode/
 .idea/
-*.swp
-*.swo
 
-# System
-.DS_Store
-Thumbs.db
+# Coverage
+.coverage
+coverage/
+htmlcov/
 
 # Build directories
-target/
 build/
 dist/
-
-# Python specific
-__pycache__/
-*.pyc
-*.pyo
-.Python
-*.so
-*.egg-info/
+target/
 ```

@@ -241,3 +241,24 @@ func (s *CompetitionService) StartCompetition(id string) error {
 
 	return s.repo.Update(existing)
 }
+
+// StopCompetition updates the competition status to "finished"
+func (s *CompetitionService) StopCompetition(id string) error {
+	if id == "" {
+		return fmt.Errorf("competition ID is required")
+	}
+
+	// Get existing competition
+	existing, err := s.repo.GetByID(id)
+	if err != nil {
+		return fmt.Errorf("failed to get competition: %w", err)
+	}
+	if existing == nil {
+		return fmt.Errorf("competition not found")
+	}
+
+	// Update status to "finished"
+	existing.Status = "finished"
+
+	return s.repo.Update(existing)
+}
