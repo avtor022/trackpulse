@@ -535,9 +535,9 @@ func (p *MonitoringPanel) onCompetitionSelected(selected string) {
 			if p.competitionButton != nil {
 				p.competitionButton.SetText(comp.CompetitionTitle)
 			}
-			// Enable Start button if competition is not in_progress
+			// Enable Start button only if competition status is scheduled
 			if p.startButton != nil {
-				if comp.Status != "in_progress" {
+				if comp.Status == "scheduled" {
 					p.startButton.Enable()
 				} else {
 					p.startButton.Disable()
