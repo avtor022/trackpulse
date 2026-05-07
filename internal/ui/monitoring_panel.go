@@ -564,6 +564,10 @@ func (p *MonitoringPanel) Refresh() {
 // UpdateData reloads competition data and refreshes filter options
 func (p *MonitoringPanel) UpdateData() {
 	p.refreshCompetitions()
+	// Refresh the selected competition state from DB
+	if p.selectedCompetition != "" {
+		p.onCompetitionSelected(p.selectedCompetition)
+	}
 }
 
 // startMonitoring starts monitoring for the selected competition
