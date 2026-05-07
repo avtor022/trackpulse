@@ -2,6 +2,8 @@ package ui
 
 import (
 	"fmt"
+	"sync"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -14,28 +16,34 @@ import (
 
 // MonitoringPanel represents the monitoring panel UI
 type MonitoringPanel struct {
-	content              *fyne.Container
-	mainWindow           fyne.Window
-	competitionService   *service.CompetitionService
-	selectedCompetition  string
+	content               *fyne.Container
+	mainWindow            fyne.Window
+	competitionService    *service.CompetitionService
+	selectedCompetition   string
 	selectedCompetitionID string
-	statusLabel          *widget.Label
-	allCompetitions      []models.Competition
-	competitionButton    *widget.Button
-	startButton          *widget.Button
-	filteredCompetitions []models.Competition
-	filteredYears        []string
-	filteredSeasons      []string
-	filteredTracks       []string
-	filteredModelTypes   []string
-	yearButton           *widget.Button
-	seasonButton         *widget.Button
-	trackButton          *widget.Button
-	modelTypeButton      *widget.Button
-	selectedYear         string
-	selectedSeason       string
-	selectedTrack        string
-	selectedModelType    string
+	statusLabel           *widget.Label
+	allCompetitions       []models.Competition
+	competitionButton     *widget.Button
+	startButton           *widget.Button
+	filteredCompetitions  []models.Competition
+	filteredYears         []string
+	filteredSeasons       []string
+	filteredTracks        []string
+	filteredModelTypes    []string
+	yearButton            *widget.Button
+	seasonButton          *widget.Button
+	trackButton           *widget.Button
+	modelTypeButton       *widget.Button
+	selectedYear          string
+	selectedSeason        string
+	selectedTrack         string
+	selectedModelType     string
+	timerLabel            *widget.Label
+	timerRunning          bool
+	timerMutex            sync.Mutex
+	timerStopChan         chan struct{}
+	isCountdown           bool
+	countdownEnd          time.Time
 }
 
 // NewMonitoringPanel creates a new monitoring panel
@@ -65,6 +73,11 @@ func (p *MonitoringPanel) createContent() *fyne.Container {
 	})
 	p.startButton.Disable()
 
+	// Timer label for countdown/stopwatch display
+	p.timerLabel = widget.NewLabel("")
+	p.timerLabel.Alignment = fyne.TextAlignCenter
+	p.timerLabel.TextStyle = fyne.TextStyle{Bold: true}
+
 	// Filter buttons using reference_popup.go without add/delete functionality
 	p.yearButton = widget.NewButton(locale.T("filter.all_years"), func() {
 		p.showYearFilterPopup()
@@ -91,12 +104,15 @@ func (p *MonitoringPanel) createContent() *fyne.Container {
 		p.modelTypeButton,
 	)
 
-	// Selector container
+	// Selector container with timer panel
+	timerPanel := container.NewHBox(p.timerLabel)
 	selectorContainer := container.NewVBox(
 		widget.NewSeparator(),
 		filterContainer,
 		widget.NewSeparator(),
 		container.NewHBox(p.competitionButton, p.startButton),
+		widget.NewSeparator(),
+		timerPanel,
 		widget.NewSeparator(),
 	)
 
@@ -562,6 +578,120 @@ func (p *MonitoringPanel) startMonitoring() {
 	// Refresh competitions list to get updated status
 	p.refreshCompetitions()
 	
+	// Start timer based on competition settings
+	p.startTimer()
+	
 	// Show success message
 	dialog.ShowInformation(locale.T("dialog.success"), locale.T("dialog.competition_started"), p.mainWindow)
+}
+
+// startTimer starts the countdown or stopwatch based on competition settings
+func (p *MonitoringPanel) startTimer() {
+	p.timerMutex.Lock()
+	defer p.timerMutex.Unlock()
+
+	// Stop any existing timer
+	if p.timerRunning {
+		p.stopTimerLocked()
+	}
+
+	// Find the selected competition to get time limit or lap count
+	var selectedComp *models.Competition
+	for _, comp := range p.allCompetitions {
+		if comp.ID == p.selectedCompetitionID {
+			selectedComp = &comp
+			break
+		}
+	}
+
+	if selectedComp == nil {
+		return
+	}
+
+	p.timerRunning = true
+	p.timerStopChan = make(chan struct{})
+
+	// Check if time limit is set (countdown mode)
+	if selectedComp.TimeLimitMinutes != nil && *selectedComp.TimeLimitMinutes > 0 {
+		p.isCountdown = true
+		duration := time.Duration(*selectedComp.TimeLimitMinutes) * time.Minute
+		p.countdownEnd = time.Now().Add(duration)
+		
+		labelText := fmt.Sprintf("%s %s", locale.T("timer.countdown"), p.formatTime(duration))
+		p.timerLabel.SetText(labelText)
+		
+		go p.runCountdownTimer()
+	} else if selectedComp.LapCountTarget != nil && *selectedComp.LapCountTarget > 0 {
+		// Lap count mode - use stopwatch
+		p.isCountdown = false
+		
+		labelText := fmt.Sprintf("%s %s", locale.T("timer.stopwatch"), p.formatTime(0))
+		p.timerLabel.SetText(labelText)
+		
+		go p.runStopwatch()
+	}
+}
+
+// stopTimerLocked stops the currently running timer (must be called with mutex held)
+func (p *MonitoringPanel) stopTimerLocked() {
+	if p.timerStopChan != nil {
+		close(p.timerStopChan)
+		p.timerStopChan = nil
+	}
+	p.timerRunning = false
+}
+
+// runCountdownTimer runs the countdown timer
+func (p *MonitoringPanel) runCountdownTimer() {
+	ticker := time.NewTicker(time.Second)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-p.timerStopChan:
+			return
+		case <-ticker.C:
+			now := time.Now()
+			p.timerMutex.Lock()
+			remaining := p.countdownEnd.Sub(now)
+			
+			if remaining <= 0 {
+				p.timerLabel.SetText(fmt.Sprintf("%s 00:00:00", locale.T("timer.countdown")))
+				p.timerMutex.Unlock()
+				return
+			}
+			
+			labelText := fmt.Sprintf("%s %s", locale.T("timer.countdown"), p.formatTime(remaining))
+			p.timerLabel.SetText(labelText)
+			p.timerMutex.Unlock()
+		}
+	}
+}
+
+// runStopwatch runs the elapsed time stopwatch
+func (p *MonitoringPanel) runStopwatch() {
+	startTime := time.Now()
+	ticker := time.NewTicker(time.Second)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-p.timerStopChan:
+			return
+		case <-ticker.C:
+			elapsed := time.Since(startTime)
+			p.timerMutex.Lock()
+			labelText := fmt.Sprintf("%s %s", locale.T("timer.stopwatch"), p.formatTime(elapsed))
+			p.timerLabel.SetText(labelText)
+			p.timerMutex.Unlock()
+		}
+	}
+}
+
+// formatTime formats a duration as HH:MM:SS
+func (p *MonitoringPanel) formatTime(d time.Duration) string {
+	hours := int(d.Hours())
+	minutes := int(d.Minutes()) % 60
+	seconds := int(d.Seconds()) % 60
+	return fmt.Sprintf(locale.T("timer.format"), hours, minutes, seconds)
 }
