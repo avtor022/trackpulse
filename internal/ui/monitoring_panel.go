@@ -579,11 +579,11 @@ func (p *MonitoringPanel) startMonitoring() {
 		return
 	}
 
-	// Update status label to show the new status
-	p.statusLabel.SetText(fmt.Sprintf("%s: %s (%s)", locale.T("common.selected"), p.selectedCompetition, locale.T("status.in_progress")))
-
-	// Refresh competitions list to get updated status
+	// Refresh competitions list to get updated status from DB
 	p.refreshCompetitions()
+
+	// Reload and update the selected competition data from DB
+	p.onCompetitionSelected(p.selectedCompetition)
 
 	// Show success message
 	dialog.ShowInformation(locale.T("dialog.success"), locale.T("dialog.competition_started"), p.mainWindow)
@@ -602,11 +602,11 @@ func (p *MonitoringPanel) stopMonitoring() {
 		return
 	}
 
-	// Update status label to show the new status
-	p.statusLabel.SetText(fmt.Sprintf("%s: %s (%s)", locale.T("common.selected"), p.selectedCompetition, locale.T("status.finished")))
-
-	// Refresh competitions list to get updated status
+	// Refresh competitions list to get updated status from DB
 	p.refreshCompetitions()
+
+	// Reload and update the selected competition data from DB
+	p.onCompetitionSelected(p.selectedCompetition)
 
 	// Show success message
 	dialog.ShowInformation(locale.T("dialog.success"), locale.T("dialog.competition_stopped"), p.mainWindow)
