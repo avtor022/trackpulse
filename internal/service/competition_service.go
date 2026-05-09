@@ -248,7 +248,7 @@ func (s *CompetitionService) StartCompetition(id string) error {
 	return s.repo.Update(existing)
 }
 
-// StopCompetition updates the competition status to "finished"
+// StopCompetition updates the competition status to "finished" and sets the finish time
 func (s *CompetitionService) StopCompetition(id string) error {
 	if id == "" {
 		return fmt.Errorf("competition ID is required")
@@ -263,8 +263,10 @@ func (s *CompetitionService) StopCompetition(id string) error {
 		return fmt.Errorf("competition not found")
 	}
 
-	// Update status to "finished"
+	// Update status to "finished" and set finish time to now
 	existing.Status = "finished"
+	now := time.Now()
+	existing.TimeFinish = &now
 
 	return s.repo.Update(existing)
 }
