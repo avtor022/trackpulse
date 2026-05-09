@@ -423,7 +423,7 @@ func (p *ParticipantPanel) bindSelectedTransponders() {
 	if len(selectedIDs) == 0 {
 		dialog.ShowInformation(
 			locale.T("dialog.info"),
-			"No transponders selected",
+			locale.T("participants.no_transponders_selected"),
 			p.window,
 		)
 		return

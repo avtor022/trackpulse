@@ -178,8 +178,10 @@ func (a *App) refreshUI() {
 		case 4:
 			tab.Text = locale.T("tab.competitions")
 		case 5:
-			tab.Text = locale.T("tab.logs")
+			tab.Text = locale.T("tab.participants")
 		case 6:
+			tab.Text = locale.T("tab.logs")
+		case 7:
 			tab.Text = locale.T("tab.settings")
 		}
 	}

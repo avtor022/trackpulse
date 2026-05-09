@@ -294,6 +294,7 @@
     "participants.button.bind": "Привязать выбранные",
     "participants.button.refresh": "Обновить",
     "participants.no_competition_selected": "Пожалуйста, сначала выберите соревнование",
+    "participants.no_transponders_selected": "Транспондеры не выбраны",
     "participants.no_transponders": "Нет транспондеров для этого типа соревнований",
     "participants.bind.success": "Успешно привязано транспондеров: %d",
     "participants.bind.errors": "Ошибок: %d",
@@ -307,5 +308,5 @@
     "participants.already_bound": "Уже привязанные участники",
     "participants.select.competition.button": "Выбрать...",
     "participants.select.competition.popup_title": "Выберите соревнование",
-    "participants.clear_selection": "Сбросить выбор",
+    "participants.clear_selection": "Сбросить выбор"
 }

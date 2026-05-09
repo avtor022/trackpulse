@@ -293,6 +293,7 @@
     "participants.button.bind": "Bind Selected",
     "participants.button.refresh": "Refresh",
     "participants.no_competition_selected": "Please select a competition first",
+    "participants.no_transponders_selected": "No transponders selected",
     "participants.no_transponders": "No transponders found for this competition type",
     "participants.bind.success": "Successfully bound %d transponder(s)",
     "participants.bind.errors": "Errors: %d",
@@ -306,5 +307,5 @@
     "participants.already_bound": "Already bound participants",
     "participants.select.competition.button": "Select...",
     "participants.select.competition.popup_title": "Select Competition",
-    "participants.clear_selection": "Clear Selection",
+    "participants.clear_selection": "Clear Selection"
 }
