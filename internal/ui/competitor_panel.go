@@ -95,7 +95,7 @@ func (p *CompetitorPanel) buildUI() *fyne.Container {
 	)
 
 	p.content = content
-	p.refreshData()
+	// Data will be loaded when the tab is selected
 
 	return content
 }
@@ -121,8 +121,8 @@ func (p *CompetitorPanel) createToolbar() *widget.Toolbar {
 
 // createRacerTable creates the data table for competitors
 func (p *CompetitorPanel) createCompetitorTable() *widget.Table {
-	// First load data
-	p.allCompetitors, _ = p.competitorService.GetAllCompetitors()
+	// Initialize empty cache - data will be loaded on tab selection
+	p.allCompetitors = []models.Competitor{}
 
 	table := widget.NewTable(
 		func() (int, int) {
@@ -235,6 +235,11 @@ func (p *CompetitorPanel) refreshData() {
 			p.statusLabel.SetText(fmt.Sprintf(locale.T("status.loaded_competitors"), len(p.allCompetitors)))
 		}
 	}
+}
+
+// RefreshData is a public wrapper for refreshData to be called from app.go
+func (p *CompetitorPanel) RefreshData() {
+	p.refreshData()
 }
 
 // showCreateDialog shows the dialog for creating a new competitor
