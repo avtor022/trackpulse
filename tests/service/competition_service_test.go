@@ -30,13 +30,17 @@ func (m *MockCompetitionRepository) GetAll() ([]models.Competition, error) {
 
 func (m *MockCompetitionRepository) GetByID(id string) (*models.Competition, error) {
 	if c, ok := m.competitions[id]; ok {
-		return c, nil
+		// Return a copy to simulate real repository behavior
+		copy := *c
+		return &copy, nil
 	}
 	return nil, nil
 }
 
 func (m *MockCompetitionRepository) Create(competition *models.Competition) error {
-	m.competitions[competition.ID] = competition
+	// Save a copy to avoid shared state issues
+	copy := *competition
+	m.competitions[competition.ID] = &copy
 	return nil
 }
 
