@@ -67,6 +67,7 @@ func main() {
 	settingsRepo := repository.NewSettingsRepository(db.DB)
 	competitorModelRepo := repository.NewCompetitorModelRepository(db.DB)
 	competitionRepo := repository.NewCompetitionRepository(db.DB)
+	participantRepo := repository.NewCompetitionParticipantRepository(db.DB)
 
 	// Initialize services
 	competitorService := service.NewCompetitorService(competitorRepo)
@@ -76,6 +77,7 @@ func main() {
 	yearRepo := repository.NewCompetitionYearRepository(db.DB)
 	seasonRepo := repository.NewCompetitionSeasonRepository(db.DB)
 	competitionService := service.NewCompetitionService(competitionRepo, typeRepo, scaleRepo, trackRepo, yearRepo, seasonRepo)
+	participantService := service.NewCompetitionParticipantService(participantRepo, competitorModelService, competitionService)
 
 	// Load locale from settings
 	savedLocale, err := settingsService.GetLocale()
@@ -91,6 +93,6 @@ func main() {
 	log.Info("TrackPulse initialization complete!")
 
 	// Start UI
-	uiApp := ui.NewApp(competitorService, modelService, settingsService, competitorModelService, competitionService, savedLocale)
+	uiApp := ui.NewApp(competitorService, modelService, settingsService, competitorModelService, competitionService, participantService, savedLocale)
 	uiApp.Run()
 }
