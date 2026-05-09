@@ -288,7 +288,7 @@
     "dialog.time_limit_reached": "Лимит времени достигнут! Соревнование остановлено.",
     "tab.participants": "Участники",
     "participants.panel.title": "Привязка транспондеров к соревнованию",
-    "participants.select.competition": "Выберите соревнование:",
+    "participants.select.competition": "Соревнование:",
     "participants.select.competition.placeholder": "-- Выберите соревнование --",
     "participants.transponders.list": "Доступные транспондеры",
     "participants.button.bind": "Привязать выбранные",

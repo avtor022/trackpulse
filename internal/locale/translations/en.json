@@ -287,7 +287,7 @@
     "dialog.time_limit_reached": "Time limit reached! Competition has been stopped.",
     "tab.participants": "Participants",
     "participants.panel.title": "Bind Transponders to Competition",
-    "participants.select.competition": "Select Competition:",
+    "participants.select.competition": "Competition:",
     "participants.select.competition.placeholder": "-- Select a competition --",
     "participants.transponders.list": "Available Transponders",
     "participants.button.bind": "Bind Selected",
