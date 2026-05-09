@@ -638,19 +638,18 @@ func (p *MonitoringPanel) stopTimer() {
 	// Timer label is only cleared when switching to a different competition
 }
 
-// formatDuration formats a duration as MM:SS or HH:MM:SS
+// formatDuration formats a duration as HH:MM:SS.ss (hours:minutes:seconds.centiseconds)
 func (p *MonitoringPanel) formatDuration(d time.Duration) string {
-	d = d.Round(time.Second)
+	d = d.Round(time.Centisecond)
 	h := d / time.Hour
 	d -= h * time.Hour
 	m := d / time.Minute
 	d -= m * time.Minute
 	s := d / time.Second
+	d -= s * time.Second
+	cs := d / time.Centisecond
 
-	if h > 0 {
-		return fmt.Sprintf("%02d:%02d:%02d", h, m, s)
-	}
-	return fmt.Sprintf("%02d:%02d", m, s)
+	return fmt.Sprintf("%02d:%02d:%02d.%02d", h, m, s, cs)
 }
 
 // UpdateData reloads competition data and refreshes filter options
