@@ -640,14 +640,15 @@ func (p *MonitoringPanel) stopTimer() {
 
 // formatDuration formats a duration as HH:MM:SS.ss (hours:minutes:seconds.centiseconds)
 func (p *MonitoringPanel) formatDuration(d time.Duration) string {
-	d = d.Round(time.Centisecond)
+	centisecond := 10 * time.Millisecond
+	d = d.Round(centisecond)
 	h := d / time.Hour
 	d -= h * time.Hour
 	m := d / time.Minute
 	d -= m * time.Minute
 	s := d / time.Second
 	d -= s * time.Second
-	cs := d / time.Centisecond
+	cs := d / centisecond
 
 	return fmt.Sprintf("%02d:%02d:%02d.%02d", h, m, s, cs)
 }
