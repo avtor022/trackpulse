@@ -539,6 +539,9 @@ func (p *MonitoringPanel) onCompetitionSelected(selected string) {
 		return
 	}
 
+	// Stop and reset timer when switching to a different competition
+	p.stopTimer()
+
 	// Find the selected competition
 	for _, comp := range p.allCompetitions {
 		if comp.CompetitionTitle == selected {
@@ -563,8 +566,6 @@ func (p *MonitoringPanel) onCompetitionSelected(selected string) {
 					p.startTimer(comp.TimeLimitMinutes)
 				} else {
 					p.stopButton.Disable()
-					// Stop timer when competition is not in progress
-					p.stopTimer()
 				}
 			}
 			return
@@ -633,9 +634,8 @@ func (p *MonitoringPanel) stopTimer() {
 		close(p.timerStop)
 		p.timerStop = nil
 	}
-	if p.timerLabel != nil {
-		p.timerLabel.SetText("")
-	}
+	// Do not clear timer label - keep showing the last elapsed time
+	// Timer label is only cleared when switching to a different competition
 }
 
 // formatDuration formats a duration as MM:SS or HH:MM:SS
