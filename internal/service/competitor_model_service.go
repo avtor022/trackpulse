@@ -30,6 +30,29 @@ func (s *CompetitorModelService) GetCompetitorModelByID(id string) (*models.Comp
 	return s.repo.GetByID(id)
 }
 
+// GetCompetitorModelsByRCModelIDs returns competitor models filtered by RC model IDs
+func (s *CompetitorModelService) GetCompetitorModelsByRCModelIDs(rcModelIDs []string) ([]models.CompetitorModel, error) {
+	allModels, err := s.repo.GetAll()
+	if err != nil {
+		return nil, err
+	}
+
+	// Create a map for quick lookup
+	idMap := make(map[string]bool)
+	for _, id := range rcModelIDs {
+		idMap[id] = true
+	}
+
+	var filtered []models.CompetitorModel
+	for _, cm := range allModels {
+		if idMap[cm.RCModelID] {
+			filtered = append(filtered, cm)
+		}
+	}
+
+	return filtered, nil
+}
+
 // CreateCompetitorModel creates a new competitor model with validation
 func (s *CompetitorModelService) CreateCompetitorModel(cm *models.CompetitorModel) error {
 	// Validate required fields

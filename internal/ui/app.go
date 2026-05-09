@@ -17,6 +17,7 @@ type App struct {
 	settingsService        *service.SettingsService
 	competitorModelService *service.CompetitorModelService
 	competitionService     *service.CompetitionService
+	participantService     *service.CompetitionParticipantService
 	config                 *Config
 	tabs                   *container.AppTabs
 	monitoringPanel        *MonitoringPanel
@@ -24,6 +25,7 @@ type App struct {
 	modelPanel             *ModelPanel
 	competitorModelPanel   *CompetitorModelPanel
 	competitionPanel       *CompetitionPanel
+	participantPanel       *ParticipantPanel
 	settingsPanel          *SettingsPanel
 	logsPanel              *LogsPanel
 }
@@ -38,7 +40,7 @@ type Config struct {
 }
 
 // NewApp creates a new TrackPulse application
-func NewApp(competitorService *service.CompetitorService, modelService *service.RCModelService, settingsService *service.SettingsService, competitorModelService *service.CompetitorModelService, competitionService *service.CompetitionService, language string) *App {
+func NewApp(competitorService *service.CompetitorService, modelService *service.RCModelService, settingsService *service.SettingsService, competitorModelService *service.CompetitorModelService, competitionService *service.CompetitionService, participantService *service.CompetitionParticipantService, language string) *App {
 	fyneApp := app.New()
 	mainWindow := fyneApp.NewWindow("TrackPulse")
 
@@ -50,6 +52,7 @@ func NewApp(competitorService *service.CompetitorService, modelService *service.
 		settingsService:        settingsService,
 		competitorModelService: competitorModelService,
 		competitionService:     competitionService,
+		participantService:     participantService,
 		config: &Config{
 			Language: language,
 			Title:    "TrackPulse",
@@ -77,6 +80,7 @@ func (a *App) createMainContent() *container.AppTabs {
 		container.NewTabItem(locale.T("tab.models"), a.createModelsTab()),
 		container.NewTabItem(locale.T("tab.transponders"), a.createTranspondersTab()),
 		container.NewTabItem(locale.T("tab.competitions"), a.createCompetitionsTab()),
+		container.NewTabItem(locale.T("tab.participants"), a.createParticipantsTab()),
 		container.NewTabItem(locale.T("tab.logs"), a.createLogsTab()),
 		container.NewTabItem(locale.T("tab.settings"), a.createSettingsTab()),
 	)
@@ -100,6 +104,10 @@ func (a *App) createMainContent() *container.AppTabs {
 		if ti == a.tabs.Items[4] && a.competitionPanel != nil {
 			// Refresh competition panel data when switching to competitions tab
 			a.competitionPanel.Refresh()
+		}
+		if ti == a.tabs.Items[5] && a.participantPanel != nil {
+			// Refresh participant panel data when switching to participants tab
+			a.participantPanel.Refresh()
 		}
 	}
 
@@ -134,6 +142,12 @@ func (a *App) createTranspondersTab() fyne.CanvasObject {
 func (a *App) createCompetitionsTab() fyne.CanvasObject {
 	a.competitionPanel = NewCompetitionPanel(a.competitionService, a.mainWindow)
 	return a.competitionPanel.content
+}
+
+// createParticipantsTab creates the Participants binding tab
+func (a *App) createParticipantsTab() fyne.CanvasObject {
+	a.participantPanel = NewParticipantPanel(a.competitionService, a.participantService, a.competitorModelService, a.modelService, a.mainWindow)
+	return a.participantPanel.content
 }
 
 // createLogsTab creates the Logs viewing tab
@@ -187,6 +201,9 @@ func (a *App) refreshUI() {
 	}
 	if a.competitionPanel != nil {
 		a.competitionPanel.Refresh()
+	}
+	if a.participantPanel != nil {
+		a.participantPanel.Refresh()
 	}
 	if a.settingsPanel != nil {
 		a.settingsPanel.Refresh()

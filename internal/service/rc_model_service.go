@@ -305,3 +305,24 @@ func (s *RCModelService) DeleteModelType(name string) error {
 
 	return nil
 }
+
+// GetModelsByTypeAndScale returns RC models filtered by model type and scale
+func (s *RCModelService) GetModelsByTypeAndScale(modelType, scale string) ([]models.RCModel, error) {
+	allModels, err := s.modelRepo.GetAll()
+	if err != nil {
+		return nil, err
+	}
+
+	var filtered []models.RCModel
+	for _, model := range allModels {
+		if modelType != "" && model.ModelType != modelType {
+			continue
+		}
+		if scale != "" && model.Scale != scale {
+			continue
+		}
+		filtered = append(filtered, model)
+	}
+
+	return filtered, nil
+}
