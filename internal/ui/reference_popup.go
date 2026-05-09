@@ -32,6 +32,7 @@ type ReferencePopupConfig struct {
 	DeleteFunc     func(string) error              // Function to delete item
 	OnItemSelected func(string)                    // Callback when item is selected
 	UpdateOptions  func([]string)                  // Callback to update select options
+	LoadDataFunc   func() ([]string, error)        // Function to load data from DB before showing popup
 }
 
 // ReferencePopupManager manages reference popups for brands, scales, and model types
@@ -58,6 +59,16 @@ func NewReferencePopupManager(window fyne.Window, config ReferencePopupConfig, i
 
 // ShowPopup displays the reference selection popup with add/delete functionality
 func (m *ReferencePopupManager) ShowPopup(mainDialog dialog.Dialog, currentDialog *dialog.Dialog, setCurrentDialog func(dialog.Dialog)) {
+	// Load data from DB before showing popup if LoadDataFunc is provided
+	if m.config.LoadDataFunc != nil {
+		items, err := m.config.LoadDataFunc()
+		if err != nil {
+			dialog.ShowError(err, m.window)
+			return
+		}
+		m.items = items
+	}
+
 	// Hide current dialog if any
 	if *currentDialog != nil {
 		(*currentDialog).Hide()
@@ -268,6 +279,16 @@ func (m *ReferencePopupManager) RefreshItems() error {
 // ShowPopupWithoutAddDelete displays the reference selection popup WITHOUT add/delete buttons
 // This is useful for selecting existing items like competitors where modification is not allowed
 func (m *ReferencePopupManager) ShowPopupWithoutAddDelete(mainDialog dialog.Dialog, currentDialog *dialog.Dialog, setCurrentDialog func(dialog.Dialog)) {
+	// Load data from DB before showing popup if LoadDataFunc is provided
+	if m.config.LoadDataFunc != nil {
+		items, err := m.config.LoadDataFunc()
+		if err != nil {
+			dialog.ShowError(err, m.window)
+			return
+		}
+		m.items = items
+	}
+
 	// Hide current dialog if any
 	if *currentDialog != nil {
 		(*currentDialog).Hide()

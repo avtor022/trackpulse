@@ -427,6 +427,17 @@ func (p *CompetitorModelPanel) showCompetitorModelDialog(title string, rm *model
 					UpdateOptions: func(opts []string) {
 						competitorSelect.Options = opts
 					},
+					LoadDataFunc: func() ([]string, error) {
+						allComps, err := p.competitorService.GetAllCompetitors()
+						if err != nil {
+							return nil, err
+						}
+						result := make([]string, len(allComps))
+						for i, c := range allComps {
+							result[i] = fmt.Sprintf("%s (#%d)", c.FullName, c.CompetitorNumber)
+						}
+						return result, nil
+					},
 				},
 				competitorDisplayNames,
 				"",
@@ -513,6 +524,17 @@ func (p *CompetitorModelPanel) showCompetitorModelDialog(title string, rm *model
 					},
 					UpdateOptions: func(opts []string) {
 						modelSelect.Options = opts
+					},
+					LoadDataFunc: func() ([]string, error) {
+						allMods, err := p.modelService.GetAllModels()
+						if err != nil {
+							return nil, err
+						}
+						result := make([]string, len(allMods))
+						for i, m := range allMods {
+							result[i] = fmt.Sprintf("%s %s (%s)", m.Brand, m.ModelName, m.Scale)
+						}
+						return result, nil
 					},
 				},
 				modelDisplayNames,

@@ -458,6 +458,17 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 						selectOptions = opts
 						brandSelect.Options = selectOptions
 					},
+					LoadDataFunc: func() ([]string, error) {
+						allBrands, err := p.modelService.GetAllBrands()
+						if err != nil {
+							return nil, err
+						}
+						result := make([]string, len(allBrands))
+						for i, b := range allBrands {
+							result[i] = b.Name
+						}
+						return result, nil
+					},
 				},
 				existingBrands,
 				newBrandOption,
@@ -574,6 +585,17 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 						scaleSelectOptions = opts
 						scaleSelect.Options = scaleSelectOptions
 					},
+					LoadDataFunc: func() ([]string, error) {
+						allScales, err := p.modelService.GetAllScales()
+						if err != nil {
+							return nil, err
+						}
+						result := make([]string, len(allScales))
+						for i, s := range allScales {
+							result[i] = s.Name
+						}
+						return result, nil
+					},
 				},
 				existingScales,
 				newScaleOption,
@@ -678,6 +700,17 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 					UpdateOptions: func(opts []string) {
 						modelTypeSelectOptions = opts
 						modelTypeSelect.Options = modelTypeSelectOptions
+					},
+					LoadDataFunc: func() ([]string, error) {
+						allTypes, err := p.modelService.GetAllModelTypes()
+						if err != nil {
+							return nil, err
+						}
+						result := make([]string, len(allTypes))
+						for i, t := range allTypes {
+							result[i] = t.Name
+						}
+						return result, nil
 					},
 				},
 				existingModelTypes,

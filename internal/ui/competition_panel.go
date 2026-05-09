@@ -883,6 +883,17 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 						trackSelectOptions = opts
 						trackSelect.Options = trackSelectOptions
 					},
+					LoadDataFunc: func() ([]string, error) {
+						allTracks, err := p.competitionService.GetAllCompetitionTracks()
+						if err != nil {
+							return nil, err
+						}
+						result := make([]string, len(allTracks))
+						for i, t := range allTracks {
+							result[i] = t.Name
+						}
+						return result, nil
+					},
 				},
 				existingTracks,
 				newTrackOption,
@@ -998,6 +1009,17 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 						yearSelectOptions = opts
 						yearSelect.Options = yearSelectOptions
 					},
+					LoadDataFunc: func() ([]string, error) {
+						allYears, err := p.competitionService.GetAllCompetitionYears()
+						if err != nil {
+							return nil, err
+						}
+						result := make([]string, len(allYears))
+						for i, y := range allYears {
+							result[i] = fmt.Sprintf("%d", y.Year)
+						}
+						return result, nil
+					},
 				},
 				existingYears,
 				newYearOption,
@@ -1102,6 +1124,17 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 					UpdateOptions: func(opts []string) {
 						seasonSelectOptions = opts
 						seasonSelect.Options = seasonSelectOptions
+					},
+					LoadDataFunc: func() ([]string, error) {
+						allSeasons, err := p.competitionService.GetAllCompetitionSeasons()
+						if err != nil {
+							return nil, err
+						}
+						result := make([]string, len(allSeasons))
+						for i, s := range allSeasons {
+							result[i] = s.Season
+						}
+						return result, nil
 					},
 				},
 				existingSeasons,
