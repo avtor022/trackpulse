@@ -304,5 +304,8 @@
     "participants.table.transponder": "Транспондер",
     "participants.table.grid": "Поз. на старте",
     "participants.table.status": "Статус",
-    "participants.already_bound": "Уже привязанные участники"
+    "participants.already_bound": "Уже привязанные участники",
+    "participants.select.competition.button": "Выбрать...",
+    "participants.select.competition.popup_title": "Выберите соревнование",
+    "participants.clear_selection": "Сбросить выбор",
 }

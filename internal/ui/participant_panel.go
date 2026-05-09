@@ -26,11 +26,13 @@ type ParticipantPanel struct {
 	allCompetitions        []models.Competition
 	availableTransponders  []models.CompetitorModel
 	boundParticipants      []models.CompetitionParticipant
-	competitionSelect      *widget.Select
+	competitionSelect      *widget.Button
+	competitionDisplay     *widget.Label
 	transponderList        *fyne.Container
 	transponderCheckboxes  map[string]*widget.Check
 	boundTable             *widget.Table
 	statusLabel            *widget.Label
+	currentDialog          dialog.Dialog
 }
 
 // NewParticipantPanel creates a new participant binding panel
@@ -63,8 +65,18 @@ func (p *ParticipantPanel) updateLocale() {
 	if p.statusLabel != nil {
 		p.statusLabel.SetText(locale.T("status.ready"))
 	}
-	if p.competitionSelect != nil {
-		p.competitionSelect.SetOptions([]string{locale.T("participants.select.competition.placeholder")})
+	if p.competitionDisplay != nil {
+		if p.selectedCompetitionID == "" {
+			p.competitionDisplay.SetText(locale.T("participants.select.competition.placeholder"))
+		} else {
+			// Refresh the display with current competition title
+			for _, comp := range p.allCompetitions {
+				if comp.ID == p.selectedCompetitionID {
+					p.competitionDisplay.SetText(comp.CompetitionTitle)
+					break
+				}
+			}
+		}
 	}
 	if p.boundTable != nil {
 		p.boundTable.Refresh()
@@ -76,27 +88,13 @@ func (p *ParticipantPanel) buildUI() *fyne.Container {
 	// Status label
 	p.statusLabel = widget.NewLabel(locale.T("status.ready"))
 
-	// Competition selector
-	p.competitionSelect = widget.NewSelect(
-		[]string{locale.T("participants.select.competition.placeholder")},
-		func(value string) {
-			if value == locale.T("participants.select.competition.placeholder") {
-				p.selectedCompetitionID = ""
-				p.clearTransponderList()
-				p.clearBoundTable()
-				return
-			}
-			// Find selected competition
-			for _, comp := range p.allCompetitions {
-				if comp.CompetitionTitle == value {
-					p.selectedCompetitionID = comp.ID
-					p.loadAvailableTransponders()
-					p.loadBoundParticipants()
-					break
-				}
-			}
-		},
-	)
+	// Competition display label
+	p.competitionDisplay = widget.NewLabel(locale.T("participants.select.competition.placeholder"))
+	
+	// Competition select button using reference_popup pattern
+	p.competitionSelect = widget.NewButton(locale.T("participants.select.competition.button"), func() {
+		p.showCompetitionPopup()
+	})
 
 	// Toolbar
 	toolbar := widget.NewToolbar(
@@ -173,9 +171,12 @@ func (p *ParticipantPanel) buildUI() *fyne.Container {
 
 	// Layout
 	leftPanel := container.NewBorder(
-		container.NewHBox(
-			widget.NewLabel(locale.T("participants.select.competition")),
-			p.competitionSelect,
+		container.NewVBox(
+			container.NewHBox(
+				widget.NewLabel(locale.T("participants.select.competition")),
+				p.competitionDisplay,
+				p.competitionSelect,
+			),
 		),
 		nil,
 		nil,
@@ -214,12 +215,73 @@ func (p *ParticipantPanel) loadCompetitions() {
 		return
 	}
 	p.allCompetitions = competitions
+}
 
-	options := []string{locale.T("participants.select.competition.placeholder")}
-	for _, comp := range competitions {
-		options = append(options, comp.CompetitionTitle)
+// showCompetitionPopup displays a popup to select a competition using reference_popup pattern
+func (p *ParticipantPanel) showCompetitionPopup() {
+	// Create container for competition items
+	itemContainer := container.NewVBox()
+
+	// Add existing competitions as select buttons
+	for _, comp := range p.allCompetitions {
+		compItem := comp
+		selectBtn := widget.NewButton(comp.CompetitionTitle, func() {
+			// Select this competition
+			p.selectedCompetitionID = compItem.ID
+			p.competitionDisplay.SetText(compItem.CompetitionTitle)
+			
+			// Hide popup
+			if p.currentDialog != nil {
+				p.currentDialog.Hide()
+				p.currentDialog = nil
+			}
+			
+			// Load transponders and bound participants
+			p.loadAvailableTransponders()
+			p.loadBoundParticipants()
+		})
+		selectBtn.Alignment = widget.ButtonAlignLeading
+		selectBtn.Importance = widget.MediumImportance
+		itemContainer.Add(selectBtn)
 	}
-	p.competitionSelect.SetOptions(options)
+
+	// Add "Clear selection" option
+	clearBtn := widget.NewButton(locale.T("participants.clear_selection"), func() {
+		p.selectedCompetitionID = ""
+		p.competitionDisplay.SetText(locale.T("participants.select.competition.placeholder"))
+		p.clearTransponderList()
+		p.clearBoundTable()
+		
+		// Hide popup
+		if p.currentDialog != nil {
+			p.currentDialog.Hide()
+			p.currentDialog = nil
+		}
+	})
+	clearBtn.Importance = widget.DangerImportance
+	itemContainer.Add(clearBtn)
+
+	// Create popup dialog
+	popup := dialog.NewCustomWithoutButtons(locale.T("participants.select.competition.popup_title"), itemContainer, p.window)
+
+	// Add close button
+	closeBtn := widget.NewButton(locale.T("common.close"), func() {
+		popup.Hide()
+		p.currentDialog = nil
+	})
+
+	popup.SetButtons([]fyne.CanvasObject{closeBtn})
+
+	// Resize popup
+	parentSize := p.window.Canvas().Size()
+	popupWidth := parentSize.Width * 0.4
+	if popupWidth < 400 {
+		popupWidth = 400
+	}
+	popup.Resize(fyne.NewSize(popupWidth, popup.MinSize().Height))
+
+	p.currentDialog = popup
+	popup.Show()
 }
 
 // loadAvailableTransponders loads transponders that match the selected competition's model type and scale

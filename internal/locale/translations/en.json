@@ -303,5 +303,8 @@
     "participants.table.transponder": "Transponder",
     "participants.table.grid": "Grid Pos",
     "participants.table.status": "Status",
-    "participants.already_bound": "Already bound participants"
+    "participants.already_bound": "Already bound participants",
+    "participants.select.competition.button": "Select...",
+    "participants.select.competition.popup_title": "Select Competition",
+    "participants.clear_selection": "Clear Selection",
 }
