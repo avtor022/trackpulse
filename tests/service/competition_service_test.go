@@ -837,3 +837,159 @@ func TestCompetitionService_StartCompetition_NotFound(t *testing.T) {
 func intPtr(i int) *int {
 	return &i
 }
+
+// TestCompetitionService_UpdateCompetition_StatusToScheduled_ClearsTimes tests that changing status to "scheduled" clears TimeStart and TimeFinish
+func TestCompetitionService_UpdateCompetition_StatusToScheduled_ClearsTimes(t *testing.T) {
+mockCompRepo := NewMockCompetitionRepository()
+mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
+svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository(), NewMockCompetitionYearRepository(), NewMockCompetitionSeasonRepository())
+
+// Create competition with status "in_progress" and set times
+compID := uuid.New().String()
+timeStart := time.Now().Add(-time.Hour)
+timeFinish := time.Now()
+c := &models.Competition{
+ID:               compID,
+CompetitionTitle: "Running Competition",
+CompetitionType:  "Race",
+ModelType:        "Buggy",
+ModelScale:       "1/10",
+TrackName:        "Track 1",
+Status:           "in_progress",
+TimeStart:        &timeStart,
+TimeFinish:       &timeFinish,
+}
+mockCompRepo.Create(c)
+
+// Update status to "scheduled"
+c.Status = "scheduled"
+err := svc.UpdateCompetition(c)
+if err != nil {
+t.Fatalf("UpdateCompetition() error = %v", err)
+}
+
+// Verify that times are cleared
+retrieved, _ := mockCompRepo.GetByID(c.ID)
+if retrieved == nil {
+t.Fatal("UpdateCompetition() failed to update competition")
+}
+if retrieved.Status != "scheduled" {
+t.Errorf("UpdateCompetition() expected status 'scheduled', got '%s'", retrieved.Status)
+}
+if retrieved.TimeStart != nil {
+t.Error("UpdateCompetition() should clear TimeStart when status changes to 'scheduled'")
+}
+if retrieved.TimeFinish != nil {
+t.Error("UpdateCompetition() should clear TimeFinish when status changes to 'scheduled'")
+}
+}
+
+// TestCompetitionService_UpdateCompetition_StatusToScheduled_SameStatus_KeepsTimes tests that keeping status as "scheduled" does not clear times
+func TestCompetitionService_UpdateCompetition_StatusToScheduled_SameStatus_KeepsTimes(t *testing.T) {
+mockCompRepo := NewMockCompetitionRepository()
+mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
+svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository(), NewMockCompetitionYearRepository(), NewMockCompetitionSeasonRepository())
+
+// Create competition with status "scheduled" and set times (edge case)
+compID := uuid.New().String()
+timeStart := time.Now().Add(time.Hour)
+c := &models.Competition{
+ID:               compID,
+CompetitionTitle: "Scheduled Competition",
+CompetitionType:  "Race",
+ModelType:        "Buggy",
+ModelScale:       "1/10",
+TrackName:        "Track 1",
+Status:           "scheduled",
+TimeStart:        &timeStart,
+}
+mockCompRepo.Create(c)
+
+// Update but keep status as "scheduled"
+c.CompetitionTitle = "Updated Scheduled Competition"
+err := svc.UpdateCompetition(c)
+if err != nil {
+t.Fatalf("UpdateCompetition() error = %v", err)
+}
+
+// Verify that times are NOT cleared since status didn't change
+retrieved, _ := mockCompRepo.GetByID(c.ID)
+if retrieved == nil {
+t.Fatal("UpdateCompetition() failed to update competition")
+}
+if retrieved.Status != "scheduled" {
+t.Errorf("UpdateCompetition() expected status 'scheduled', got '%s'", retrieved.Status)
+}
+if retrieved.TimeStart == nil {
+t.Error("UpdateCompetition() should keep TimeStart when status remains 'scheduled'")
+}
+}
+
+// TestCompetitionService_SetCompetitionScheduled_Success tests the SetCompetitionScheduled method
+func TestCompetitionService_SetCompetitionScheduled_Success(t *testing.T) {
+mockCompRepo := NewMockCompetitionRepository()
+mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
+svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository(), NewMockCompetitionYearRepository(), NewMockCompetitionSeasonRepository())
+
+// Create competition with status "finished" and set times
+compID := uuid.New().String()
+timeStart := time.Now().Add(-2 * time.Hour)
+timeFinish := time.Now().Add(-time.Hour)
+c := &models.Competition{
+ID:               compID,
+CompetitionTitle: "Finished Competition",
+CompetitionType:  "Race",
+ModelType:        "Buggy",
+ModelScale:       "1/10",
+TrackName:        "Track 1",
+Status:           "finished",
+TimeStart:        &timeStart,
+TimeFinish:       &timeFinish,
+}
+mockCompRepo.Create(c)
+
+// Set competition to scheduled
+err := svc.SetCompetitionScheduled(c.ID)
+if err != nil {
+t.Fatalf("SetCompetitionScheduled() error = %v", err)
+}
+
+// Verify status and times
+retrieved, _ := mockCompRepo.GetByID(c.ID)
+if retrieved == nil {
+t.Fatal("SetCompetitionScheduled() failed to update competition")
+}
+if retrieved.Status != "scheduled" {
+t.Errorf("SetCompetitionScheduled() expected status 'scheduled', got '%s'", retrieved.Status)
+}
+if retrieved.TimeStart != nil {
+t.Error("SetCompetitionScheduled() should clear TimeStart")
+}
+if retrieved.TimeFinish != nil {
+t.Error("SetCompetitionScheduled() should clear TimeFinish")
+}
+}
+
+// TestCompetitionService_SetCompetitionScheduled_EmptyID tests validation for empty ID
+func TestCompetitionService_SetCompetitionScheduled_EmptyID(t *testing.T) {
+mockCompRepo := NewMockCompetitionRepository()
+mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
+svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository(), NewMockCompetitionYearRepository(), NewMockCompetitionSeasonRepository())
+
+err := svc.SetCompetitionScheduled("")
+if err == nil {
+t.Error("SetCompetitionScheduled() expected error for empty ID, got nil")
+}
+}
+
+// TestCompetitionService_SetCompetitionScheduled_NotFound tests setting non-existent competition to scheduled
+func TestCompetitionService_SetCompetitionScheduled_NotFound(t *testing.T) {
+mockCompRepo := NewMockCompetitionRepository()
+mockTypeRepo := NewMockRCModelTypeRepositoryForCompetition()
+svc := service.NewCompetitionService(mockCompRepo, mockTypeRepo, NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository(), NewMockCompetitionYearRepository(), NewMockCompetitionSeasonRepository())
+
+err := svc.SetCompetitionScheduled(uuid.New().String())
+if err == nil {
+t.Error("SetCompetitionScheduled() expected error for non-existent competition, got nil")
+}
+}

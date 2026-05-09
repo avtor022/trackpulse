@@ -190,6 +190,12 @@ func (s *CompetitionService) UpdateCompetition(competition *models.Competition) 
 		return fmt.Errorf("competition not found")
 	}
 
+	// If status is being changed to "scheduled", clear start and finish times
+	if competition.Status == "scheduled" && existing.Status != "scheduled" {
+		competition.TimeStart = nil
+		competition.TimeFinish = nil
+	}
+
 	return s.repo.Update(competition)
 }
 
@@ -259,6 +265,31 @@ func (s *CompetitionService) StopCompetition(id string) error {
 
 	// Update status to "finished"
 	existing.Status = "finished"
+
+	return s.repo.Update(existing)
+}
+
+// SetCompetitionScheduled updates the competition status to "scheduled" and clears start/finish times
+func (s *CompetitionService) SetCompetitionScheduled(id string) error {
+	if id == "" {
+		return fmt.Errorf("competition ID is required")
+	}
+
+	// Get existing competition
+	existing, err := s.repo.GetByID(id)
+	if err != nil {
+		return fmt.Errorf("failed to get competition: %w", err)
+	}
+	if existing == nil {
+		return fmt.Errorf("competition not found")
+	}
+
+	// Update status to "scheduled"
+	existing.Status = "scheduled"
+
+	// Clear start and finish times
+	existing.TimeStart = nil
+	existing.TimeFinish = nil
 
 	return s.repo.Update(existing)
 }
