@@ -283,6 +283,8 @@
     "status.finished": "Finished",
     "error.no_competition_selected": "No competition selected",
     "dialog.success": "Success",
+    "dialog.info": "Information",
     "dialog.competition_started": "Competition started successfully",
-    "dialog.competition_stopped": "Competition stopped successfully"
+    "dialog.competition_stopped": "Competition stopped successfully",
+    "dialog.time_limit_reached": "Time limit reached! Competition has been stopped."
 }
