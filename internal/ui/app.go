@@ -93,6 +93,10 @@ func (a *App) createMainContent() *container.AppTabs {
 			// Refresh competitor panel data when switching to competitors tab
 			a.competitorPanel.RefreshData()
 		}
+		if ti == a.tabs.Items[2] && a.modelPanel != nil {
+			// Refresh model panel data when switching to models tab
+			a.modelPanel.RefreshData()
+		}
 		if ti == a.tabs.Items[4] && a.competitionPanel != nil {
 			// Refresh competition panel data when switching to competitions tab
 			a.competitionPanel.Refresh()
