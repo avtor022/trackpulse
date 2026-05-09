@@ -200,6 +200,7 @@ func (p *ParticipantPanel) buildUI() *fyne.Container {
 	)
 
 	p.content = content
+	// Load competitions on panel initialization
 	p.loadCompetitions()
 
 	return content
@@ -239,8 +240,18 @@ func (p *ParticipantPanel) loadAvailableTransponders() {
 		return
 	}
 
+	// Convert "*" to "all" for the service method
+	modelType := selectedComp.ModelType
+	if modelType == "*" {
+		modelType = "all"
+	}
+	modelScale := selectedComp.ModelScale
+	if modelScale == "*" {
+		modelScale = "all"
+	}
+
 	// Get RC models matching the competition's type and scale
-	rcModels, err := p.rcModelService.GetModelsByTypeAndScale(selectedComp.ModelType, selectedComp.ModelScale)
+	rcModels, err := p.rcModelService.GetModelsByTypeAndScale(modelType, modelScale)
 	if err != nil {
 		p.showError(locale.T("status.error_loading"))
 		return

@@ -1,3 +1,4 @@
+```
 # Compiled and build artifacts
 *.o
 *.obj
@@ -9,11 +10,7 @@ vendor/
 # Logs and temp files
 *.log
 *.tmp
-
-# Environment
-.env
-.env.local
-*.env.*
+*.swp
 
 # Editors
 .vscode/
@@ -24,27 +21,8 @@ coverage/
 htmlcov/
 .coverage
 
-# Build artifacts
-dist/
-build/
-target/
-bin/
-
-# Python specific
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-*.so
-
-# Go specific
-*.exe
-*.dll
-*.so
-*.dylib
-*.test
-*.prof
-
-# Original rules preserved
-*.log
+# Environment
+.env
+.env.local
+*.env.*
+```
