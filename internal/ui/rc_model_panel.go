@@ -111,7 +111,6 @@ func (p *ModelPanel) buildUI() *fyne.Container {
 	)
 
 	p.content = content
-	p.refreshData()
 
 	return content
 }
@@ -137,9 +136,6 @@ func (p *ModelPanel) createToolbar() *widget.Toolbar {
 
 // createModelTable creates the data table for RC models
 func (p *ModelPanel) createModelTable() *widget.Table {
-	// First load data
-	p.allModels, _ = p.modelService.GetAllModels()
-
 	table := widget.NewTable(
 		func() (int, int) {
 			if len(p.allModels) == 0 {
@@ -257,6 +253,11 @@ func (p *ModelPanel) refreshData() {
 			p.statusLabel.SetText(fmt.Sprintf(locale.T("status.loaded_models"), len(p.allModels)))
 		}
 	}
+}
+
+// RefreshData reloads the model data from the database
+func (p *ModelPanel) RefreshData() {
+	p.refreshData()
 }
 
 // showCreateDialog shows the dialog for creating a new model
