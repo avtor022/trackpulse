@@ -587,7 +587,7 @@ func (p *MonitoringPanel) startTimer(timeLimitMinutes *int) {
 	var limitReached bool
 
 	p.timerStop = make(chan struct{})
-	p.timerTicker = time.NewTicker(time.Second)
+	p.timerTicker = time.NewTicker(10 * time.Millisecond)
 
 	go func() {
 		for {
