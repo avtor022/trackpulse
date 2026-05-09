@@ -277,9 +277,12 @@
     "common.model_type": "Model Type",
     "monitoring.placeholder": "Select a competition to view monitoring data",
     "button.start": "Start",
+    "button.stop": "Stop",
     "status.error_loading": "Error loading data",
     "status.in_progress": "In Progress",
+    "status.finished": "Finished",
     "error.no_competition_selected": "No competition selected",
     "dialog.success": "Success",
-    "dialog.competition_started": "Competition started successfully"
+    "dialog.competition_started": "Competition started successfully",
+    "dialog.competition_stopped": "Competition stopped successfully"
 }

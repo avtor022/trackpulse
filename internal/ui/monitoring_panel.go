@@ -14,28 +14,29 @@ import (
 
 // MonitoringPanel represents the monitoring panel UI
 type MonitoringPanel struct {
-	content              *fyne.Container
-	mainWindow           fyne.Window
-	competitionService   *service.CompetitionService
-	selectedCompetition  string
+	content               *fyne.Container
+	mainWindow            fyne.Window
+	competitionService    *service.CompetitionService
+	selectedCompetition   string
 	selectedCompetitionID string
-	statusLabel          *widget.Label
-	allCompetitions      []models.Competition
-	competitionButton    *widget.Button
-	startButton          *widget.Button
-	filteredCompetitions []models.Competition
-	filteredYears        []string
-	filteredSeasons      []string
-	filteredTracks       []string
-	filteredModelTypes   []string
-	yearButton           *widget.Button
-	seasonButton         *widget.Button
-	trackButton          *widget.Button
-	modelTypeButton      *widget.Button
-	selectedYear         string
-	selectedSeason       string
-	selectedTrack        string
-	selectedModelType    string
+	statusLabel           *widget.Label
+	allCompetitions       []models.Competition
+	competitionButton     *widget.Button
+	startButton           *widget.Button
+	stopButton            *widget.Button
+	filteredCompetitions  []models.Competition
+	filteredYears         []string
+	filteredSeasons       []string
+	filteredTracks        []string
+	filteredModelTypes    []string
+	yearButton            *widget.Button
+	seasonButton          *widget.Button
+	trackButton           *widget.Button
+	modelTypeButton       *widget.Button
+	selectedYear          string
+	selectedSeason        string
+	selectedTrack         string
+	selectedModelType     string
 }
 
 // NewMonitoringPanel creates a new monitoring panel
@@ -64,6 +65,12 @@ func (p *MonitoringPanel) createContent() *fyne.Container {
 		p.startMonitoring()
 	})
 	p.startButton.Disable()
+
+	// Stop button - disabled by default, enabled only when competition status is in_progress
+	p.stopButton = widget.NewButton(locale.T("button.stop"), func() {
+		p.stopMonitoring()
+	})
+	p.stopButton.Disable()
 
 	// Filter buttons using reference_popup.go without add/delete functionality
 	p.yearButton = widget.NewButton(locale.T("filter.all_years"), func() {
@@ -96,7 +103,7 @@ func (p *MonitoringPanel) createContent() *fyne.Container {
 		widget.NewSeparator(),
 		filterContainer,
 		widget.NewSeparator(),
-		container.NewHBox(p.competitionButton, p.startButton),
+		container.NewHBox(p.competitionButton, p.startButton, p.stopButton),
 		widget.NewSeparator(),
 	)
 
@@ -513,6 +520,9 @@ func (p *MonitoringPanel) onCompetitionSelected(selected string) {
 		if p.startButton != nil {
 			p.startButton.Disable()
 		}
+		if p.stopButton != nil {
+			p.stopButton.Disable()
+		}
 		p.selectedCompetitionID = ""
 		return
 	}
@@ -525,8 +535,21 @@ func (p *MonitoringPanel) onCompetitionSelected(selected string) {
 			if p.competitionButton != nil {
 				p.competitionButton.SetText(comp.CompetitionTitle)
 			}
+			// Enable Start button only if competition status is scheduled
 			if p.startButton != nil {
-				p.startButton.Enable()
+				if comp.Status == "scheduled" {
+					p.startButton.Enable()
+				} else {
+					p.startButton.Disable()
+				}
+			}
+			// Enable Stop button only if competition status is in_progress
+			if p.stopButton != nil {
+				if comp.Status == "in_progress" {
+					p.stopButton.Enable()
+				} else {
+					p.stopButton.Disable()
+				}
 			}
 			return
 		}
@@ -541,6 +564,10 @@ func (p *MonitoringPanel) Refresh() {
 // UpdateData reloads competition data and refreshes filter options
 func (p *MonitoringPanel) UpdateData() {
 	p.refreshCompetitions()
+	// Refresh the selected competition state from DB
+	if p.selectedCompetition != "" {
+		p.onCompetitionSelected(p.selectedCompetition)
+	}
 }
 
 // startMonitoring starts monitoring for the selected competition
@@ -556,12 +583,35 @@ func (p *MonitoringPanel) startMonitoring() {
 		return
 	}
 
-	// Update status label to show the new status
-	p.statusLabel.SetText(fmt.Sprintf("%s: %s (%s)", locale.T("common.selected"), p.selectedCompetition, locale.T("status.in_progress")))
-	
-	// Refresh competitions list to get updated status
+	// Refresh competitions list to get updated status from DB
 	p.refreshCompetitions()
-	
+
+	// Reload and update the selected competition data from DB
+	p.onCompetitionSelected(p.selectedCompetition)
+
 	// Show success message
 	dialog.ShowInformation(locale.T("dialog.success"), locale.T("dialog.competition_started"), p.mainWindow)
+}
+
+// stopMonitoring stops the selected competition by changing its status to "finished"
+func (p *MonitoringPanel) stopMonitoring() {
+	if p.selectedCompetitionID == "" {
+		dialog.ShowError(fmt.Errorf(locale.T("error.no_competition_selected")), p.mainWindow)
+		return
+	}
+
+	err := p.competitionService.StopCompetition(p.selectedCompetitionID)
+	if err != nil {
+		dialog.ShowError(err, p.mainWindow)
+		return
+	}
+
+	// Refresh competitions list to get updated status from DB
+	p.refreshCompetitions()
+
+	// Reload and update the selected competition data from DB
+	p.onCompetitionSelected(p.selectedCompetition)
+
+	// Show success message
+	dialog.ShowInformation(locale.T("dialog.success"), locale.T("dialog.competition_stopped"), p.mainWindow)
 }

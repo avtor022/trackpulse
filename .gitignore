@@ -1,5 +1,5 @@
 ```
-# Compiled and build artifacts
+# Compiled and binary files
 *.o
 *.obj
 *.out
@@ -11,36 +11,17 @@ vendor/
 *.log
 *.tmp
 
+# Editors
+.vscode/
+.idea/
+
+# Coverage
+coverage/
+htmlcov/
+.coverage
+
 # Environment
 .env
 .env.local
 *.env.*
-
-# Coverage
-coverage/
-.coverage
-htmlcov/
-
-# Editors
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# System
-.DS_Store
-Thumbs.db
-
-# Build directories
-target/
-build/
-dist/
-
-# Python specific
-__pycache__/
-*.pyc
-*.pyo
-.Python
-*.so
-*.egg-info/
 ```
