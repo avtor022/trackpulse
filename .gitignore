@@ -1,27 +1,3 @@
-```
-# Compiled and binary files
-*.o
-*.obj
-*.out
+```go
 
-# Dependencies
-vendor/
-
-# Logs and temp files
-*.log
-*.tmp
-
-# Editors
-.vscode/
-.idea/
-
-# Coverage
-coverage/
-htmlcov/
-.coverage
-
-# Environment
-.env
-.env.local
-*.env.*
 ```

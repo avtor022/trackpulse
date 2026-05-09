@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -24,6 +25,9 @@ type MonitoringPanel struct {
 	competitionButton     *widget.Button
 	startButton           *widget.Button
 	stopButton            *widget.Button
+	timerLabel            *widget.Label
+	timerTicker           *time.Ticker
+	timerStop             chan struct{}
 	filteredCompetitions  []models.Competition
 	filteredYears         []string
 	filteredSeasons       []string
@@ -72,6 +76,10 @@ func (p *MonitoringPanel) createContent() *fyne.Container {
 	})
 	p.stopButton.Disable()
 
+	// Timer label - displays elapsed time during monitoring
+	p.timerLabel = widget.NewLabel("00:00:00.00")
+	p.timerLabel.Alignment = fyne.TextAlignCenter
+
 	// Filter buttons using reference_popup.go without add/delete functionality
 	p.yearButton = widget.NewButton(locale.T("filter.all_years"), func() {
 		p.showYearFilterPopup()
@@ -103,7 +111,7 @@ func (p *MonitoringPanel) createContent() *fyne.Container {
 		widget.NewSeparator(),
 		filterContainer,
 		widget.NewSeparator(),
-		container.NewHBox(p.competitionButton, p.startButton, p.stopButton),
+		container.NewHBox(p.competitionButton, p.startButton, p.stopButton, p.timerLabel),
 		widget.NewSeparator(),
 	)
 
@@ -513,6 +521,7 @@ func (p *MonitoringPanel) getCompetitionTitles() []string {
 // onCompetitionSelected handles competition selection
 func (p *MonitoringPanel) onCompetitionSelected(selected string) {
 	if selected == "" {
+		p.stopTimer()
 		p.statusLabel.SetText(locale.T("status.ready"))
 		if p.competitionButton != nil {
 			p.competitionButton.SetText(locale.T("form.competition.select"))
@@ -523,9 +532,15 @@ func (p *MonitoringPanel) onCompetitionSelected(selected string) {
 		if p.stopButton != nil {
 			p.stopButton.Disable()
 		}
+		if p.timerLabel != nil {
+			p.timerLabel.SetText("")
+		}
 		p.selectedCompetitionID = ""
 		return
 	}
+
+	// Stop and reset timer when switching to a different competition
+	p.stopTimer()
 
 	// Find the selected competition
 	for _, comp := range p.allCompetitions {
@@ -547,6 +562,8 @@ func (p *MonitoringPanel) onCompetitionSelected(selected string) {
 			if p.stopButton != nil {
 				if comp.Status == "in_progress" {
 					p.stopButton.Enable()
+					// Start timer when competition is in progress
+					p.startTimer(comp.TimeLimitMinutes)
 				} else {
 					p.stopButton.Disable()
 				}
@@ -559,6 +576,81 @@ func (p *MonitoringPanel) onCompetitionSelected(selected string) {
 // Refresh updates the panel with new locale strings
 func (p *MonitoringPanel) Refresh() {
 	p.content = p.createContent()
+}
+
+// startTimer starts the timer for monitoring elapsed time
+func (p *MonitoringPanel) startTimer(timeLimitMinutes *int) {
+	// Stop any existing timer first
+	p.stopTimer()
+
+	startTime := time.Now()
+	var limitReached bool
+
+	p.timerStop = make(chan struct{})
+	p.timerTicker = time.NewTicker(10 * time.Millisecond)
+
+	go func() {
+		for {
+			select {
+			case <-p.timerTicker.C:
+				elapsed := time.Since(startTime)
+
+				// Check if time limit is reached
+				if timeLimitMinutes != nil && !limitReached {
+					limitDuration := time.Duration(*timeLimitMinutes) * time.Minute
+					if elapsed >= limitDuration {
+						limitReached = true
+						// Timer reached limit, stop it and notify on main thread
+						fyne.Do(func() {
+							p.stopTimer()
+							p.stopMonitoring()
+							dialog.ShowInformation(locale.T("dialog.info"), locale.T("dialog.time_limit_reached"), p.mainWindow)
+						})
+						return
+					}
+				}
+
+				// Update timer label on main thread
+				finalElapsed := elapsed
+				fyne.Do(func() {
+					if p.timerLabel != nil {
+						p.timerLabel.SetText(p.formatDuration(finalElapsed))
+					}
+				})
+			case <-p.timerStop:
+				return
+			}
+		}
+	}()
+}
+
+// stopTimer stops the running timer
+func (p *MonitoringPanel) stopTimer() {
+	if p.timerTicker != nil {
+		p.timerTicker.Stop()
+		p.timerTicker = nil
+	}
+	if p.timerStop != nil {
+		close(p.timerStop)
+		p.timerStop = nil
+	}
+	// Do not clear timer label - keep showing the last elapsed time
+	// Timer label is only cleared when switching to a different competition
+}
+
+// formatDuration formats a duration as HH:MM:SS.ss (hours:minutes:seconds.centiseconds)
+func (p *MonitoringPanel) formatDuration(d time.Duration) string {
+	centisecond := 10 * time.Millisecond
+	d = d.Round(centisecond)
+	h := d / time.Hour
+	d -= h * time.Hour
+	m := d / time.Minute
+	d -= m * time.Minute
+	s := d / time.Second
+	d -= s * time.Second
+	cs := d / centisecond
+
+	return fmt.Sprintf("%02d:%02d:%02d.%02d", h, m, s, cs)
 }
 
 // UpdateData reloads competition data and refreshes filter options
