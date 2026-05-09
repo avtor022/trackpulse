@@ -77,7 +77,7 @@ func (p *MonitoringPanel) createContent() *fyne.Container {
 	p.stopButton.Disable()
 
 	// Timer label - displays elapsed time during monitoring
-	p.timerLabel = widget.NewLabel("")
+	p.timerLabel = widget.NewLabel("00:00:00.00")
 	p.timerLabel.Alignment = fyne.TextAlignCenter
 
 	// Filter buttons using reference_popup.go without add/delete functionality
