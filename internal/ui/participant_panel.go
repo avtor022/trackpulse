@@ -90,7 +90,7 @@ func (p *ParticipantPanel) buildUI() *fyne.Container {
 
 	// Competition display label
 	p.competitionDisplay = widget.NewLabel(locale.T("participants.select.competition.placeholder"))
-	
+
 	// Competition select button using reference_popup pattern
 	p.competitionSelect = widget.NewButton(locale.T("participants.select.competition.button"), func() {
 		p.showCompetitionPopup()
@@ -128,7 +128,7 @@ func (p *ParticipantPanel) buildUI() *fyne.Container {
 				return
 			}
 			participant := p.boundParticipants[i.Row]
-			
+
 			switch i.Col {
 			case 0:
 				o.(*widget.Label).SetText(participant.ID[:8])
@@ -168,6 +168,14 @@ func (p *ParticipantPanel) buildUI() *fyne.Container {
 			o.(*widget.Label).TextStyle = fyne.TextStyle{Bold: true}
 		}
 	}
+
+	// Set column widths based on header content
+	p.boundTable.SetColumnWidth(0, 100) // ID
+	p.boundTable.SetColumnWidth(1, 200) // Competition
+	p.boundTable.SetColumnWidth(2, 150) // Competitor
+	p.boundTable.SetColumnWidth(3, 150) // Model
+	p.boundTable.SetColumnWidth(4, 120) // Transponder
+	p.boundTable.SetColumnWidth(5, 80)  // Grid
 
 	// Layout
 	leftPanel := container.NewBorder(
@@ -229,13 +237,13 @@ func (p *ParticipantPanel) showCompetitionPopup() {
 			// Select this competition
 			p.selectedCompetitionID = compItem.ID
 			p.competitionDisplay.SetText(compItem.CompetitionTitle)
-			
+
 			// Hide popup
 			if p.currentDialog != nil {
 				p.currentDialog.Hide()
 				p.currentDialog = nil
 			}
-			
+
 			// Load transponders and bound participants
 			p.loadAvailableTransponders()
 			p.loadBoundParticipants()
@@ -251,7 +259,7 @@ func (p *ParticipantPanel) showCompetitionPopup() {
 		p.competitionDisplay.SetText(locale.T("participants.select.competition.placeholder"))
 		p.clearTransponderList()
 		p.clearBoundTable()
-		
+
 		// Hide popup
 		if p.currentDialog != nil {
 			p.currentDialog.Hide()
@@ -364,7 +372,7 @@ func (p *ParticipantPanel) renderTransponderList() {
 		competitorName := p.getCompetitorName(t.ID)
 		modelName := p.getRCModelName(t.ID)
 		labelText := fmt.Sprintf("%s - %s (%s)", t.TransponderNumber, competitorName, modelName)
-		
+
 		check := widget.NewCheck(labelText, nil)
 		p.transponderCheckboxes[t.ID] = check
 		p.transponderList.Add(check)
