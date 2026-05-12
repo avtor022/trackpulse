@@ -30,17 +30,9 @@ venv/
 .idea/
 
 # Coverage
+.coverage
 coverage/
 htmlcov/
-.coverage
-
-# Build directories
-dist/
-build/
-target/
-.mypy_cache/
-.pytest_cache/
-.gradle/
 
 # System files
 .DS_Store

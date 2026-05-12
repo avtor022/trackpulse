@@ -131,7 +131,7 @@
     "form.model.type_placeholder": "e.g., Monster Truck",
     "form.model.motor_placeholder": "e.g., Brushless",
     "form.model.drive_placeholder": "e.g., 4WD",
-    "form.competitor.number": "Competitor Number",
+    "form.competitor.number": "Number",
     "form.competitor.name": "Full Name",
     "form.competitor.country": "Country",
     "form.competitor.city": "City",

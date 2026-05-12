@@ -132,7 +132,7 @@
     "form.model.type_placeholder": "например, Monster Truck",
     "form.model.motor_placeholder": "например, Brushless",
     "form.model.drive_placeholder": "например, 4WD",
-    "form.competitor.number": "Номер спортсмена",
+    "form.competitor.number": "Номер",
     "form.competitor.name": "Полное имя",
     "form.competitor.country": "Страна",
     "form.competitor.city": "Город",
