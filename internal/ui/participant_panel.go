@@ -96,6 +96,15 @@ func (p *ParticipantPanel) buildUI() *fyne.Container {
 		p.showCompetitionPopup()
 	})
 
+	// Clear selection button
+	clearBtn := widget.NewButton(locale.T("participants.clear_selection"), func() {
+		p.selectedCompetitionID = ""
+		p.competitionDisplay.SetText(locale.T("participants.select.competition.placeholder"))
+		p.clearTransponderList()
+		p.clearBoundTable()
+	})
+	clearBtn.Importance = widget.DangerImportance
+
 	// Toolbar
 	toolbar := widget.NewToolbar(
 		widget.NewToolbarAction(theme.ViewRefreshIcon(), func() {
@@ -106,8 +115,21 @@ func (p *ParticipantPanel) buildUI() *fyne.Container {
 		}),
 	)
 
+	// Competition selection area
+	competitionArea := container.NewVBox(
+		container.NewHBox(
+			widget.NewLabel(locale.T("participants.select.competition")),
+			p.competitionDisplay,
+			p.competitionSelect,
+			clearBtn,
+		),
+	)
+
 	// Transponder list container
 	p.transponderList = container.NewVBox()
+
+	// Left panel with transponder list
+	leftPanel := container.NewScroll(p.transponderList)
 
 	// Bound participants table
 	p.boundTable = widget.NewTable(
@@ -177,21 +199,7 @@ func (p *ParticipantPanel) buildUI() *fyne.Container {
 	p.boundTable.SetColumnWidth(4, 120) // Transponder
 	p.boundTable.SetColumnWidth(5, 80)  // Grid
 
-	// Layout
-	leftPanel := container.NewBorder(
-		container.NewVBox(
-			container.NewHBox(
-				widget.NewLabel(locale.T("participants.select.competition")),
-				p.competitionDisplay,
-				p.competitionSelect,
-			),
-		),
-		nil,
-		nil,
-		nil,
-		container.NewScroll(p.transponderList),
-	)
-
+	// Right panel with bound participants table
 	rightPanel := container.NewBorder(
 		widget.NewLabelWithStyle(locale.T("participants.already_bound"), fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 		nil,
@@ -200,8 +208,12 @@ func (p *ParticipantPanel) buildUI() *fyne.Container {
 		container.NewScroll(p.boundTable),
 	)
 
+	// Main content: competition selection area at top, split panel below
 	content := container.NewBorder(
-		container.NewHBox(toolbar, p.statusLabel),
+		container.NewVBox(
+			container.NewHBox(toolbar, p.statusLabel),
+			competitionArea,
+		),
 		nil,
 		nil,
 		nil,
@@ -252,22 +264,6 @@ func (p *ParticipantPanel) showCompetitionPopup() {
 		selectBtn.Importance = widget.MediumImportance
 		itemContainer.Add(selectBtn)
 	}
-
-	// Add "Clear selection" option
-	clearBtn := widget.NewButton(locale.T("participants.clear_selection"), func() {
-		p.selectedCompetitionID = ""
-		p.competitionDisplay.SetText(locale.T("participants.select.competition.placeholder"))
-		p.clearTransponderList()
-		p.clearBoundTable()
-
-		// Hide popup
-		if p.currentDialog != nil {
-			p.currentDialog.Hide()
-			p.currentDialog = nil
-		}
-	})
-	clearBtn.Importance = widget.DangerImportance
-	itemContainer.Add(clearBtn)
 
 	// Create popup dialog
 	popup := dialog.NewCustomWithoutButtons(locale.T("participants.select.competition.popup_title"), itemContainer, p.window)
