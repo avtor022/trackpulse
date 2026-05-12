@@ -96,6 +96,15 @@ func (p *ParticipantPanel) buildUI() *fyne.Container {
 		p.showCompetitionPopup()
 	})
 
+	// Clear selection button
+	clearBtn := widget.NewButton(locale.T("participants.clear_selection"), func() {
+		p.selectedCompetitionID = ""
+		p.competitionDisplay.SetText(locale.T("participants.select.competition.placeholder"))
+		p.clearTransponderList()
+		p.clearBoundTable()
+	})
+	clearBtn.Importance = widget.DangerImportance
+
 	// Toolbar
 	toolbar := widget.NewToolbar(
 		widget.NewToolbarAction(theme.ViewRefreshIcon(), func() {
@@ -184,6 +193,7 @@ func (p *ParticipantPanel) buildUI() *fyne.Container {
 				widget.NewLabel(locale.T("participants.select.competition")),
 				p.competitionDisplay,
 				p.competitionSelect,
+				clearBtn,
 			),
 		),
 		nil,
@@ -252,22 +262,6 @@ func (p *ParticipantPanel) showCompetitionPopup() {
 		selectBtn.Importance = widget.MediumImportance
 		itemContainer.Add(selectBtn)
 	}
-
-	// Add "Clear selection" option
-	clearBtn := widget.NewButton(locale.T("participants.clear_selection"), func() {
-		p.selectedCompetitionID = ""
-		p.competitionDisplay.SetText(locale.T("participants.select.competition.placeholder"))
-		p.clearTransponderList()
-		p.clearBoundTable()
-
-		// Hide popup
-		if p.currentDialog != nil {
-			p.currentDialog.Hide()
-			p.currentDialog = nil
-		}
-	})
-	clearBtn.Importance = widget.DangerImportance
-	itemContainer.Add(clearBtn)
 
 	// Create popup dialog
 	popup := dialog.NewCustomWithoutButtons(locale.T("participants.select.competition.popup_title"), itemContainer, p.window)
