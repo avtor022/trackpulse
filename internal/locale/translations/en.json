@@ -308,5 +308,5 @@
     "participants.select.competition.button": "Select...",
     "participants.select.competition.popup_title": "Select Competition",
     "participants.clear_selection": "Clear Selection",
-    "participants.competitor_models_list": "List of competitor models"
+    "participants.transponders_list": "Athletes' transponders"
 }

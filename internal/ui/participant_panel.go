@@ -129,7 +129,7 @@ func (p *ParticipantPanel) buildUI() *fyne.Container {
 	p.transponderList = container.NewVBox()
 
 	// Left panel with transponder list and header
-	leftHeader := widget.NewLabelWithStyle(locale.T("participants.competitor_models_list"), fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	leftHeader := widget.NewLabelWithStyle(locale.T("participants.transponders_list"), fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
 	leftPanel := container.NewBorder(
 		leftHeader,
 		nil,
