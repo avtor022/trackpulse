@@ -33,6 +33,7 @@ type ParticipantPanel struct {
 	boundTable             *widget.Table
 	statusLabel            *widget.Label
 	currentDialog          dialog.Dialog
+	competitionFilter      *CompetitionFilter
 }
 
 // NewParticipantPanel creates a new participant binding panel
@@ -114,6 +115,11 @@ func (p *ParticipantPanel) buildUI() *fyne.Container {
 			p.bindSelectedTransponders()
 		}),
 	)
+
+	// Create competition filter component at the top of the panel
+	p.competitionFilter = NewCompetitionFilter(p.window, func() {
+		// Filter changed callback - refresh competition popup if open
+	})
 
 	// Competition selection area (without toolbar - moved to main content)
 	competitionArea := container.NewVBox(
@@ -215,9 +221,10 @@ func (p *ParticipantPanel) buildUI() *fyne.Container {
 		container.NewScroll(p.boundTable),
 	)
 
-	// Main content: competition selection area at top, split panel below
+	// Main content: filter at top, then competition selection area, then split panel
 	content := container.NewBorder(
 		container.NewVBox(
+			p.competitionFilter.CreateContent(),
 			competitionArea,
 			container.NewHBox(toolbar, p.statusLabel),
 		),
@@ -242,6 +249,11 @@ func (p *ParticipantPanel) loadCompetitions() {
 		return
 	}
 	p.allCompetitions = competitions
+
+	// Set competitions to filter component
+	if p.competitionFilter != nil {
+		p.competitionFilter.SetCompetitions(p.allCompetitions)
+	}
 }
 
 // showCompetitionPopup displays a popup to select a competition using reference_popup pattern
@@ -249,8 +261,14 @@ func (p *ParticipantPanel) showCompetitionPopup() {
 	// Create container for competition items
 	itemContainer := container.NewVBox()
 
+	// Use filtered competitions from the filter component
+	filteredCompetitions := p.allCompetitions
+	if p.competitionFilter != nil {
+		filteredCompetitions = p.competitionFilter.GetFilteredCompetitions()
+	}
+
 	// Add existing competitions as select buttons
-	for _, comp := range p.allCompetitions {
+	for _, comp := range filteredCompetitions {
 		compItem := comp
 		selectBtn := widget.NewButton(comp.CompetitionTitle, func() {
 			// Select this competition
