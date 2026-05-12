@@ -308,5 +308,6 @@
     "participants.already_bound": "Уже привязанные участники",
     "participants.select.competition.button": "Выбрать...",
     "participants.select.competition.popup_title": "Выберите соревнование",
-    "participants.clear_selection": "Сбросить выбор"
+    "participants.clear_selection": "Сбросить выбор",
+    "participants.competitor_models_list": "Список моделей спортсменов"
 }
