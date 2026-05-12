@@ -199,15 +199,7 @@ func (p *ParticipantPanel) buildUI() *fyne.Container {
 	p.boundTable.SetColumnWidth(4, 120) // Transponder
 	p.boundTable.SetColumnWidth(5, 80)  // Grid
 
-	// Left panel with competition selection area and transponder list
-	leftPanelWithHeader := container.NewBorder(
-		competitionArea,
-		nil,
-		nil,
-		nil,
-		leftPanel,
-	)
-
+	// Right panel with bound participants table
 	rightPanel := container.NewBorder(
 		widget.NewLabelWithStyle(locale.T("participants.already_bound"), fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 		nil,
@@ -216,12 +208,16 @@ func (p *ParticipantPanel) buildUI() *fyne.Container {
 		container.NewScroll(p.boundTable),
 	)
 
+	// Main content: competition selection area at top, split panel below
 	content := container.NewBorder(
-		container.NewHBox(toolbar, p.statusLabel),
+		container.NewVBox(
+			container.NewHBox(toolbar, p.statusLabel),
+			competitionArea,
+		),
 		nil,
 		nil,
 		nil,
-		container.NewHSplit(leftPanelWithHeader, rightPanel),
+		container.NewHSplit(leftPanel, rightPanel),
 	)
 
 	p.content = content
