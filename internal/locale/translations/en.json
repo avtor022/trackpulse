@@ -307,5 +307,6 @@
     "participants.already_bound": "Already bound participants",
     "participants.select.competition.button": "Select...",
     "participants.select.competition.popup_title": "Select Competition",
-    "participants.clear_selection": "Clear Selection"
+    "participants.clear_selection": "Clear Selection",
+    "participants.transponders_list": "Athletes' transponders"
 }

@@ -105,7 +105,7 @@ func (p *ParticipantPanel) buildUI() *fyne.Container {
 	})
 	clearBtn.Importance = widget.DangerImportance
 
-	// Toolbar
+	// Toolbar with refresh and save buttons
 	toolbar := widget.NewToolbar(
 		widget.NewToolbarAction(theme.ViewRefreshIcon(), func() {
 			p.refreshData()
@@ -115,7 +115,7 @@ func (p *ParticipantPanel) buildUI() *fyne.Container {
 		}),
 	)
 
-	// Competition selection area
+	// Competition selection area (without toolbar - moved to main content)
 	competitionArea := container.NewVBox(
 		container.NewHBox(
 			widget.NewLabel(locale.T("participants.select.competition")),
@@ -128,8 +128,15 @@ func (p *ParticipantPanel) buildUI() *fyne.Container {
 	// Transponder list container
 	p.transponderList = container.NewVBox()
 
-	// Left panel with transponder list
-	leftPanel := container.NewScroll(p.transponderList)
+	// Left panel with transponder list and header
+	leftHeader := widget.NewLabelWithStyle(locale.T("participants.transponders_list"), fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	leftPanel := container.NewBorder(
+		leftHeader,
+		nil,
+		nil,
+		nil,
+		container.NewScroll(p.transponderList),
+	)
 
 	// Bound participants table
 	p.boundTable = widget.NewTable(
@@ -211,8 +218,8 @@ func (p *ParticipantPanel) buildUI() *fyne.Container {
 	// Main content: competition selection area at top, split panel below
 	content := container.NewBorder(
 		container.NewVBox(
-			container.NewHBox(toolbar, p.statusLabel),
 			competitionArea,
+			container.NewHBox(toolbar, p.statusLabel),
 		),
 		nil,
 		nil,
