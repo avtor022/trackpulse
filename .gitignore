@@ -1,1 +1,23 @@
-Nothing needs to be added to .gitignore since the changes only include Go source files (.go) which are source code files that should not be ignored.
+```
+# Compiled and build artifacts
+*.o
+*.obj
+*.out
+
+# Dependencies
+vendor/
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+
+# Editors
+.vscode/
+.idea/
+
+# Environment
+.env
+.env.local
+.env.*
+```
