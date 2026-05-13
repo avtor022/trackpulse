@@ -14,7 +14,6 @@ import (
 	"github.com/jacobsa/go-serial/serial"
 	"go.bug.st/serial/enumerator"
 	"trackpulse/internal/locale"
-	"trackpulse/internal/models"
 	"trackpulse/internal/service"
 )
 
