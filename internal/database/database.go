@@ -229,6 +229,7 @@ func (db *DB) Initialize() error {
 	CREATE INDEX IF NOT EXISTS idx_raw_scans_tag ON raw_scans(tag_value);
 	CREATE INDEX IF NOT EXISTS idx_raw_scans_processed ON raw_scans(is_processed);
 	CREATE INDEX IF NOT EXISTS idx_raw_scans_tag_timestamp ON raw_scans(tag_value, timestamp);
+	CREATE INDEX IF NOT EXISTS idx_raw_scans_processed_timestamp ON raw_scans(is_processed, timestamp);
 
 	-- System Settings table
 	CREATE TABLE IF NOT EXISTS system_settings (

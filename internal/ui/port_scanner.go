@@ -322,6 +322,16 @@ func (p *PortScanner) RefreshLabels() {
 	}
 }
 
+// SetReaderType sets the RFID reader type for scan records
+func (p *PortScanner) SetReaderType(readerType string) {
+	p.readerType = readerType
+}
+
+// SetLapService sets the lap service for processing scans
+func (p *PortScanner) SetLapService(lapService *service.LapService) {
+	p.lapService = lapService
+}
+
 // readFromPort continuously reads data from the serial port and logs RFID tags
 func (p *PortScanner) readFromPort() {
 	if p.port == nil {
@@ -334,11 +344,21 @@ func (p *PortScanner) readFromPort() {
 		case <-p.stopReading:
 			return
 		default:
+			// Set read deadline to prevent blocking indefinitely
+			if rc, ok := p.port.(interface{ SetReadDeadline(time.Time) error }); ok {
+				rc.SetReadDeadline(time.Now().Add(500 * time.Millisecond))
+			}
+
 			n, err := p.port.Read(buf)
 			if err != nil {
-				if err != io.EOF {
-					fmt.Printf("Error reading from port: %v\n", err)
+				if err == io.EOF {
+					return
 				}
+				// Check for timeout error (expected with SetReadDeadline)
+				if netErr, ok := err.(interface{ Timeout() bool }); ok && netErr.Timeout() {
+					continue // Retry on timeout
+				}
+				fmt.Printf("Error reading from port: %v\n", err)
 				return
 			}
 			if n > 0 {
@@ -364,14 +384,4 @@ func (p *PortScanner) readFromPort() {
 			}
 		}
 	}
-}
-
-// SetReaderType sets the RFID reader type for scan records
-func (p *PortScanner) SetReaderType(readerType string) {
-	p.readerType = readerType
-}
-
-// SetLapService sets the lap service for processing scans
-func (p *PortScanner) SetLapService(lapService *service.LapService) {
-	p.lapService = lapService
 }

@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -11,12 +12,35 @@ import (
 
 // RawScanRepository handles data access for raw RFID scans
 type RawScanRepository struct {
-	db *sql.DB
+	db            *sql.DB
+	insertStmt    *sql.Stmt // Cached prepared statement for bulk inserts
+	stmtCacheOnce sync.Once // Ensure one-time initialization
 }
 
 // NewRawScanRepository creates a new raw scan repository
 func NewRawScanRepository(db *sql.DB) *RawScanRepository {
 	return &RawScanRepository{db: db}
+}
+
+// initPreparedStmt initializes the cached prepared statement for bulk inserts
+func (r *RawScanRepository) initPreparedStmt() error {
+	var err error
+	r.insertStmt, err = r.db.Prepare(`
+		INSERT INTO raw_scans (id, timestamp, tag_value, reader_type, com_port, signal_strength, is_processed, linked_competitor_model_id, created_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+	`)
+	if err != nil {
+		return fmt.Errorf("failed to prepare statement: %w", err)
+	}
+	return nil
+}
+
+// Close closes the cached prepared statement (call when shutting down)
+func (r *RawScanRepository) Close() error {
+	if r.insertStmt != nil {
+		return r.insertStmt.Close()
+	}
+	return nil
 }
 
 // Create inserts a single raw scan record
@@ -71,21 +95,23 @@ func (r *RawScanRepository) CreateBulk(scans []*models.RawScan) error {
 		return nil
 	}
 
+	// Initialize prepared statement once using sync.Once
+	var initErr error
+	r.stmtCacheOnce.Do(func() {
+		initErr = r.initPreparedStmt()
+	})
+	if initErr != nil {
+		return initErr
+	}
+
 	// Start transaction for atomic bulk insert
 	tx, err := r.db.Begin()
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction: %w", err)
 	}
 
-	// Prepare statement for efficient repeated execution
-	stmt, err := tx.Prepare(`
-		INSERT INTO raw_scans (id, timestamp, tag_value, reader_type, com_port, signal_strength, is_processed, linked_competitor_model_id, created_at)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-	`)
-	if err != nil {
-		tx.Rollback()
-		return fmt.Errorf("failed to prepare statement: %w", err)
-	}
+	// Use cached prepared statement with transaction
+	stmt := tx.Stmt(r.insertStmt)
 	defer stmt.Close()
 
 	now := time.Now().Format(time.RFC3339)

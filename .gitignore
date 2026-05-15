@@ -1,4 +1,4 @@
-```
+```go
 # Compiled and build artifacts
 *.o
 *.obj
@@ -12,12 +12,32 @@ vendor/
 *.tmp
 *.swp
 
-# Editors
-.vscode/
-.idea/
-
 # Environment
 .env
 .env.local
 *.env.*
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Coverage reports
+coverage/
+htmlcov/
+.coverage
+
+# Build artifacts
+bin/
+target/
+_dist_/
+dist/
+build/
+
+# Go specific
+*.test
+*.prof
+go.mod
+go.sum
 ```
