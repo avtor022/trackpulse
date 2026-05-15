@@ -11,40 +11,44 @@ import (
 
 // LapScan represents a scanned RFID tag with timing information
 type LapScan struct {
-	ID           string
-	TagValue     string
-	Timestamp    time.Time
-	ReaderType   string
-	COMPort      string
+	ID             string
+	TagValue       string
+	Timestamp      time.Time
+	ReaderType     string
+	COMPort        string
 	SignalStrength *int
 }
 
 // LapService handles real-time lap processing from RFID scans
 type LapService struct {
-	rawScanRepo       *repository.RawScanRepository
+	rawScanRepo         *repository.RawScanRepository
 	competitorModelRepo *repository.CompetitorModelRepository
-	competitionRepo   *repository.CompetitionRepository
-	participantRepo   *repository.CompetitionParticipantRepository
-	
+	competitionRepo     *repository.CompetitionRepository
+	participantRepo     *repository.CompetitionParticipantRepository
+
 	// Buffered channel for async processing
 	scanChannel chan LapScan
-	
+
 	// Active competition cache (in-memory)
-	activeCompetition     *models.Competition
-	activeCompetitionMu   sync.RWMutex
-	
+	activeCompetition   *models.Competition
+	activeCompetitionMu sync.RWMutex
+
 	// Competitor models cache (transponder -> competitor_model_id)
 	transponderCache map[string]string
 	transponderMu    sync.RWMutex
-	
+
 	// Participant results cache (competition_participant_id -> current lap data)
 	participantResults map[string]*ParticipantLapData
 	resultsMu          sync.RWMutex
-	
+
+	// Reverse lookup cache for O(1) participant search (competitor_model_id -> participant_id)
+	modelToParticipant map[string]string
+	cacheMu            sync.RWMutex
+
 	// Worker control
 	stopWorker chan bool
 	wg         sync.WaitGroup
-	
+
 	// Batch settings
 	batchSize    int
 	batchTimeout time.Duration
@@ -73,16 +77,17 @@ func NewLapService(
 	participantRepo *repository.CompetitionParticipantRepository,
 ) *LapService {
 	return &LapService{
-		rawScanRepo:           rawScanRepo,
-		competitorModelRepo:   competitorModelRepo,
-		competitionRepo:       competitionRepo,
-		participantRepo:       participantRepo,
-		scanChannel:           make(chan LapScan, 200), // Buffer for 200 scans
-		transponderCache:      make(map[string]string),
-		participantResults:    make(map[string]*ParticipantLapData),
-		stopWorker:            make(chan bool),
-		batchSize:             50,  // Write to DB every 50 scans
-		batchTimeout:          100 * time.Millisecond, // Or every 100ms
+		rawScanRepo:         rawScanRepo,
+		competitorModelRepo: competitorModelRepo,
+		competitionRepo:     competitionRepo,
+		participantRepo:     participantRepo,
+		scanChannel:         make(chan LapScan, 200), // Buffer for 200 scans
+		transponderCache:    make(map[string]string),
+		modelToParticipant:  make(map[string]string),
+		participantResults:  make(map[string]*ParticipantLapData),
+		stopWorker:          make(chan bool),
+		batchSize:           50,                     // Write to DB every 50 scans
+		batchTimeout:        100 * time.Millisecond, // Or every 100ms
 	}
 }
 
@@ -103,7 +108,7 @@ func (s *LapService) SetActiveCompetition(comp *models.Competition) {
 	s.activeCompetitionMu.Lock()
 	defer s.activeCompetitionMu.Unlock()
 	s.activeCompetition = comp
-	
+
 	// Reload participant cache for this competition
 	if comp != nil && comp.Status == "in_progress" {
 		s.loadParticipantCache(comp.ID)
@@ -123,22 +128,29 @@ func (s *LapService) loadParticipantCache(competitionID string) {
 	if err != nil {
 		return
 	}
-	
+
 	s.transponderMu.Lock()
 	defer s.transponderMu.Unlock()
-	
+
+	s.cacheMu.Lock()
+	defer s.cacheMu.Unlock()
+
 	// Clear and rebuild cache
 	s.transponderCache = make(map[string]string)
-	
+	s.modelToParticipant = make(map[string]string)
+
 	for _, p := range participants {
 		cm, err := s.competitorModelRepo.GetByID(p.CompetitorModelID)
 		if err != nil || cm == nil {
 			continue
 		}
-		
+
 		// Cache transponder -> competitor_model_id mapping
 		s.transponderCache[cm.TransponderNumber] = cm.ID
-		
+
+		// Cache competitor_model_id -> participant_id for O(1) lookup
+		s.modelToParticipant[cm.ID] = p.ID
+
 		// Initialize lap data for this participant
 		s.resultsMu.Lock()
 		s.participantResults[p.ID] = &ParticipantLapData{
@@ -168,35 +180,29 @@ func (s *LapService) ProcessScan(scan LapScan) {
 	s.activeCompetitionMu.RLock()
 	activeComp := s.activeCompetition
 	s.activeCompetitionMu.RUnlock()
-	
+
 	if activeComp == nil || activeComp.Status != "in_progress" {
 		return // No active race
 	}
-	
+
 	// Look up competitor model from cache
 	s.transponderMu.RLock()
 	competitorModelID, exists := s.transponderCache[scan.TagValue]
 	s.transponderMu.RUnlock()
-	
+
 	if !exists {
 		return // Unknown transponder
 	}
-	
-	// Find participant for this competitor model
-	var participantID string
-	s.resultsMu.RLock()
-	for pid, data := range s.participantResults {
-		if data.CompetitorModelID == competitorModelID {
-			participantID = pid
-			break
-		}
-	}
-	s.resultsMu.RUnlock()
-	
-	if participantID == "" {
+
+	// Find participant for this competitor model using O(1) lookup
+	s.cacheMu.RLock()
+	participantID, exists := s.modelToParticipant[competitorModelID]
+	s.cacheMu.RUnlock()
+
+	if !exists {
 		return // Participant not found
 	}
-	
+
 	// Calculate lap
 	s.recordLap(participantID, scan.Timestamp)
 }
@@ -205,12 +211,12 @@ func (s *LapService) ProcessScan(scan LapScan) {
 func (s *LapService) recordLap(participantID string, timestamp time.Time) {
 	s.resultsMu.Lock()
 	defer s.resultsMu.Unlock()
-	
+
 	data, exists := s.participantResults[participantID]
 	if !exists {
 		return
 	}
-	
+
 	// Calculate lap time
 	lapTimeMs := 0
 	if data.LastPassTime.IsZero() {
@@ -227,7 +233,7 @@ func (s *LapService) recordLap(participantID string, timestamp time.Time) {
 		data.TotalTimeMs = int(timestamp.Sub(data.StartTime).Milliseconds())
 		data.LastLapTimeMs = lapTimeMs
 		data.LapTimes = append(data.LapTimes, lapTimeMs)
-		
+
 		// Update best lap
 		if data.BestLapTimeMs == 0 || lapTimeMs < data.BestLapTimeMs {
 			data.BestLapTimeMs = lapTimeMs
@@ -240,7 +246,7 @@ func (s *LapService) recordLap(participantID string, timestamp time.Time) {
 func (s *LapService) GetParticipantResults() map[string]*ParticipantLapData {
 	s.resultsMu.RLock()
 	defer s.resultsMu.RUnlock()
-	
+
 	results := make(map[string]*ParticipantLapData)
 	for k, v := range s.participantResults {
 		results[k] = v
@@ -252,25 +258,25 @@ func (s *LapService) GetParticipantResults() map[string]*ParticipantLapData {
 func (s *LapService) PersistResults() error {
 	s.resultsMu.RLock()
 	defer s.resultsMu.RUnlock()
-	
+
 	// In a full implementation, this would upsert competition_laps records
 	// for each participant with their current lap data
 	// The loop is intentionally empty as this is a placeholder for future DB integration
 	for range s.participantResults {
 		// Placeholder for future persistence logic
 	}
-	
+
 	return nil
 }
 
 // processingWorker is the background goroutine that processes scans in batches
 func (s *LapService) processingWorker() {
 	defer s.wg.Done()
-	
+
 	batch := make([]*models.RawScan, 0, s.batchSize)
 	ticker := time.NewTicker(s.batchTimeout)
 	defer ticker.Stop()
-	
+
 	for {
 		select {
 		case <-s.stopWorker:
@@ -279,7 +285,7 @@ func (s *LapService) processingWorker() {
 				s.flushBatch(batch)
 			}
 			return
-			
+
 		case scan := <-s.scanChannel:
 			// Create RawScan record
 			rawScan := &models.RawScan{
@@ -291,18 +297,18 @@ func (s *LapService) processingWorker() {
 				SignalStrength: scan.SignalStrength,
 				IsProcessed:    false,
 			}
-			
+
 			batch = append(batch, rawScan)
-			
+
 			// Process lap immediately (don't wait for batch)
 			s.ProcessScan(scan)
-			
+
 			// Flush batch if full
 			if len(batch) >= s.batchSize {
 				s.flushBatch(batch)
 				batch = make([]*models.RawScan, 0, s.batchSize)
 			}
-			
+
 		case <-ticker.C:
 			// Timeout - flush current batch
 			if len(batch) > 0 {
@@ -318,7 +324,7 @@ func (s *LapService) flushBatch(batch []*models.RawScan) {
 	if len(batch) == 0 {
 		return
 	}
-	
+
 	err := s.rawScanRepo.CreateBulk(batch)
 	if err != nil {
 		// Log error but don't block processing
@@ -333,10 +339,10 @@ func (s *LapService) RefreshTransponderCache() {
 	if err != nil {
 		return
 	}
-	
+
 	s.transponderMu.Lock()
 	defer s.transponderMu.Unlock()
-	
+
 	s.transponderCache = make(map[string]string)
 	for _, cm := range allModels {
 		s.transponderCache[cm.TransponderNumber] = cm.ID
@@ -347,7 +353,7 @@ func (s *LapService) RefreshTransponderCache() {
 func (s *LapService) GetTransponderForModel(transponderNumber string) (string, bool) {
 	s.transponderMu.RLock()
 	defer s.transponderMu.RUnlock()
-	
+
 	id, exists := s.transponderCache[transponderNumber]
 	return id, exists
 }
