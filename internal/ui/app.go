@@ -1,10 +1,12 @@
 package ui
 
 import (
+	"database/sql"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"trackpulse/internal/locale"
+	"trackpulse/internal/repository"
 	"trackpulse/internal/service"
 )
 
@@ -18,6 +20,8 @@ type App struct {
 	competitorModelService *service.CompetitorModelService
 	competitionService     *service.CompetitionService
 	participantService     *service.CompetitionParticipantService
+	lapService             *service.LapService
+	rawScanRepo            *repository.RawScanRepository
 	config                 *Config
 	tabs                   *container.AppTabs
 	monitoringPanel        *MonitoringPanel
@@ -28,6 +32,7 @@ type App struct {
 	participantPanel       *ParticipantPanel
 	settingsPanel          *SettingsPanel
 	logsPanel              *LogsPanel
+	portScanner            *PortScanner
 }
 
 // GlobalApp holds a reference to the main app for locale change notifications
@@ -40,9 +45,19 @@ type Config struct {
 }
 
 // NewApp creates a new TrackPulse application
-func NewApp(competitorService *service.CompetitorService, modelService *service.RCModelService, settingsService *service.SettingsService, competitorModelService *service.CompetitorModelService, competitionService *service.CompetitionService, participantService *service.CompetitionParticipantService, language string) *App {
+func NewApp(competitorService *service.CompetitorService, modelService *service.RCModelService, settingsService *service.SettingsService, competitorModelService *service.CompetitorModelService, competitionService *service.CompetitionService, participantService *service.CompetitionParticipantService, language string, db *sql.DB) *App {
 	fyneApp := app.New()
 	mainWindow := fyneApp.NewWindow("TrackPulse")
+
+	// Initialize repositories for lap service
+	rawScanRepo := repository.NewRawScanRepository(db)
+	competitorModelRepo := repository.NewCompetitorModelRepository(db)
+	competitionRepo := repository.NewCompetitionRepository(db)
+	participantRepo := repository.NewCompetitionParticipantRepository(db)
+
+	// Initialize lap service with buffered processing
+	lapService := service.NewLapService(rawScanRepo, competitorModelRepo, competitionRepo, participantRepo)
+	lapService.Start()
 
 	appInstance := &App{
 		fyneApp:                fyneApp,
@@ -53,6 +68,8 @@ func NewApp(competitorService *service.CompetitorService, modelService *service.
 		competitorModelService: competitorModelService,
 		competitionService:     competitionService,
 		participantService:     participantService,
+		lapService:             lapService,
+		rawScanRepo:            rawScanRepo,
 		config: &Config{
 			Language: language,
 			Title:    "TrackPulse",
@@ -153,7 +170,18 @@ func (a *App) createParticipantsTab() fyne.CanvasObject {
 // createLogsTab creates the Logs viewing tab
 func (a *App) createLogsTab() fyne.CanvasObject {
 	a.logsPanel = NewLogsPanel(a.mainWindow)
-	return a.logsPanel.content
+	
+	// Initialize port scanner with lap service
+	a.portScanner = NewPortScanner(a.logsPanel, a.lapService)
+	
+	// Create container with logs and port scanner
+	return container.NewBorder(
+		a.portScanner.BuildUI(),
+		nil,
+		nil,
+		nil,
+		a.logsPanel.content,
+	)
 }
 
 // createSettingsTab creates the Settings tab

@@ -4,14 +4,17 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"github.com/google/uuid"
 	"github.com/jacobsa/go-serial/serial"
 	"go.bug.st/serial/enumerator"
 	"trackpulse/internal/locale"
+	"trackpulse/internal/service"
 )
 
 // PortScanner handles serial port scanning and connection UI
@@ -26,6 +29,9 @@ type PortScanner struct {
 	settingsForm *widget.Form
 	logsPanel    *LogsPanel
 	stopReading  chan bool
+	lapService   *service.LapService
+	readerType   string
+	comPort      string
 }
 
 // scanPorts scans for available serial ports
@@ -93,11 +99,12 @@ func extractPortName(selected string) string {
 }
 
 // NewPortScanner creates a new PortScanner instance
-func NewPortScanner(logsPanel *LogsPanel) *PortScanner {
+func NewPortScanner(logsPanel *LogsPanel, lapService *service.LapService) *PortScanner {
 	return &PortScanner{
 		isConnected: false,
 		logsPanel:   logsPanel,
 		stopReading: make(chan bool),
+		lapService:  lapService,
 	}
 }
 
@@ -153,6 +160,7 @@ func (p *PortScanner) connect() {
 
 	p.port = port
 	p.isConnected = true
+	p.comPort = portName
 	p.connectBtn.SetText(locale.T("settings.disconnect"))
 	p.statusText.Segments = []widget.RichTextSegment{
 		&widget.TextSegment{
@@ -335,10 +343,35 @@ func (p *PortScanner) readFromPort() {
 			}
 			if n > 0 {
 				data := strings.TrimSpace(string(buf[:n]))
-				if data != "" && p.logsPanel != nil {
-					p.logsPanel.AddLog(fmt.Sprintf("RFID tag detected: %s", data))
+				if data != "" {
+					// Log to UI
+					if p.logsPanel != nil {
+						p.logsPanel.AddLog(fmt.Sprintf("RFID tag detected: %s", data))
+					}
+
+					// Queue scan for processing by LapService
+					if p.lapService != nil {
+						scan := service.LapScan{
+							ID:         uuid.New().String(),
+							TagValue:   data,
+							Timestamp:  time.Now(),
+							ReaderType: p.readerType,
+							COMPort:    p.comPort,
+						}
+						p.lapService.QueueScan(scan)
+					}
 				}
 			}
 		}
 	}
+}
+
+// SetReaderType sets the RFID reader type for scan records
+func (p *PortScanner) SetReaderType(readerType string) {
+	p.readerType = readerType
+}
+
+// SetLapService sets the lap service for processing scans
+func (p *PortScanner) SetLapService(lapService *service.LapService) {
+	p.lapService = lapService
 }

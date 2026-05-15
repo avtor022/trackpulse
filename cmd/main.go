@@ -92,7 +92,7 @@ func main() {
 
 	log.Info("TrackPulse initialization complete!")
 
-	// Start UI
-	uiApp := ui.NewApp(competitorService, modelService, settingsService, competitorModelService, competitionService, participantService, savedLocale)
+	// Start UI with lap service integration
+	uiApp := ui.NewApp(competitorService, modelService, settingsService, competitorModelService, competitionService, participantService, savedLocale, db.DB)
 	uiApp.Run()
 }
