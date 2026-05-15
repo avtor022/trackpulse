@@ -8,102 +8,67 @@ import (
 	"trackpulse/internal/models"
 )
 
-// CompetitionRepository handles data access for competitions
-type CompetitionRepository struct {
-	db *sql.DB
-}
-
-// NewCompetitionRepository creates a new competition repository
-func NewCompetitionRepository(db *sql.DB) *CompetitionRepository {
-	return &CompetitionRepository{db: db}
-}
-
-// GetAll returns all competitions
-func (r *CompetitionRepository) GetAll() ([]models.Competition, error) {
-	rows, err := r.db.Query(`
-		SELECT id, competition_title, competition_type, model_type, model_scale, track_name, 
-		       lap_count_target, time_limit_minutes, time_start, time_finish, status, 
-		       competition_year, season, created_at, updated_at
-		FROM competitions
-		ORDER BY time_start DESC
-	`)
+// scanCompetitionRow is a helper function to scan a competition row from sql.Rows
+func scanCompetitionRow(rows *sql.Rows) (*models.Competition, error) {
+	var c models.Competition
+	var lapCountTarget, timeLimitMinutes, competitionYear sql.NullInt64
+	var timeStartStr, timeFinishStr sql.NullString
+	var createdAtStr, updatedAtStr string
+	err := rows.Scan(
+		&c.ID,
+		&c.CompetitionTitle,
+		&c.CompetitionType,
+		&c.ModelType,
+		&c.ModelScale,
+		&c.TrackName,
+		&lapCountTarget,
+		&timeLimitMinutes,
+		&timeStartStr,
+		&timeFinishStr,
+		&c.Status,
+		&competitionYear,
+		&c.Season,
+		&createdAtStr,
+		&updatedAtStr,
+	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to query competitions: %w", err)
-	}
-	defer rows.Close()
-
-	var competitions []models.Competition
-	for rows.Next() {
-		var c models.Competition
-		var lapCountTarget, timeLimitMinutes, competitionYear sql.NullInt64
-		var timeStartStr, timeFinishStr sql.NullString
-		var createdAtStr, updatedAtStr string
-		err := rows.Scan(
-			&c.ID,
-			&c.CompetitionTitle,
-			&c.CompetitionType,
-			&c.ModelType,
-			&c.ModelScale,
-			&c.TrackName,
-			&lapCountTarget,
-			&timeLimitMinutes,
-			&timeStartStr,
-			&timeFinishStr,
-			&c.Status,
-			&competitionYear,
-			&c.Season,
-			&createdAtStr,
-			&updatedAtStr,
-		)
-		if err != nil {
-			return nil, fmt.Errorf("failed to scan competition: %w", err)
-		}
-
-		if lapCountTarget.Valid {
-			lct := int(lapCountTarget.Int64)
-			c.LapCountTarget = &lct
-		}
-		if timeLimitMinutes.Valid {
-			tlm := int(timeLimitMinutes.Int64)
-			c.TimeLimitMinutes = &tlm
-		}
-		if timeStartStr.Valid {
-			if t, err := time.Parse(time.RFC3339, timeStartStr.String); err == nil {
-				c.TimeStart = &t
-			}
-		}
-		if timeFinishStr.Valid {
-			if t, err := time.Parse(time.RFC3339, timeFinishStr.String); err == nil {
-				c.TimeFinish = &t
-			}
-		}
-		if competitionYear.Valid {
-			cy := int(competitionYear.Int64)
-			c.CompetitionYear = &cy
-		}
-		if t, err := time.Parse(time.RFC3339, createdAtStr); err == nil {
-			c.CreatedAt = t
-		}
-		if t, err := time.Parse(time.RFC3339, updatedAtStr); err == nil {
-			c.UpdatedAt = t
-		}
-
-		competitions = append(competitions, c)
+		return nil, fmt.Errorf("failed to scan competition: %w", err)
 	}
 
-	return competitions, rows.Err()
+	if lapCountTarget.Valid {
+		lct := int(lapCountTarget.Int64)
+		c.LapCountTarget = &lct
+	}
+	if timeLimitMinutes.Valid {
+		tlm := int(timeLimitMinutes.Int64)
+		c.TimeLimitMinutes = &tlm
+	}
+	if timeStartStr.Valid {
+		if t, err := time.Parse(time.RFC3339, timeStartStr.String); err == nil {
+			c.TimeStart = &t
+		}
+	}
+	if timeFinishStr.Valid {
+		if t, err := time.Parse(time.RFC3339, timeFinishStr.String); err == nil {
+			c.TimeFinish = &t
+		}
+	}
+	if competitionYear.Valid {
+		cy := int(competitionYear.Int64)
+		c.CompetitionYear = &cy
+	}
+	if t, err := time.Parse(time.RFC3339, createdAtStr); err == nil {
+		c.CreatedAt = t
+	}
+	if t, err := time.Parse(time.RFC3339, updatedAtStr); err == nil {
+		c.UpdatedAt = t
+	}
+
+	return &c, nil
 }
 
-// GetByID returns a competition by ID
-func (r *CompetitionRepository) GetByID(id string) (*models.Competition, error) {
-	row := r.db.QueryRow(`
-		SELECT id, competition_title, competition_type, model_type, model_scale, track_name, 
-		       lap_count_target, time_limit_minutes, time_start, time_finish, status, 
-		       competition_year, season, created_at, updated_at
-		FROM competitions
-		WHERE id = ?
-	`, id)
-
+// scanCompetitionRowFromRow is a helper function to scan a competition row from sql.Row
+func scanCompetitionRowFromRow(row *sql.Row) (*models.Competition, error) {
 	var c models.Competition
 	var lapCountTarget, timeLimitMinutes, competitionYear sql.NullInt64
 	var timeStartStr, timeFinishStr sql.NullString
@@ -162,6 +127,55 @@ func (r *CompetitionRepository) GetByID(id string) (*models.Competition, error) 
 	}
 
 	return &c, nil
+}
+
+// CompetitionRepository handles data access for competitions
+type CompetitionRepository struct {
+	db *sql.DB
+}
+
+// NewCompetitionRepository creates a new competition repository
+func NewCompetitionRepository(db *sql.DB) *CompetitionRepository {
+	return &CompetitionRepository{db: db}
+}
+
+// GetAll returns all competitions
+func (r *CompetitionRepository) GetAll() ([]models.Competition, error) {
+	rows, err := r.db.Query(`
+		SELECT id, competition_title, competition_type, model_type, model_scale, track_name, 
+		       lap_count_target, time_limit_minutes, time_start, time_finish, status, 
+		       competition_year, season, created_at, updated_at
+		FROM competitions
+		ORDER BY time_start DESC
+	`)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query competitions: %w", err)
+	}
+	defer rows.Close()
+
+	var competitions []models.Competition
+	for rows.Next() {
+		c, err := scanCompetitionRow(rows)
+		if err != nil {
+			return nil, err
+		}
+		competitions = append(competitions, *c)
+	}
+
+	return competitions, rows.Err()
+}
+
+// GetByID returns a competition by ID
+func (r *CompetitionRepository) GetByID(id string) (*models.Competition, error) {
+	row := r.db.QueryRow(`
+		SELECT id, competition_title, competition_type, model_type, model_scale, track_name, 
+		       lap_count_target, time_limit_minutes, time_start, time_finish, status, 
+		       competition_year, season, created_at, updated_at
+		FROM competitions
+		WHERE id = ?
+	`, id)
+
+	return scanCompetitionRowFromRow(row)
 }
 
 // Create inserts a new competition
@@ -339,61 +353,11 @@ func (r *CompetitionRepository) GetByStatus(status string) ([]models.Competition
 
 	var competitions []models.Competition
 	for rows.Next() {
-		var c models.Competition
-		var lapCountTarget, timeLimitMinutes, competitionYear sql.NullInt64
-		var timeStartStr, timeFinishStr sql.NullString
-		var createdAtStr, updatedAtStr string
-		err := rows.Scan(
-			&c.ID,
-			&c.CompetitionTitle,
-			&c.CompetitionType,
-			&c.ModelType,
-			&c.ModelScale,
-			&c.TrackName,
-			&lapCountTarget,
-			&timeLimitMinutes,
-			&timeStartStr,
-			&timeFinishStr,
-			&c.Status,
-			&competitionYear,
-			&c.Season,
-			&createdAtStr,
-			&updatedAtStr,
-		)
+		c, err := scanCompetitionRow(rows)
 		if err != nil {
-			return nil, fmt.Errorf("failed to scan competition: %w", err)
+			return nil, err
 		}
-
-		if lapCountTarget.Valid {
-			lct := int(lapCountTarget.Int64)
-			c.LapCountTarget = &lct
-		}
-		if timeLimitMinutes.Valid {
-			tlm := int(timeLimitMinutes.Int64)
-			c.TimeLimitMinutes = &tlm
-		}
-		if timeStartStr.Valid {
-			if t, err := time.Parse(time.RFC3339, timeStartStr.String); err == nil {
-				c.TimeStart = &t
-			}
-		}
-		if timeFinishStr.Valid {
-			if t, err := time.Parse(time.RFC3339, timeFinishStr.String); err == nil {
-				c.TimeFinish = &t
-			}
-		}
-		if competitionYear.Valid {
-			cy := int(competitionYear.Int64)
-			c.CompetitionYear = &cy
-		}
-		if t, err := time.Parse(time.RFC3339, createdAtStr); err == nil {
-			c.CreatedAt = t
-		}
-		if t, err := time.Parse(time.RFC3339, updatedAtStr); err == nil {
-			c.UpdatedAt = t
-		}
-
-		competitions = append(competitions, c)
+		competitions = append(competitions, *c)
 	}
 
 	return competitions, rows.Err()

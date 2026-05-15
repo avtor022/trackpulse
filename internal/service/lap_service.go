@@ -261,9 +261,15 @@ func (s *LapService) PersistResults() error {
 
 	// In a full implementation, this would upsert competition_laps records
 	// for each participant with their current lap data
-	// The loop is intentionally empty as this is a placeholder for future DB integration
-	for range s.participantResults {
+	for participantID, data := range s.participantResults {
 		// Placeholder for future persistence logic
+		// Example: err := s.lapRepo.UpsertCompetitionLap(data)
+		// if err != nil {
+		//     log.Printf("Failed to persist results for participant %s: %v", participantID, err)
+		//     return err
+		// }
+		_ = participantID // avoid unused variable warning
+		_ = data
 	}
 
 	return nil
