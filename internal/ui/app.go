@@ -54,9 +54,10 @@ func NewApp(competitorService *service.CompetitorService, modelService *service.
 	competitorModelRepo := repository.NewCompetitorModelRepository(db)
 	competitionRepo := repository.NewCompetitionRepository(db)
 	participantRepo := repository.NewCompetitionParticipantRepository(db)
+	competitionLapsRepo := repository.NewCompetitionLapsRepository(db)
 
 	// Initialize lap service with buffered processing
-	lapService := service.NewLapService(rawScanRepo, competitorModelRepo, competitionRepo, participantRepo)
+	lapService := service.NewLapService(rawScanRepo, competitorModelRepo, competitionRepo, participantRepo, competitionLapsRepo)
 	lapService.Start()
 
 	appInstance := &App{
