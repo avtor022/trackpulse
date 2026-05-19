@@ -25,6 +25,7 @@ type LapService struct {
 	competitorModelRepo *repository.CompetitorModelRepository
 	competitionRepo     *repository.CompetitionRepository
 	participantRepo     *repository.CompetitionParticipantRepository
+	competitionLapsRepo *repository.CompetitionLapsRepository
 
 	// Buffered channel for async processing
 	scanChannel chan LapScan
@@ -75,12 +76,14 @@ func NewLapService(
 	competitorModelRepo *repository.CompetitorModelRepository,
 	competitionRepo *repository.CompetitionRepository,
 	participantRepo *repository.CompetitionParticipantRepository,
+	competitionLapsRepo *repository.CompetitionLapsRepository,
 ) *LapService {
 	return &LapService{
 		rawScanRepo:         rawScanRepo,
 		competitorModelRepo: competitorModelRepo,
 		competitionRepo:     competitionRepo,
 		participantRepo:     participantRepo,
+		competitionLapsRepo: competitionLapsRepo,
 		scanChannel:         make(chan LapScan, 200), // Buffer for 200 scans
 		transponderCache:    make(map[string]string),
 		modelToParticipant:  make(map[string]string),
@@ -259,17 +262,24 @@ func (s *LapService) PersistResults() error {
 	s.resultsMu.RLock()
 	defer s.resultsMu.RUnlock()
 
-	// In a full implementation, this would upsert competition_laps records
-	// for each participant with their current lap data
 	for participantID, data := range s.participantResults {
-		// Placeholder for future persistence logic
-		// Example: err := s.lapRepo.UpsertCompetitionLap(data)
-		// if err != nil {
-		//     log.Printf("Failed to persist results for participant %s: %v", participantID, err)
-		//     return err
-		// }
-		_ = participantID // avoid unused variable warning
-		_ = data
+		laps := &models.CompetitionLaps{
+			ID:                       uuid.New().String(),
+			CompetitionParticipantID: participantID,
+			TimeStart:                data.StartTime,
+			NumberOfLaps:             data.LapCount,
+			BestLapTimeMs:            data.BestLapTimeMs,
+			BestLapNumber:            data.BestLapNumber,
+			LastLapTimeMs:            data.LastLapTimeMs,
+			LastPassTime:             &data.LastPassTime,
+			TotalCompetitionTimeMs:   data.TotalTimeMs,
+			CreatedAt:                time.Now(),
+			UpdatedAt:                time.Now(),
+		}
+
+		if err := s.competitionLapsRepo.Upsert(laps); err != nil {
+			return fmt.Errorf("failed to persist results for participant %s: %w", participantID, err)
+		}
 	}
 
 	return nil
