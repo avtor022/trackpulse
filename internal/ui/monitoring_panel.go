@@ -34,7 +34,6 @@ type MonitoringPanel struct {
 	timer                 *Timer
 	competitionFilter     *CompetitionFilter
 	resultsTable          *widget.Table
-	lapHistoryList        *widget.List
 	currentLapData        map[string]*service.ParticipantLapData
 	participants          []models.CompetitionParticipant
 	competitorModels      map[string]models.CompetitorModel
@@ -122,39 +121,8 @@ func (p *MonitoringPanel) createContent() *fyne.Container {
 		},
 	)
 
-	// Create lap history list
-	p.lapHistoryList = widget.NewList(
-		func() int {
-			if p.currentLapData != nil {
-				count := 0
-				for _, data := range p.currentLapData {
-					count += len(data.LapTimes)
-				}
-				return count
-			}
-			return 0
-		},
-		func() fyne.CanvasObject {
-			return widget.NewLabel("Lap history")
-		},
-		func(id widget.ListItemID, obj fyne.CanvasObject) {
-			if label, ok := obj.(*widget.Label); ok {
-				p.updateLapHistoryItem(label, id)
-			}
-		},
-	)
-
-	// Main content area with results table and lap history
-	monitoringContent := container.NewHSplit(
-		container.NewScroll(p.resultsTable),
-		container.NewBorder(
-			widget.NewLabel(locale.T("monitoring.lap_history")),
-			nil,
-			nil,
-			nil,
-			container.NewScroll(p.lapHistoryList),
-		),
-	)
+	// Main content area with results table only
+	monitoringContent := container.NewScroll(p.resultsTable)
 
 	// Layout
 	content := container.NewBorder(
@@ -359,9 +327,6 @@ func (p *MonitoringPanel) loadCompetitionData(competitionID string) {
 		if p.resultsTable != nil {
 			p.resultsTable.Refresh()
 		}
-		if p.lapHistoryList != nil {
-			p.lapHistoryList.Refresh()
-		}
 	})
 }
 
@@ -445,50 +410,6 @@ func (p *MonitoringPanel) updateTableCell(label *widget.Label, id widget.TableCe
 				label.SetText("-")
 			}
 		}
-	}
-}
-
-// updateLapHistoryItem updates a lap history list item
-func (p *MonitoringPanel) updateLapHistoryItem(label *widget.Label, id widget.ListItemID) {
-	// Collect all laps from all participants
-	type LapEntry struct {
-		CompetitorName string
-		LapNumber      int
-		LapTime        int
-		Time           time.Time
-	}
-	
-	var allLaps []LapEntry
-	
-	for participantID, data := range p.currentLapData {
-		// Find participant
-		var participantName string
-		for _, part := range p.participants {
-			if part.ID == participantID {
-				if cm, ok := p.competitorModels[part.CompetitorModelID]; ok {
-					if c, ok2 := p.competitors[cm.CompetitorID]; ok2 {
-						participantName = c.FullName
-					}
-				}
-				break
-			}
-		}
-		
-		// Add all laps for this participant
-		for i, lapTime := range data.LapTimes {
-			allLaps = append(allLaps, LapEntry{
-				CompetitorName: participantName,
-				LapNumber:      i + 1,
-				LapTime:        lapTime,
-			})
-		}
-	}
-	
-	if id < len(allLaps) {
-		lap := allLaps[id]
-		label.SetText(fmt.Sprintf("%s - Lap %d: %s", lap.CompetitorName, lap.LapNumber, formatLapTime(lap.LapTime)))
-	} else {
-		label.SetText("")
 	}
 }
 
