@@ -146,18 +146,19 @@ type LapHistory struct {
 ### RawScan (Сырые RFID сканирования)
 ```go
 type RawScan struct {
-    ID             string     // UUID
-    TagValue       string     // Значение RFID метки
-    Timestamp      time.Time  // Время сканирования
-    ReaderType     string     // Тип считывателя
-    COMPort        string     // COM-порт
-    SignalStrength *int       // Уровень сигнала (опционально)
-    Processed      bool       // Обработано ли
-    CreatedAt      time.Time
+    ID                      string     // UUID
+    TagValue                string     // Значение RFID метки
+    Timestamp               time.Time  // Время сканирования
+    ReaderType              string     // Тип считывателя
+    COMPort                 string     // COM-порт
+    SignalStrength          *int       // Уровень сигнала (опционально)
+    IsProcessed             bool       // Обработано ли
+    LinkedCompetitorModelID *string    // Связь с CompetitorModel (опционально)
+    CreatedAt               time.Time
 }
 ```
 
-**Индексы**: по времени, по обработанному статусу
+**Индексы**: по времени, по обработанному статусу, по linked_competitor_model_id
 
 ---
 
@@ -243,18 +244,37 @@ type CompetitionSeason struct {
 
 ---
 
-### Settings
+### Settings (Системные настройки)
 ```go
-type Settings struct {
-    ID        string    // UUID
-    Key       string    // Ключ настройки (уникальный)
-    Value     string    // Значение
-    CreatedAt time.Time
-    UpdatedAt time.Time
+type SystemSetting struct {
+    Key         string    // Ключ настройки (уникальный)
+    Value       string    // Значение
+    ValueType   string    // Тип значения (string, int, bool)
+    Description string    // Описание настройки
+    UpdatedAt   time.Time
 }
 ```
 
 Используется для хранения настроек приложения (локаль, последний COM-порт и т.д.)
+
+---
+
+### AuditLog (Аудит действий)
+```go
+type AuditLog struct {
+    ID         string    // UUID
+    Timestamp  time.Time // Время события
+    ActionType string    // Тип действия (CREATE, UPDATE, DELETE)
+    EntityType string    // Тип сущности
+    EntityID   string    // ID сущности
+    UserName   string    // Имя пользователя
+    IPAddress  string    // IP адрес
+    Details    string    // Детали в JSON
+    CreatedAt  time.Time
+}
+```
+
+**Индексы**: по timestamp, по entity_type, по action_type
 
 ---
 
@@ -273,7 +293,9 @@ Competitor (1) ──< CompetitorModel >── (1) RCModel
                           ▼
                       LapHistory
 
-RawScan (независимая таблица сырых данных)
+RawScan (независимая таблица сырых данных, может быть связана с CompetitorModel)
+SystemSetting (независимая таблица настроек)
+AuditLog (независимая таблица аудита)
 ```
 
 ---
