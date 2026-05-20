@@ -309,5 +309,6 @@
     "participants.select.competition.button": "Выбрать...",
     "participants.select.competition.popup_title": "Выберите соревнование",
     "participants.clear_selection": "Сбросить выбор",
-    "participants.transponders_list": "Транспондеры спортсменов"
+    "participants.transponders_list": "Транспондеры спортсменов",
+    "participants.registered_list": "Зарегистрированные участники"
 }

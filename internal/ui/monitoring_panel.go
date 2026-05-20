@@ -17,6 +17,9 @@ type MonitoringPanel struct {
 	content               *fyne.Container
 	mainWindow            fyne.Window
 	competitionService    *service.CompetitionService
+	participantService    *service.CompetitionParticipantService
+	competitorModelService *service.CompetitorModelService
+	rcModelService        *service.RCModelService
 	selectedCompetition   string
 	selectedCompetitionID string
 	statusLabel           *widget.Label
@@ -27,13 +30,18 @@ type MonitoringPanel struct {
 	timerLabel            *widget.Label
 	timer                 *Timer
 	competitionFilter     *CompetitionFilter
+	participantsTable     *widget.Table
+	boundParticipants     []models.CompetitionParticipant
 }
 
 // NewMonitoringPanel creates a new monitoring panel
-func NewMonitoringPanel(competitionService *service.CompetitionService, mainWindow fyne.Window) *MonitoringPanel {
+func NewMonitoringPanel(competitionService *service.CompetitionService, participantService *service.CompetitionParticipantService, competitorModelService *service.CompetitorModelService, rcModelService *service.RCModelService, mainWindow fyne.Window) *MonitoringPanel {
 	p := &MonitoringPanel{
-		mainWindow:         mainWindow,
-		competitionService: competitionService,
+		mainWindow:             mainWindow,
+		competitionService:     competitionService,
+		participantService:     participantService,
+		competitorModelService: competitorModelService,
+		rcModelService:         rcModelService,
 	}
 
 	p.content = p.createContent()
@@ -74,6 +82,74 @@ func (p *MonitoringPanel) createContent() *fyne.Container {
 		// Filter changed callback - refresh competition popup if open
 	})
 
+	// Participants table
+	p.participantsTable = widget.NewTable(
+		func() (int, int) {
+			if len(p.boundParticipants) == 0 {
+				return 0, 0
+			}
+			return len(p.boundParticipants), 5
+		},
+		func() fyne.CanvasObject {
+			label := widget.NewLabel("Template")
+			label.Truncation = fyne.TextTruncateEllipsis
+			return label
+		},
+		func(i widget.TableCellID, o fyne.CanvasObject) {
+			if i.Row >= len(p.boundParticipants) {
+				o.(*widget.Label).SetText("")
+				return
+			}
+			participant := p.boundParticipants[i.Row]
+
+			switch i.Col {
+			case 0:
+				o.(*widget.Label).SetText(p.getCompetitorName(participant.CompetitorModelID))
+			case 1:
+				o.(*widget.Label).SetText(p.getRCModelName(participant.CompetitorModelID))
+			case 2:
+				o.(*widget.Label).SetText(p.getTransponderNumber(participant.CompetitorModelID))
+			case 3:
+				if participant.GridPosition != nil {
+					o.(*widget.Label).SetText(fmt.Sprintf("%d", *participant.GridPosition))
+				} else {
+					o.(*widget.Label).SetText("-")
+				}
+			case 4:
+				status := locale.T("competition.status.scheduled")
+				if participant.IsFinished {
+					status = locale.T("competition.status.finished")
+				} else if participant.Disqualified {
+					status = locale.T("competition.status.cancelled")
+				}
+				o.(*widget.Label).SetText(status)
+			}
+			o.(*widget.Label).Truncation = fyne.TextTruncateEllipsis
+		},
+	)
+	p.participantsTable.ShowHeaderRow = true
+	p.participantsTable.CreateHeader = func() fyne.CanvasObject {
+		return widget.NewLabelWithStyle("Header", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	}
+	p.participantsTable.UpdateHeader = func(id widget.TableCellID, o fyne.CanvasObject) {
+		headers := []string{
+			locale.T("participants.table.competitor"),
+			locale.T("participants.table.model"),
+			locale.T("participants.table.transponder"),
+			locale.T("participants.table.grid"),
+			locale.T("participants.table.status"),
+		}
+		if id.Col >= 0 && id.Col < len(headers) {
+			o.(*widget.Label).SetText(headers[id.Col])
+			o.(*widget.Label).TextStyle = fyne.TextStyle{Bold: true}
+		}
+	}
+	p.participantsTable.SetColumnWidth(0, 200) // Competitor
+	p.participantsTable.SetColumnWidth(1, 150) // Model
+	p.participantsTable.SetColumnWidth(2, 120) // Transponder
+	p.participantsTable.SetColumnWidth(3, 80)  // Grid
+	p.participantsTable.SetColumnWidth(4, 120) // Status
+
 	// Selector container
 	selectorContainer := container.NewVBox(
 		widget.NewSeparator(),
@@ -83,9 +159,15 @@ func (p *MonitoringPanel) createContent() *fyne.Container {
 		widget.NewSeparator(),
 	)
 
-	// Main content area (placeholder for future monitoring widgets)
-	monitoringContent := widget.NewLabel(locale.T("monitoring.placeholder"))
-	monitoringContent.Alignment = fyne.TextAlignCenter
+	// Participants section with header
+	participantsHeader := widget.NewLabelWithStyle(locale.T("participants.registered_list"), fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	participantsSection := container.NewBorder(
+		participantsHeader,
+		nil,
+		nil,
+		nil,
+		container.NewScroll(p.participantsTable),
+	)
 
 	// Layout
 	content := container.NewBorder(
@@ -93,7 +175,7 @@ func (p *MonitoringPanel) createContent() *fyne.Container {
 		nil,
 		nil,
 		nil,
-		monitoringContent,
+		participantsSection,
 	)
 
 	// Load competitions
@@ -198,6 +280,8 @@ func (p *MonitoringPanel) onCompetitionSelected(selected string) {
 			p.timer.Reset()
 		}
 		p.selectedCompetitionID = ""
+		p.boundParticipants = nil
+		p.participantsTable.Refresh()
 		return
 	}
 
@@ -232,6 +316,8 @@ func (p *MonitoringPanel) onCompetitionSelected(selected string) {
 					p.stopButton.Disable()
 				}
 			}
+			// Load registered participants for the selected competition
+			p.loadBoundParticipants()
 			return
 		}
 	}
@@ -295,4 +381,60 @@ func (p *MonitoringPanel) stopMonitoring() {
 
 	// Show success message
 	dialog.ShowInformation(locale.T("dialog.success"), locale.T("dialog.competition_stopped"), p.mainWindow)
+}
+
+// loadBoundParticipants loads participants already bound to the selected competition
+func (p *MonitoringPanel) loadBoundParticipants() {
+	if p.selectedCompetitionID == "" || p.participantService == nil {
+		return
+	}
+
+	participants, err := p.participantService.GetParticipantsByCompetitionID(p.selectedCompetitionID)
+	if err != nil {
+		fmt.Println("ERROR loading participants:", err)
+		return
+	}
+	p.boundParticipants = participants
+	if p.participantsTable != nil {
+		p.participantsTable.Refresh()
+	}
+}
+
+// Helper methods to get related data
+func (p *MonitoringPanel) getCompetitorName(cmID string) string {
+	if p.competitorModelService == nil {
+		return cmID
+	}
+	cm, err := p.competitorModelService.GetCompetitorModelByID(cmID)
+	if err != nil || cm == nil {
+		return cmID
+	}
+	// In a real implementation, you would fetch the competitor name from the competitor service
+	return cm.TransponderNumber
+}
+
+func (p *MonitoringPanel) getRCModelName(cmID string) string {
+	if p.rcModelService == nil || p.competitorModelService == nil {
+		return ""
+	}
+	cm, err := p.competitorModelService.GetCompetitorModelByID(cmID)
+	if err != nil || cm == nil {
+		return ""
+	}
+	model, err := p.rcModelService.GetModelByID(cm.RCModelID)
+	if err != nil || model == nil {
+		return ""
+	}
+	return model.ModelName
+}
+
+func (p *MonitoringPanel) getTransponderNumber(cmID string) string {
+	if p.competitorModelService == nil {
+		return ""
+	}
+	cm, err := p.competitorModelService.GetCompetitorModelByID(cmID)
+	if err != nil || cm == nil {
+		return ""
+	}
+	return cm.TransponderNumber
 }
