@@ -229,6 +229,9 @@ func (s *LapService) recordLap(participantID string, timestamp time.Time) {
 		data.LastPassTime = timestamp
 		data.LapCount = 1
 		data.TotalTimeMs = 0
+		
+		// Mark transponder as worked on first pass
+		s.markTransponderWorked(participantID)
 	} else {
 		// Subsequent lap
 		lapTimeMs = int(timestamp.Sub(data.LastPassTime).Milliseconds())
@@ -243,6 +246,20 @@ func (s *LapService) recordLap(participantID string, timestamp time.Time) {
 			data.BestLapTimeMs = lapTimeMs
 			data.BestLapNumber = data.LapCount
 		}
+	}
+}
+
+// markTransponderWorked sets transponder_worked = true for the participant
+func (s *LapService) markTransponderWorked(participantID string) {
+	participant, err := s.participantRepo.GetByID(participantID)
+	if err != nil || participant == nil {
+		return
+	}
+	
+	// Only update if not already marked
+	if !participant.TransponderWorked {
+		participant.TransponderWorked = true
+		s.participantRepo.Update(participant)
 	}
 }
 

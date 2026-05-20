@@ -109,6 +109,12 @@ getParticipantByTransponder(tag) string
 - `resultsMu` — защита результатов участников
 - `cacheMu` — защита обратного lookup
 
+### Метод markTransponderWorked
+```go
+markTransponderWorked(participantID string)
+```
+Этот метод автоматически вызывается при первом проезде участника через антенну и устанавливает флаг `transponder_worked = true` в таблице `competition_participants`.
+
 ---
 
 ## CompetitorService (competitor_service.go)
@@ -240,7 +246,7 @@ ValidateCompetition(dto) error
 
 ### Методы
 ```go
-NewCompetitionParticipantService(repo, cmService, compService) *CompetitionParticipantService
+NewCompetitionParticipantService(repo, cmService, compService, lapsRepo, competitorService, rcModelService) *CompetitionParticipantService
 
 AddParticipant(competitionID, competitorModelID, gridPosition) error
 RemoveParticipant(id) error
@@ -249,12 +255,27 @@ GetByCompetitionID(competitionID) ([]*CompetitionParticipant, error)
 GetByCompetitorModelID(cmID) ([]*CompetitionParticipant, error)
 IsRegistered(competitionID, competitorModelID) bool
 MarkAsFinished(id, dnf, reason) error
+GetParticipantRegistrationData(competitionID string) ([]ParticipantRegistrationData, error)
+```
+
+### Структура ParticipantRegistrationData
+```go
+type ParticipantRegistrationData struct {
+    TransponderWorked bool   // Работоспособность транспондера (false по умолчанию, true после первого проезда)
+    CompetitorNumber  int    // Номер участника
+    FullName          string // ФИО участника
+    ModelName         string // Название модели
+    ModelScale        string // Масштаб модели
+    LapCount          int    // Количество кругов
+    BestLapTimeMs     int    // Время самого быстрого круга (мс)
+}
 ```
 
 ### Бизнес-правила
 - Один участник может быть зарегистрирован только один раз в заезде
 - Grid position опционален
 - Можно отметить как финишировавшего или DNF
+- Флаг `TransponderWorked` автоматически устанавливается в `true` при первом проезде через антенну (обрабатывается в LapService)
 
 ---
 

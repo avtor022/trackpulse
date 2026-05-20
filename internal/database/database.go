@@ -172,6 +172,7 @@ func (db *DB) Initialize() error {
 		is_finished BOOLEAN DEFAULT 0,
 		disqualified BOOLEAN DEFAULT 0,
 		dnf_reason TEXT,
+                transponder_worked BOOLEAN DEFAULT 0,
 		created_at TEXT NOT NULL,
 		updated_at TEXT NOT NULL,
 		UNIQUE(competition_id, competitor_model_id)

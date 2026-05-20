@@ -222,55 +222,68 @@ validateCompetition(dto) error
 ## MonitoringPanel (monitoring_panel.go)
 
 ### Назначение
-Экран гонки в реальном времени: таймер, круги, результаты.
+Экран гонки в реальном времени: таймер, круги, результаты, регистрация участников.
 
 ### Элементы UI
 - `timerLabel` — текущее время заезда (MM:SS)
 - `statusLabel` — статус (Running, Finished)
-- `startButton`, `stopButton` — управление таймером
-- `resultsTable` — таблица результатов
-- `lapHistoryList` — последние круги
-- `controlButtons` — старт/стоп гонки
+- `competitionButton` — выбор соревнования
+- `startButton`, `stopButton` — управление гонкой
+- `participantsTable` — таблица регистрации участников с данными о кругах
+- `competitionFilter` — фильтр соревнований
 
-### Таблица результатов
+### Таблица регистрации участников
+Отображается сразу после выбора соревнования. Обновляется в реальном времени.
+
 Колонки:
-- Position (авторасчёт)
-- Competitor Name
-- Model
-- Laps Count
-- Best Lap Time
-- Last Lap Time
-- Total Time
-- Gap to Leader
+- **Транспондер** — работоспособность (✓/✗): false по умолчанию, true после первого проезда через антенну
+- **Номер** — номер участника
+- **ФИО** — полное имя участника
+- **Модель** — название модели
+- **Масштаб** — масштаб модели
+- **Круги** — количество пройденных кругов
+- **Лучший круг** — время лучшего круга (MM:SS.mmm)
 
-### Обновление в реальном времени
+### Структура MonitoringPanel
 ```go
 type MonitoringPanel struct {
-    lapService *service.LapService
-    timer      *Timer
-    updateChan chan LapUpdate
-    ticker     *time.Ticker
-}
-
-func (p *MonitoringPanel) startRealTimeUpdates() {
-    p.ticker = time.NewTicker(500 * time.Millisecond)
-    go func() {
-        for range p.ticker.C {
-            p.refreshResults()
-        }
-    }()
+    content                *fyne.Container
+    mainWindow             fyne.Window
+    competitionService     *service.CompetitionService
+    participantService     *service.CompetitionParticipantService
+    selectedCompetition    string
+    selectedCompetitionID  string
+    statusLabel            *widget.Label
+    competitionButton      *widget.Button
+    startButton            *widget.Button
+    stopButton             *widget.Button
+    timerLabel             *widget.Label
+    timer                  *Timer
+    competitionFilter      *CompetitionFilter
+    participantsTable      *widget.Table
+    participantsContainer  *fyne.Container
 }
 ```
 
 ### Методы
 ```go
-NewMonitoringPanel(lapService) *MonitoringPanel
-startRace()
-stopRace()
-refreshResults()
-formatLapTime(ms int) string
-calculatePositions() map[string]int
+NewMonitoringPanel(competitionService, participantService, mainWindow) *MonitoringPanel
+createContent() *fyne.Container
+createParticipantsTable() *fyne.Container
+updateParticipantsTable()                        // Обновление таблицы участников
+onCompetitionSelected(selected string)           // Обработка выбора соревнования
+startMonitoring()                                // Старт гонки
+stopMonitoring()                                 // Остановка гонки
+refreshCompetitions()                            // Обновление списка соревнований
+UpdateData()                                     // Обновление данных панели
+Refresh()                                        // Перерисовка панели
 ```
+
+### Интеграция с LapService
+- При первом проезде участника через антенну LapService вызывает `markTransponderWorked(participantID)`
+- Флаг `TransponderWorked` сохраняется в БД и отображается в таблице как "✓"
+- Данные для таблицы загружаются через `participantService.GetParticipantRegistrationData(competitionID)`
+- Таблица обновляется автоматически при выборе соревнования и периодически во время гонки
 
 ### Таймер
 Компонент `Timer`:

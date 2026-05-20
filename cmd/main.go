@@ -68,6 +68,8 @@ func main() {
 	competitorModelRepo := repository.NewCompetitorModelRepository(db.DB)
 	competitionRepo := repository.NewCompetitionRepository(db.DB)
 	participantRepo := repository.NewCompetitionParticipantRepository(db.DB)
+	rawScanRepo := repository.NewRawScanRepository(db.DB)
+	competitionLapsRepo := repository.NewCompetitionLapsRepository(db.DB)
 
 	// Initialize services
 	competitorService := service.NewCompetitorService(competitorRepo)
@@ -77,7 +79,8 @@ func main() {
 	yearRepo := repository.NewCompetitionYearRepository(db.DB)
 	seasonRepo := repository.NewCompetitionSeasonRepository(db.DB)
 	competitionService := service.NewCompetitionService(competitionRepo, typeRepo, scaleRepo, trackRepo, yearRepo, seasonRepo)
-	participantService := service.NewCompetitionParticipantService(participantRepo, competitorModelService, competitionService)
+	lapService := service.NewLapService(rawScanRepo, competitorModelRepo, competitionRepo, participantRepo, competitionLapsRepo)
+	participantService := service.NewCompetitionParticipantService(participantRepo, competitorModelService, competitionService, competitionLapsRepo, competitorService, modelService)
 
 	// Load locale from settings
 	savedLocale, err := settingsService.GetLocale()

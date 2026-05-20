@@ -26,25 +26,59 @@ type CompetitorModelServiceInterface interface {
 	GetCompetitorModelByID(id string) (*models.CompetitorModel, error)
 }
 
+// RCModelServiceInterface defines the interface for RC model data access
+type RCModelServiceInterface interface {
+	GetModelByID(id string) (*models.RCModel, error)
+}
+
 // CompetitionServiceInterface defines the interface for competition data access
 type CompetitionServiceInterface interface {
 	GetAllCompetitions() ([]models.Competition, error)
 	GetCompetitionByID(id string) (*models.Competition, error)
 }
 
+// CompetitionLapsRepositoryInterface defines the interface for competition laps data access
+type CompetitionLapsRepositoryInterface interface {
+	GetByParticipantID(participantID string) (*models.CompetitionLaps, error)
+	GetAllByCompetitionID(competitionID string) ([]*models.CompetitionLaps, error)
+	Upsert(laps *models.CompetitionLaps) error
+}
+
+// CompetitorServiceInterface defines the interface for competitor data access
+type CompetitorServiceInterface interface {
+	GetCompetitorByID(id string) (*models.Competitor, error)
+}
+
+// ParticipantRegistrationData represents registration data for a competition participant
+type ParticipantRegistrationData struct {
+	TransponderWorked bool   // Работоспособность транспондера (false по умолчанию, true после первого проезда)
+	CompetitorNumber  int    // Номер участника
+	FullName          string // ФИО участника
+	ModelName         string // Название модели
+	ModelScale        string // Масштаб модели
+	LapCount          int    // Количество кругов
+	BestLapTimeMs     int    // Время самого быстрого круга (мс)
+}
+
 // CompetitionParticipantService handles business logic for competition participants
 type CompetitionParticipantService struct {
-	repo                 CompetitionParticipantRepositoryInterface
+	repo                   CompetitionParticipantRepositoryInterface
 	competitorModelService CompetitorModelServiceInterface
 	competitionService     CompetitionServiceInterface
+	lapsRepo               CompetitionLapsRepositoryInterface
+	competitorService      CompetitorServiceInterface
+	rcModelService         RCModelServiceInterface
 }
 
 // NewCompetitionParticipantService creates a new competition participant service
-func NewCompetitionParticipantService(repo CompetitionParticipantRepositoryInterface, competitorModelService CompetitorModelServiceInterface, competitionService CompetitionServiceInterface) *CompetitionParticipantService {
+func NewCompetitionParticipantService(repo CompetitionParticipantRepositoryInterface, competitorModelService CompetitorModelServiceInterface, competitionService CompetitionServiceInterface, lapsRepo CompetitionLapsRepositoryInterface, competitorService CompetitorServiceInterface, rcModelService RCModelServiceInterface) *CompetitionParticipantService {
 	return &CompetitionParticipantService{
-		repo:                 repo,
+		repo:                   repo,
 		competitorModelService: competitorModelService,
 		competitionService:     competitionService,
+		lapsRepo:               lapsRepo,
+		competitorService:      competitorService,
+		rcModelService:         rcModelService,
 	}
 }
 
@@ -193,4 +227,57 @@ func (s *CompetitionParticipantService) RemoveParticipantByCompetitionAndModel(c
 // GetParticipantCount returns total number of participants
 func (s *CompetitionParticipantService) GetParticipantCount() (int, error) {
 	return s.repo.Count()
+}
+
+// GetParticipantRegistrationData returns registration data for all participants in a competition
+func (s *CompetitionParticipantService) GetParticipantRegistrationData(competitionID string) ([]ParticipantRegistrationData, error) {
+	// Get all participants for the competition
+	participants, err := s.repo.GetByCompetitionID(competitionID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get participants: %w", err)
+	}
+
+	var result []ParticipantRegistrationData
+
+	for _, p := range participants {
+		// Get competitor model info
+		cm, err := s.competitorModelService.GetCompetitorModelByID(p.CompetitorModelID)
+		if err != nil || cm == nil {
+			continue
+		}
+
+		// Get competitor info
+		competitor, err := s.competitorService.GetCompetitorByID(cm.CompetitorID)
+		if err != nil || competitor == nil {
+			continue
+		}
+
+		// Get RC model info
+		rcModel, err := s.rcModelService.GetModelByID(cm.RCModelID)
+		if err != nil || rcModel == nil {
+			continue
+		}
+
+		// Get lap data if exists
+		laps, _ := s.lapsRepo.GetByParticipantID(p.ID)
+
+		regData := ParticipantRegistrationData{
+			TransponderWorked: p.TransponderWorked,
+			CompetitorNumber:  competitor.CompetitorNumber,
+			FullName:          competitor.FullName,
+			ModelName:         rcModel.ModelName,
+			ModelScale:        rcModel.Scale,
+			LapCount:          0,
+			BestLapTimeMs:     0,
+		}
+
+		if laps != nil {
+			regData.LapCount = laps.NumberOfLaps
+			regData.BestLapTimeMs = laps.BestLapTimeMs
+		}
+
+		result = append(result, regData)
+	}
+
+	return result, nil
 }

@@ -309,5 +309,14 @@
     "participants.select.competition.button": "Выбрать...",
     "participants.select.competition.popup_title": "Выберите соревнование",
     "participants.clear_selection": "Сбросить выбор",
-    "participants.transponders_list": "Транспондеры спортсменов"
+    "participants.transponders_list": "Транспондеры спортсменов",
+    "monitoring.participants.title": "Участники соревнования",
+    "monitoring.participants.transponder": "Транспондер",
+    "monitoring.participants.number": "Номер",
+    "monitoring.participants.name": "ФИО",
+    "monitoring.participants.model": "Модель",
+    "monitoring.participants.scale": "Масштаб",
+    "monitoring.participants.laps": "Круги",
+    "monitoring.participants.best_lap": "Лучший круг",
+    "monitoring.no_participants": "Нет участников в этом соревновании"
 }
