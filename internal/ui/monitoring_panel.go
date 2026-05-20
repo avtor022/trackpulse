@@ -14,19 +14,35 @@ import (
 
 // MonitoringPanel represents the monitoring panel UI
 type MonitoringPanel struct {
-	content               *fyne.Container
-	mainWindow            fyne.Window
-	competitionService    *service.CompetitionService
-	selectedCompetition   string
-	selectedCompetitionID string
-	statusLabel           *widget.Label
-	allCompetitions       []models.Competition
-	competitionButton     *widget.Button
-	startButton           *widget.Button
-	stopButton            *widget.Button
-	timerLabel            *widget.Label
-	timer                 *Timer
-	competitionFilter     *CompetitionFilter
+	content                   *fyne.Container
+	mainWindow                fyne.Window
+	competitionService        *service.CompetitionService
+	participantService        *service.CompetitionParticipantService
+	competitorModelService    *service.CompetitorModelService
+	competitorService         *service.CompetitorService
+	modelService              *service.RCModelService
+	selectedCompetition       string
+	selectedCompetitionID     string
+	statusLabel               *widget.Label
+	allCompetitions           []models.Competition
+	competitionButton         *widget.Button
+	startButton               *widget.Button
+	stopButton                *widget.Button
+	timerLabel                *widget.Label
+	timer                     *Timer
+	competitionFilter         *CompetitionFilter
+	participantsTable         *widget.Table
+	participantsContainer     *fyne.Container
+	currentParticipants       []ParticipantInfo
+}
+
+// ParticipantInfo holds display information about a competition participant
+type ParticipantInfo struct {
+	CompetitorName   string
+	CompetitorNumber int
+	ModelName        string
+	Transponder      string
+	GridPosition     int
 }
 
 // NewMonitoringPanel creates a new monitoring panel
