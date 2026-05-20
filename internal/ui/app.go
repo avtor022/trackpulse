@@ -134,7 +134,7 @@ func (a *App) createMainContent() *container.AppTabs {
 
 // createMonitoringTab creates the Live Monitoring tab
 func (a *App) createMonitoringTab() fyne.CanvasObject {
-	a.monitoringPanel = NewMonitoringPanel(a.competitionService, a.mainWindow)
+	a.monitoringPanel = NewMonitoringPanel(a.competitionService, a.participantService, a.competitorModelService, a.competitorService, a.modelService, a.lapService, a.mainWindow)
 	return a.monitoringPanel.content
 }
 
