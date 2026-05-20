@@ -85,7 +85,7 @@ type Competition struct {
 
 ---
 
-### CompetitionParticipant (Участник в заезде)
+## CompetitionParticipant (Участник в заезде)
 ```go
 type CompetitionParticipant struct {
     ID                string    // UUID
@@ -95,6 +95,7 @@ type CompetitionParticipant struct {
     IsFinished        bool      // Финишировал ли
     Disqualified      bool      // Дисквалифицирован
     DNFReason         string    // Причина схода
+    TransponderWorked bool      // Работоспособность транспондера (false по умолчанию, true после первого проезда)
     CreatedAt         time.Time
     UpdatedAt         time.Time
 }
