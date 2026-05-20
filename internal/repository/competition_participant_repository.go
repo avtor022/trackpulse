@@ -21,7 +21,7 @@ func NewCompetitionParticipantRepository(db *sql.DB) *CompetitionParticipantRepo
 // GetAll returns all competition participants
 func (r *CompetitionParticipantRepository) GetAll() ([]models.CompetitionParticipant, error) {
 	rows, err := r.db.Query(`
-		SELECT id, competition_id, competitor_model_id, grid_position, is_finished, disqualified, dnf_reason, created_at, updated_at
+		SELECT id, competition_id, competitor_model_id, grid_position, is_finished, disqualified, dnf_reason, transponder_worked, created_at, updated_at
 		FROM competition_participants
 		ORDER BY competition_id, grid_position ASC
 	`)
@@ -42,6 +42,7 @@ func (r *CompetitionParticipantRepository) GetAll() ([]models.CompetitionPartici
 			&p.IsFinished,
 			&p.Disqualified,
 			&p.DNFReason,
+			&p.TransponderWorked,
 			&createdAtStr,
 			&updatedAtStr,
 		)
@@ -65,7 +66,7 @@ func (r *CompetitionParticipantRepository) GetAll() ([]models.CompetitionPartici
 // GetByID returns a competition participant by ID
 func (r *CompetitionParticipantRepository) GetByID(id string) (*models.CompetitionParticipant, error) {
 	row := r.db.QueryRow(`
-		SELECT id, competition_id, competitor_model_id, grid_position, is_finished, disqualified, dnf_reason, created_at, updated_at
+		SELECT id, competition_id, competitor_model_id, grid_position, is_finished, disqualified, dnf_reason, transponder_worked, created_at, updated_at
 		FROM competition_participants
 		WHERE id = ?
 	`, id)
@@ -80,6 +81,7 @@ func (r *CompetitionParticipantRepository) GetByID(id string) (*models.Competiti
 		&p.IsFinished,
 		&p.Disqualified,
 		&p.DNFReason,
+		&p.TransponderWorked,
 		&createdAtStr,
 		&updatedAtStr,
 	)
@@ -103,7 +105,7 @@ func (r *CompetitionParticipantRepository) GetByID(id string) (*models.Competiti
 // GetByCompetitionID returns all participants for a specific competition
 func (r *CompetitionParticipantRepository) GetByCompetitionID(competitionID string) ([]models.CompetitionParticipant, error) {
 	rows, err := r.db.Query(`
-		SELECT id, competition_id, competitor_model_id, grid_position, is_finished, disqualified, dnf_reason, created_at, updated_at
+		SELECT id, competition_id, competitor_model_id, grid_position, is_finished, disqualified, dnf_reason, transponder_worked, created_at, updated_at
 		FROM competition_participants
 		WHERE competition_id = ?
 		ORDER BY grid_position ASC
@@ -125,6 +127,7 @@ func (r *CompetitionParticipantRepository) GetByCompetitionID(competitionID stri
 			&p.IsFinished,
 			&p.Disqualified,
 			&p.DNFReason,
+			&p.TransponderWorked,
 			&createdAtStr,
 			&updatedAtStr,
 		)
@@ -150,8 +153,8 @@ func (r *CompetitionParticipantRepository) Create(participant *models.Competitio
 	now := time.Now().Format(time.RFC3339)
 
 	result, err := r.db.Exec(`
-		INSERT INTO competition_participants (id, competition_id, competitor_model_id, grid_position, is_finished, disqualified, dnf_reason, created_at, updated_at)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+		INSERT INTO competition_participants (id, competition_id, competitor_model_id, grid_position, is_finished, disqualified, dnf_reason, transponder_worked, created_at, updated_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`,
 		participant.ID,
 		participant.CompetitionID,
@@ -160,6 +163,7 @@ func (r *CompetitionParticipantRepository) Create(participant *models.Competitio
 		participant.IsFinished,
 		participant.Disqualified,
 		participant.DNFReason,
+		participant.TransponderWorked,
 		now,
 		now,
 	)
@@ -185,7 +189,7 @@ func (r *CompetitionParticipantRepository) Update(participant *models.Competitio
 
 	result, err := r.db.Exec(`
 		UPDATE competition_participants
-		SET competition_id = ?, competitor_model_id = ?, grid_position = ?, is_finished = ?, disqualified = ?, dnf_reason = ?, updated_at = ?
+		SET competition_id = ?, competitor_model_id = ?, grid_position = ?, is_finished = ?, disqualified = ?, dnf_reason = ?, transponder_worked = ?, updated_at = ?
 		WHERE id = ?
 	`,
 		participant.CompetitionID,
@@ -194,6 +198,7 @@ func (r *CompetitionParticipantRepository) Update(participant *models.Competitio
 		participant.IsFinished,
 		participant.Disqualified,
 		participant.DNFReason,
+		participant.TransponderWorked,
 		now,
 		participant.ID,
 	)

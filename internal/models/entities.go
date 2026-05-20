@@ -68,6 +68,7 @@ type CompetitionParticipant struct {
 	IsFinished        bool      `json:"is_finished" db:"is_finished"`
 	Disqualified      bool      `json:"disqualified" db:"disqualified"`
 	DNFReason         string    `json:"dnf_reason" db:"dnf_reason"`
+	TransponderWorked bool      `json:"transponder_worked" db:"transponder_worked"`
 	CreatedAt         time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt         time.Time `json:"updated_at" db:"updated_at"`
 }
