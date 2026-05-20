@@ -30,37 +30,42 @@ trackpulse/
 │   └── main.go              # Точка входа, DI контейнер
 ├── internal/
 │   ├── config/              # Конфигурация приложения
-│   │   └── config.go
+│   │   └── config.go        # Загрузка config.json
 │   ├── database/            # Работа с БД, схема
-│   │   └── database.go
+│   │   └── database.go      # Инициализация SQLite, миграции
 │   ├── locale/              # Локализация (i18n)
-│   │   ├── locale.go
+│   │   ├── locale.go        # Система переводов
 │   │   └── translations/    # en.json, ru.json
 │   ├── models/              # Доменные модели/сущности
-│   │   ├── entities.go      # Основные структуры
-│   │   └── *.go             # Справочники (бренды, типы и т.д.)
+│   │   ├── entities.go      # Основные структуры (Competitor, RCModel, Competition...)
+│   │   └── *.go             # Справочники (бренды, типы, масштабы, сезоны, годы, трассы)
 │   ├── repository/          # Data Access Layer
 │   │   ├── *_repository.go  # CRUD операции для каждой сущности
-│   │   └── raw_scan_repository.go
+│   │   └── raw_scan_repository.go  # Массовая вставка сырых RFID-сканирований
 │   ├── service/             # Бизнес-логика
-│   │   ├── competitor_service.go
-│   │   ├── rc_model_service.go
-│   │   ├── competitor_model_service.go
-│   │   ├── competition_service.go
-│   │   ├── competition_participant_service.go
-│   │   ├── lap_service.go   # Обработка RFID, подсчёт кругов
-│   │   └── settings_service.go
+│   │   ├── competitor_service.go         # Управление пилотами
+│   │   ├── rc_model_service.go           # Управление моделями и справочниками
+│   │   ├── competitor_model_service.go   # Привязка транспондеров
+│   │   ├── competition_service.go        # Управление заездами
+│   │   ├── competition_participant_service.go  # Участники заезда
+│   │   ├── lap_service.go    # Обработка RFID, подсчёт кругов (асинхронный worker)
+│   │   └── settings_service.go # Настройки приложения
 │   └── ui/                  # Fyne UI компоненты
-│       ├── app.go           # Главный UI компонент
-│       ├── participant_panel.go
-│       ├── competitor_panel.go
-│       ├── rc_model_panel.go
-│       ├── competitor_model_panel.go
-│       ├── competition_panel.go
+│       ├── app.go           # Главный UI компонент, навигация по вкладкам
+│       ├── participant_panel.go  # Управление участниками заезда
+│       ├── competitor_panel.go   # Управление пилотами
+│       ├── rc_model_panel.go     # Каталог моделей
+│       ├── competitor_model_panel.go  # Привязка транспондеров
+│       ├── competition_panel.go  # Создание и настройка заездов
+│       ├── competition_filter.go  # Фильтрация заездов
 │       ├── monitoring_panel.go  # Экран гонки в реальном времени
-│       ├── settings_panel.go
-│       ├── logs_panel.go
-│       └── *.go             # Вспомогательные компоненты
+│       ├── participant_panel.go  # Регистрация участников на заезд
+│       ├── settings_panel.go # Настройки приложения
+│       ├── logs_panel.go     # Просмотр логов
+│       ├── port_scanner.go   # Сканирование COM-портов
+│       ├── timer.go          # Таймер для заездов
+│       ├── autocomplete_entry.go  # Поле с автодополнением
+│       └── reference_popup.go # Всплывающие справочники
 ├── pkg/
 │   ├── logger/              # Логгер (info/error/debug)
 │   │   └── logger.go
@@ -68,7 +73,13 @@ trackpulse/
 │       └── utils.go
 ├── tests/
 │   ├── service/             # Юнит-тесты сервисов
-│   └── repository/          # Тесты репозиториев
+│   │   ├── competitor_service_test.go
+│   │   ├── competition_service_test.go
+│   │   ├── rc_model_service_test.go
+│   │   └── competitor_model_service_test.go
+│   └── ui/                  # UI тесты
+│       ├── monitoring_panel_test.go
+│       └── reference_popup_test.go
 ├── config.json              # Конфигурационный файл
 ├── go.mod                   # Зависимости
 └── README.md
@@ -103,13 +114,16 @@ UI → Service → Repository → Database
 
 ### Ключевые сервисы
 
-#### LapService (lap_service.go)
-- **Назначение**: Обработка RFID-сканирований в реальном времени
-- **Особенности**:
-  - Фоновый worker с буферизацией (канал на 200 сканирований)
-  - Кэширование транспондеров и участников
-  - Пакетная запись в БД (50 сканирований или 100ms)
-  - Методы: `Start()`, `Stop()`, `SetActiveCompetition()`, `ProcessScan()`
+### LapService (lap_service.go)
+
+**Назначение**: Обработка RFID-сканирований в реальном времени, подсчёт кругов, ведение результатов заезда.
+
+**Особенности**:
+- Фоновый worker с буферизацией (канал на 200 сканирований)
+- Кэширование транспондеров и участников для O(1) поиска
+- Пакетная запись в БД (50 сканирований или 100ms)
+- Методы: `Start()`, `Stop()`, `SetActiveCompetition()`, `ProcessScan()`, `QueueScan()`
+- Структуры: `LapScan`, `ParticipantLapData`
 
 #### CompetitionService
 - Управление заездами: создание, старт, финиш, статусы
