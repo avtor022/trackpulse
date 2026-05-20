@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -14,26 +15,40 @@ import (
 
 // MonitoringPanel represents the monitoring panel UI
 type MonitoringPanel struct {
-	content               *fyne.Container
-	mainWindow            fyne.Window
-	competitionService    *service.CompetitionService
-	selectedCompetition   string
-	selectedCompetitionID string
-	statusLabel           *widget.Label
-	allCompetitions       []models.Competition
-	competitionButton     *widget.Button
-	startButton           *widget.Button
-	stopButton            *widget.Button
-	timerLabel            *widget.Label
-	timer                 *Timer
-	competitionFilter     *CompetitionFilter
+	content                  *fyne.Container
+	mainWindow               fyne.Window
+	competitionService       *service.CompetitionService
+	participantService       *service.CompetitionParticipantService
+	lapService               *service.LapService
+	competitorModelService   *service.CompetitorModelService
+	competitorService        *service.CompetitorService
+	rcModelService           *service.RCModelService
+	selectedCompetition      string
+	selectedCompetitionID    string
+	statusLabel              *widget.Label
+	allCompetitions          []models.Competition
+	competitionButton        *widget.Button
+	startButton              *widget.Button
+	stopButton               *widget.Button
+	timerLabel               *widget.Label
+	timer                    *Timer
+	competitionFilter        *CompetitionFilter
+	participantsTable        *widget.Table
+	currentParticipants      []models.CompetitionParticipant
+	lapDataMap               map[string]*service.ParticipantLapData
 }
 
 // NewMonitoringPanel creates a new monitoring panel
-func NewMonitoringPanel(competitionService *service.CompetitionService, mainWindow fyne.Window) *MonitoringPanel {
+func NewMonitoringPanel(competitionService *service.CompetitionService, participantService *service.CompetitionParticipantService, lapService *service.LapService, competitorModelService *service.CompetitorModelService, competitorService *service.CompetitorService, rcModelService *service.RCModelService, mainWindow fyne.Window) *MonitoringPanel {
 	p := &MonitoringPanel{
-		mainWindow:         mainWindow,
-		competitionService: competitionService,
+		mainWindow:             mainWindow,
+		competitionService:     competitionService,
+		participantService:     participantService,
+		lapService:             lapService,
+		competitorModelService: competitorModelService,
+		competitorService:      competitorService,
+		rcModelService:         rcModelService,
+		lapDataMap:             make(map[string]*service.ParticipantLapData),
 	}
 
 	p.content = p.createContent()
@@ -83,9 +98,98 @@ func (p *MonitoringPanel) createContent() *fyne.Container {
 		widget.NewSeparator(),
 	)
 
-	// Main content area (placeholder for future monitoring widgets)
-	monitoringContent := widget.NewLabel(locale.T("monitoring.placeholder"))
-	monitoringContent.Alignment = fyne.TextAlignCenter
+	// Create participants table for displaying registered participants and lap data
+	p.participantsTable = widget.NewTable(
+		func() (int, int) {
+			return len(p.currentParticipants), 7
+		},
+		func() fyne.CanvasObject {
+			label := widget.NewLabel("Template")
+			label.Truncation = fyne.TextTruncateEllipsis
+			return label
+		},
+		func(i widget.TableCellID, o fyne.CanvasObject) {
+			if i.Row >= len(p.currentParticipants) {
+				o.(*widget.Label).SetText("")
+				return
+			}
+			participant := p.currentParticipants[i.Row]
+			
+			// Get lap data from lapService if available
+			var lapData *service.ParticipantLapData
+			if p.lapDataMap != nil {
+				lapData = p.lapDataMap[participant.ID]
+			}
+			
+			switch i.Col {
+			case 0: // Position
+				pos := i.Row + 1
+				o.(*widget.Label).SetText(fmt.Sprintf("%d", pos))
+			case 1: // Competitor Name
+				o.(*widget.Label).SetText(p.getCompetitorName(participant.CompetitorModelID))
+			case 2: // Model
+				o.(*widget.Label).SetText(p.getRCModelName(participant.CompetitorModelID))
+			case 3: // Transponder
+				o.(*widget.Label).SetText(p.getTransponderNumber(participant.CompetitorModelID))
+			case 4: // Laps
+				if lapData != nil {
+					o.(*widget.Label).SetText(fmt.Sprintf("%d", lapData.LapCount))
+				} else {
+					o.(*widget.Label).SetText("0")
+				}
+			case 5: // Best Lap
+				if lapData != nil && lapData.BestLapTimeMs > 0 {
+					o.(*widget.Label).SetText(p.formatLapTime(lapData.BestLapTimeMs))
+				} else {
+					o.(*widget.Label).SetText("-")
+				}
+			case 6: // Last Lap
+				if lapData != nil && lapData.LastLapTimeMs > 0 {
+					o.(*widget.Label).SetText(p.formatLapTime(lapData.LastLapTimeMs))
+				} else {
+					o.(*widget.Label).SetText("-")
+				}
+			}
+			o.(*widget.Label).Truncation = fyne.TextTruncateEllipsis
+		},
+	)
+	p.participantsTable.ShowHeaderRow = true
+	p.participantsTable.CreateHeader = func() fyne.CanvasObject {
+		return widget.NewLabelWithStyle("Header", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	}
+	p.participantsTable.UpdateHeader = func(id widget.TableCellID, o fyne.CanvasObject) {
+		headers := []string{
+			locale.T("monitoring.table.position"),
+			locale.T("monitoring.table.competitor"),
+			locale.T("monitoring.table.model"),
+			locale.T("monitoring.table.transponder"),
+			locale.T("monitoring.table.laps"),
+			locale.T("monitoring.table.best_lap"),
+			locale.T("monitoring.table.last_lap"),
+		}
+		if id.Col >= 0 && id.Col < len(headers) {
+			o.(*widget.Label).SetText(headers[id.Col])
+			o.(*widget.Label).TextStyle = fyne.TextStyle{Bold: true}
+		}
+	}
+	
+	// Set column widths
+	p.participantsTable.SetColumnWidth(0, 60)  // Position
+	p.participantsTable.SetColumnWidth(1, 200) // Competitor
+	p.participantsTable.SetColumnWidth(2, 150) // Model
+	p.participantsTable.SetColumnWidth(3, 120) // Transponder
+	p.participantsTable.SetColumnWidth(4, 80)  // Laps
+	p.participantsTable.SetColumnWidth(5, 100) // Best Lap
+	p.participantsTable.SetColumnWidth(6, 100) // Last Lap
+
+	// Main content area with participants table
+	monitoringContent := container.NewBorder(
+		widget.NewLabelWithStyle(locale.T("monitoring.participants_title"), fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+		nil,
+		nil,
+		nil,
+		container.NewScroll(p.participantsTable),
+	)
 
 	// Layout
 	content := container.NewBorder(
@@ -198,6 +302,11 @@ func (p *MonitoringPanel) onCompetitionSelected(selected string) {
 			p.timer.Reset()
 		}
 		p.selectedCompetitionID = ""
+		p.currentParticipants = nil
+		p.lapDataMap = make(map[string]*service.ParticipantLapData)
+		if p.participantsTable != nil {
+			p.participantsTable.Refresh()
+		}
 		return
 	}
 
@@ -232,9 +341,67 @@ func (p *MonitoringPanel) onCompetitionSelected(selected string) {
 					p.stopButton.Disable()
 				}
 			}
+			
+			// Load participants for the selected competition
+			p.loadParticipantsForCompetition(comp.ID)
+			
 			return
 		}
 	}
+}
+
+// loadParticipantsForCompetition loads participants for the selected competition
+func (p *MonitoringPanel) loadParticipantsForCompetition(competitionID string) {
+	if p.participantService == nil {
+		return
+	}
+	
+	participants, err := p.participantService.GetParticipantsByCompetitionID(competitionID)
+	if err != nil {
+		fmt.Println("ERROR loading participants:", err)
+		return
+	}
+	
+	p.currentParticipants = participants
+	
+	// Initialize lap data map for all participants
+	p.lapDataMap = make(map[string]*service.ParticipantLapData)
+	for _, participant := range participants {
+		p.lapDataMap[participant.ID] = &service.ParticipantLapData{
+			CompetitionParticipantID: participant.ID,
+			CompetitionID:            competitionID,
+			CompetitorModelID:        participant.CompetitorModelID,
+		}
+	}
+	
+	// Update UI with participants list
+	if p.participantsTable != nil {
+		p.participantsTable.Refresh()
+	}
+}
+
+// refreshLapData updates lap data from lapService
+func (p *MonitoringPanel) refreshLapData() {
+	if p.lapService == nil || p.selectedCompetitionID == "" {
+		return
+	}
+	
+	// Get current lap data from lap service
+	lapData := p.lapService.GetParticipantResults()
+	
+	// Update our local map
+	for participantID, data := range lapData {
+		if _, exists := p.lapDataMap[participantID]; exists {
+			p.lapDataMap[participantID] = data
+		}
+	}
+	
+	// Refresh table to show updated data
+	fyne.Do(func() {
+		if p.participantsTable != nil {
+			p.participantsTable.Refresh()
+		}
+	})
 }
 
 // Refresh updates the panel with new locale strings
@@ -249,6 +416,25 @@ func (p *MonitoringPanel) UpdateData() {
 	if p.selectedCompetition != "" {
 		p.onCompetitionSelected(p.selectedCompetition)
 	}
+	// Start periodic lap data refresh if competition is in progress
+	if p.selectedCompetitionID != "" {
+		p.startLapDataRefresh()
+	}
+}
+
+// startLapDataRefresh starts periodic refresh of lap data
+func (p *MonitoringPanel) startLapDataRefresh() {
+	go func() {
+		ticker := time.NewTicker(500 * time.Millisecond)
+		defer ticker.Stop()
+		
+		for range ticker.C {
+			if p.selectedCompetitionID == "" {
+				return
+			}
+			p.refreshLapData()
+		}
+	}()
 }
 
 // startMonitoring starts monitoring for the selected competition
@@ -295,4 +481,74 @@ func (p *MonitoringPanel) stopMonitoring() {
 
 	// Show success message
 	dialog.ShowInformation(locale.T("dialog.success"), locale.T("dialog.competition_stopped"), p.mainWindow)
+}
+
+// getCompetitorName returns the competitor name for a competitor model ID
+func (p *MonitoringPanel) getCompetitorName(cmID string) string {
+	if p.competitorModelService == nil {
+		return cmID[:8]
+	}
+	
+	cm, err := p.competitorModelService.GetCompetitorModelByID(cmID)
+	if err != nil || cm == nil {
+		return cmID[:8]
+	}
+	
+	if p.competitorService == nil {
+		return cm.TransponderNumber
+	}
+	
+	competitor, err := p.competitorService.GetCompetitorByID(cm.CompetitorID)
+	if err != nil || competitor == nil {
+		return cm.TransponderNumber
+	}
+	
+	return fmt.Sprintf("#%d %s", competitor.CompetitorNumber, competitor.FullName)
+}
+
+// getRCModelName returns the RC model name for a competitor model ID
+func (p *MonitoringPanel) getRCModelName(cmID string) string {
+	if p.competitorModelService == nil || p.rcModelService == nil {
+		return "Model"
+	}
+	
+	cm, err := p.competitorModelService.GetCompetitorModelByID(cmID)
+	if err != nil || cm == nil {
+		return "Model"
+	}
+	
+	model, err := p.rcModelService.GetModelByID(cm.RCModelID)
+	if err != nil || model == nil {
+		return "Model"
+	}
+	
+	return fmt.Sprintf("%s %s", model.Brand, model.ModelName)
+}
+
+// getTransponderNumber returns the transponder number for a competitor model ID
+func (p *MonitoringPanel) getTransponderNumber(cmID string) string {
+	if p.competitorModelService == nil {
+		return "TP" + cmID[:4]
+	}
+	
+	cm, err := p.competitorModelService.GetCompetitorModelByID(cmID)
+	if err != nil || cm == nil {
+		return "TP" + cmID[:4]
+	}
+	
+	return cm.TransponderNumber
+}
+
+// formatLapTime formats lap time in milliseconds to MM:SS.mmm format
+func (p *MonitoringPanel) formatLapTime(lapTimeMs int) string {
+	if lapTimeMs <= 0 {
+		return "-"
+	}
+	
+	totalSeconds := lapTimeMs / 1000
+	minutes := totalSeconds / 60
+	seconds := totalSeconds % 60
+	milliseconds := lapTimeMs % 1000
+	
+	return fmt.Sprintf("%02d:%02d.%03d", minutes, seconds, milliseconds)
 }
