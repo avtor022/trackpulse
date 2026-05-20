@@ -80,7 +80,7 @@ func main() {
 	seasonRepo := repository.NewCompetitionSeasonRepository(db.DB)
 	competitionService := service.NewCompetitionService(competitionRepo, typeRepo, scaleRepo, trackRepo, yearRepo, seasonRepo)
 	lapService := service.NewLapService(rawScanRepo, competitorModelRepo, competitionRepo, participantRepo, competitionLapsRepo)
-	participantService := service.NewCompetitionParticipantService(participantRepo, competitorModelService, competitionService, competitionLapsRepo, competitorService)
+	participantService := service.NewCompetitionParticipantService(participantRepo, competitorModelService, competitionService, competitionLapsRepo, competitorService, modelService)
 
 	// Load locale from settings
 	savedLocale, err := settingsService.GetLocale()

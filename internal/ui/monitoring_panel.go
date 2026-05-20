@@ -14,26 +14,30 @@ import (
 
 // MonitoringPanel represents the monitoring panel UI
 type MonitoringPanel struct {
-	content               *fyne.Container
-	mainWindow            fyne.Window
-	competitionService    *service.CompetitionService
-	selectedCompetition   string
-	selectedCompetitionID string
-	statusLabel           *widget.Label
-	allCompetitions       []models.Competition
-	competitionButton     *widget.Button
-	startButton           *widget.Button
-	stopButton            *widget.Button
-	timerLabel            *widget.Label
-	timer                 *Timer
-	competitionFilter     *CompetitionFilter
+	content                *fyne.Container
+	mainWindow             fyne.Window
+	competitionService     *service.CompetitionService
+	participantService     *service.CompetitionParticipantService
+	selectedCompetition    string
+	selectedCompetitionID  string
+	statusLabel            *widget.Label
+	allCompetitions        []models.Competition
+	competitionButton      *widget.Button
+	startButton            *widget.Button
+	stopButton             *widget.Button
+	timerLabel             *widget.Label
+	timer                  *Timer
+	competitionFilter      *CompetitionFilter
+	participantsTable      *widget.Table
+	participantsContainer  *fyne.Container
 }
 
 // NewMonitoringPanel creates a new monitoring panel
-func NewMonitoringPanel(competitionService *service.CompetitionService, mainWindow fyne.Window) *MonitoringPanel {
+func NewMonitoringPanel(competitionService *service.CompetitionService, participantService *service.CompetitionParticipantService, mainWindow fyne.Window) *MonitoringPanel {
 	p := &MonitoringPanel{
 		mainWindow:         mainWindow,
 		competitionService: competitionService,
+		participantService: participantService,
 	}
 
 	p.content = p.createContent()
@@ -83,9 +87,11 @@ func (p *MonitoringPanel) createContent() *fyne.Container {
 		widget.NewSeparator(),
 	)
 
-	// Main content area (placeholder for future monitoring widgets)
-	monitoringContent := widget.NewLabel(locale.T("monitoring.placeholder"))
-	monitoringContent.Alignment = fyne.TextAlignCenter
+	// Create participants table container (will be populated when competition is selected)
+	p.participantsContainer = p.createParticipantsTable()
+
+	// Main content area with participants table
+	monitoringContent := container.NewBorder(nil, nil, nil, nil, p.participantsContainer)
 
 	// Layout
 	content := container.NewBorder(
@@ -100,6 +106,106 @@ func (p *MonitoringPanel) createContent() *fyne.Container {
 	p.refreshCompetitions()
 
 	return content
+}
+
+// createParticipantsTable creates the participants registration table
+func (p *MonitoringPanel) createParticipantsTable() *fyne.Container {
+	// Headers for the table
+	headers := []string{
+		locale.T("monitoring.participants.transponder"),
+		locale.T("monitoring.participants.number"),
+		locale.T("monitoring.participants.name"),
+		locale.T("monitoring.participants.model"),
+		locale.T("monitoring.participants.scale"),
+		locale.T("monitoring.participants.laps"),
+		locale.T("monitoring.participants.best_lap"),
+	}
+
+	var data [][]string
+
+	p.participantsTable = widget.NewTable(
+		func() (int, int) {
+			if len(data) == 0 {
+				return 0, 0
+			}
+			return len(data) + 1, len(headers) // +1 for header row
+		},
+		func() fyne.CanvasObject {
+			return widget.NewLabel("")
+		},
+		func(id widget.TableCellID, object fyne.CanvasObject) {
+			label := object.(*widget.Label)
+			if id.Row == 0 {
+				// Header row
+				label.Text = headers[id.Col]
+				label.TextStyle = fyne.TextStyle{Bold: true}
+			} else {
+				// Data row
+				if id.Col < len(data[id.Row-1]) {
+					label.Text = data[id.Row-1][id.Col]
+				}
+			}
+		},
+	)
+
+	p.participantsTable.ShowHeaderRow = false
+	p.participantsTable.ShowHeaderColumn = false
+
+	return container.NewScroll(p.participantsTable)
+}
+
+// updateParticipantsTable updates the participants table with current data
+func (p *MonitoringPanel) updateParticipantsTable() {
+	if p.participantsTable == nil || p.selectedCompetitionID == "" {
+		return
+	}
+
+	if p.participantService == nil {
+		return
+	}
+
+	participantsData, err := p.participantService.GetParticipantRegistrationData(p.selectedCompetitionID)
+	if err != nil {
+		fmt.Println("ERROR loading participants data:", err)
+		return
+	}
+
+	// Build table data
+	var data [][]string
+	for _, pd := range participantsData {
+		transponderStatus := "✗"
+		if pd.TransponderWorked {
+			transponderStatus = "✓"
+		}
+
+		bestLapStr := "-"
+		if pd.BestLapTimeMs > 0 {
+			bestLapStr = formatDuration(pd.BestLapTimeMs)
+		}
+
+		row := []string{
+			transponderStatus,
+			fmt.Sprintf("%d", pd.CompetitorNumber),
+			pd.FullName,
+			pd.ModelName,
+			pd.ModelScale,
+			fmt.Sprintf("%d", pd.LapCount),
+			bestLapStr,
+		}
+		data = append(data, row)
+	}
+
+	// Update table and refresh
+	p.participantsTable.Refresh()
+}
+
+// formatDuration formats milliseconds to MM:SS.mmm format
+func formatDuration(ms int) string {
+	totalSeconds := ms / 1000
+	minutes := totalSeconds / 60
+	seconds := totalSeconds % 60
+	milliseconds := ms % 1000
+	return fmt.Sprintf("%02d:%02d.%03d", minutes, seconds, milliseconds)
 }
 
 // refreshCompetitions loads all competitions from the service
@@ -232,6 +338,8 @@ func (p *MonitoringPanel) onCompetitionSelected(selected string) {
 					p.stopButton.Disable()
 				}
 			}
+			// Update participants table after competition selection
+			p.updateParticipantsTable()
 			return
 		}
 	}
@@ -248,6 +356,10 @@ func (p *MonitoringPanel) UpdateData() {
 	// Refresh the selected competition state from DB
 	if p.selectedCompetition != "" {
 		p.onCompetitionSelected(p.selectedCompetition)
+	}
+	// Also update participants table if a competition is selected
+	if p.selectedCompetitionID != "" {
+		p.updateParticipantsTable()
 	}
 }
 

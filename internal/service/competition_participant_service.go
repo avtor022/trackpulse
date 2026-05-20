@@ -26,6 +26,11 @@ type CompetitorModelServiceInterface interface {
 	GetCompetitorModelByID(id string) (*models.CompetitorModel, error)
 }
 
+// RCModelServiceInterface defines the interface for RC model data access
+type RCModelServiceInterface interface {
+	GetModelByID(id string) (*models.RCModel, error)
+}
+
 // CompetitionServiceInterface defines the interface for competition data access
 type CompetitionServiceInterface interface {
 	GetAllCompetitions() ([]models.Competition, error)
@@ -57,21 +62,23 @@ type ParticipantRegistrationData struct {
 
 // CompetitionParticipantService handles business logic for competition participants
 type CompetitionParticipantService struct {
-	repo                 CompetitionParticipantRepositoryInterface
+	repo                   CompetitionParticipantRepositoryInterface
 	competitorModelService CompetitorModelServiceInterface
 	competitionService     CompetitionServiceInterface
 	lapsRepo               CompetitionLapsRepositoryInterface
 	competitorService      CompetitorServiceInterface
+	rcModelService         RCModelServiceInterface
 }
 
 // NewCompetitionParticipantService creates a new competition participant service
-func NewCompetitionParticipantService(repo CompetitionParticipantRepositoryInterface, competitorModelService CompetitorModelServiceInterface, competitionService CompetitionServiceInterface, lapsRepo CompetitionLapsRepositoryInterface, competitorService CompetitorServiceInterface) *CompetitionParticipantService {
+func NewCompetitionParticipantService(repo CompetitionParticipantRepositoryInterface, competitorModelService CompetitorModelServiceInterface, competitionService CompetitionServiceInterface, lapsRepo CompetitionLapsRepositoryInterface, competitorService CompetitorServiceInterface, rcModelService RCModelServiceInterface) *CompetitionParticipantService {
 	return &CompetitionParticipantService{
-		repo:                 repo,
+		repo:                   repo,
 		competitorModelService: competitorModelService,
 		competitionService:     competitionService,
 		lapsRepo:               lapsRepo,
 		competitorService:      competitorService,
+		rcModelService:         rcModelService,
 	}
 }
 
@@ -245,8 +252,11 @@ func (s *CompetitionParticipantService) GetParticipantRegistrationData(competiti
 			continue
 		}
 
-		// Get RC model info - we need to add this to the interface
-		// For now, we'll use a simplified approach
+		// Get RC model info
+		rcModel, err := s.rcModelService.GetModelByID(cm.RCModelID)
+		if err != nil || rcModel == nil {
+			continue
+		}
 
 		// Get lap data if exists
 		laps, _ := s.lapsRepo.GetByParticipantID(p.ID)
@@ -255,6 +265,8 @@ func (s *CompetitionParticipantService) GetParticipantRegistrationData(competiti
 			TransponderWorked: p.TransponderWorked,
 			CompetitorNumber:  competitor.CompetitorNumber,
 			FullName:          competitor.FullName,
+			ModelName:         rcModel.ModelName,
+			ModelScale:        rcModel.Scale,
 			LapCount:          0,
 			BestLapTimeMs:     0,
 		}

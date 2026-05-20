@@ -308,5 +308,14 @@
     "participants.select.competition.button": "Select...",
     "participants.select.competition.popup_title": "Select Competition",
     "participants.clear_selection": "Clear Selection",
-    "participants.transponders_list": "Athletes' transponders"
+    "participants.transponders_list": "Athletes' transponders",
+    "monitoring.participants.title": "Competition Participants",
+    "monitoring.participants.transponder": "Transponder",
+    "monitoring.participants.number": "Number",
+    "monitoring.participants.name": "Full Name",
+    "monitoring.participants.model": "Model",
+    "monitoring.participants.scale": "Scale",
+    "monitoring.participants.laps": "Laps",
+    "monitoring.participants.best_lap": "Best Lap",
+    "monitoring.no_participants": "No participants in this competition"
 }
