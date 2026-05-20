@@ -463,9 +463,9 @@ func (p *MonitoringPanel) updateLapHistoryItem(label *widget.Label, id widget.Li
 	for participantID, data := range p.currentLapData {
 		// Find participant
 		var participantName string
-		for _, p := range p.participants {
-			if p.ID == participantID {
-				if cm, ok := p.competitorModels[p.CompetitorModelID]; ok {
+		for _, part := range p.participants {
+			if part.ID == participantID {
+				if cm, ok := p.competitorModels[part.CompetitorModelID]; ok {
 					if c, ok2 := p.competitors[cm.CompetitorID]; ok2 {
 						participantName = c.FullName
 					}
