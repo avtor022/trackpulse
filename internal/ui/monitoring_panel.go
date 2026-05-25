@@ -109,7 +109,7 @@ func (p *MonitoringPanel) createContent() *fyne.Container {
 }
 
 // createParticipantsTable creates the participants registration table
-func (p *MonitoringPanel) createParticipantsTable() *fyne.Container {
+func (p *MonitoringPanel) createParticipantsTable() fyne.CanvasObject {
 	// Headers for the table
 	headers := []string{
 		locale.T("monitoring.participants.transponder"),
