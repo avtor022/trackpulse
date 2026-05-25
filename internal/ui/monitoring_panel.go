@@ -29,7 +29,7 @@ type MonitoringPanel struct {
 	timer                  *Timer
 	competitionFilter      *CompetitionFilter
 	participantsTable      *widget.Table
-	participantsContainer  *fyne.Container
+	participantsContainer  fyne.CanvasObject
 }
 
 // NewMonitoringPanel creates a new monitoring panel
