@@ -69,6 +69,7 @@ type ParticipantLapData struct {
 	LastLapTimeMs            int
 	TotalTimeMs              int
 	LapTimes                 []int // in milliseconds
+	TransponderVerified      bool  // true after first pass through antenna
 }
 
 // NewLapService creates a new lap service with buffered processing
@@ -224,11 +225,12 @@ func (s *LapService) recordLap(participantID string, timestamp time.Time) {
 	// Calculate lap time
 	lapTimeMs := 0
 	if data.LastPassTime.IsZero() {
-		// First lap - start timer
+		// First lap - start timer and mark transponder as verified
 		data.StartTime = timestamp
 		data.LastPassTime = timestamp
 		data.LapCount = 1
 		data.TotalTimeMs = 0
+		data.TransponderVerified = true
 	} else {
 		// Subsequent lap
 		lapTimeMs = int(timestamp.Sub(data.LastPassTime).Milliseconds())
