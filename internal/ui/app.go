@@ -55,9 +55,11 @@ func NewApp(competitorService *service.CompetitorService, modelService *service.
 	competitionRepo := repository.NewCompetitionRepository(db)
 	participantRepo := repository.NewCompetitionParticipantRepository(db)
 	competitionLapsRepo := repository.NewCompetitionLapsRepository(db)
+	competitorRepo := repository.NewCompetitorRepository(db)
+	rcModelRepo := repository.NewRCModelRepository(db)
 
 	// Initialize lap service with buffered processing
-	lapService := service.NewLapService(rawScanRepo, competitorModelRepo, competitionRepo, participantRepo, competitionLapsRepo)
+	lapService := service.NewLapService(rawScanRepo, competitorModelRepo, competitionRepo, participantRepo, competitionLapsRepo, competitorRepo, rcModelRepo)
 	lapService.Start()
 
 	appInstance := &App{
@@ -134,7 +136,7 @@ func (a *App) createMainContent() *container.AppTabs {
 
 // createMonitoringTab creates the Live Monitoring tab
 func (a *App) createMonitoringTab() fyne.CanvasObject {
-	a.monitoringPanel = NewMonitoringPanel(a.competitionService, a.mainWindow)
+	a.monitoringPanel = NewMonitoringPanel(a.competitionService, a.lapService, a.mainWindow)
 	return a.monitoringPanel.content
 }
 

@@ -20,6 +20,22 @@ type LapScan struct {
 	SignalStrength *int
 }
 
+// MonitoringParticipantData represents combined data for displaying participant info on monitoring panel
+type MonitoringParticipantData struct {
+	CompetitorID       string
+	CompetitorNumber   int
+	FullName           string
+	RCModelID          string
+	ModelScale         string
+	ModelName          string
+	TransponderNumber  string
+	TransponderActive  bool // false by default, becomes true after first pass through antenna
+	Laps               int
+	BestLapTimeMs      int
+	BestLapTimeFormatted string
+	CompetitionParticipantID string
+}
+
 // LapService handles real-time lap processing from RFID scans
 type LapService struct {
 	rawScanRepo         *repository.RawScanRepository
@@ -27,6 +43,8 @@ type LapService struct {
 	competitionRepo     *repository.CompetitionRepository
 	participantRepo     *repository.CompetitionParticipantRepository
 	competitionLapsRepo *repository.CompetitionLapsRepository
+	competitorRepo      *repository.CompetitorRepository
+	rcModelRepo         *repository.RCModelRepository
 
 	// Buffered channel for async processing
 	scanChannel chan LapScan
@@ -78,6 +96,8 @@ func NewLapService(
 	competitionRepo *repository.CompetitionRepository,
 	participantRepo *repository.CompetitionParticipantRepository,
 	competitionLapsRepo *repository.CompetitionLapsRepository,
+	competitorRepo *repository.CompetitorRepository,
+	rcModelRepo *repository.RCModelRepository,
 ) *LapService {
 	return &LapService{
 		rawScanRepo:         rawScanRepo,
@@ -85,6 +105,8 @@ func NewLapService(
 		competitionRepo:     competitionRepo,
 		participantRepo:     participantRepo,
 		competitionLapsRepo: competitionLapsRepo,
+		competitorRepo:      competitorRepo,
+		rcModelRepo:         rcModelRepo,
 		scanChannel:         make(chan LapScan, 200), // Buffer for 200 scans
 		transponderCache:    make(map[string]string),
 		modelToParticipant:  make(map[string]string),
@@ -373,4 +395,90 @@ func (s *LapService) GetTransponderForModel(transponderNumber string) (string, b
 
 	id, exists := s.transponderCache[transponderNumber]
 	return id, exists
+}
+
+// formatLapTime formats lap time in milliseconds to MM:SS.mmm format
+func formatLapTime(ms int) string {
+	if ms <= 0 {
+		return "--:--.---"
+	}
+	totalSeconds := ms / 1000
+	minutes := totalSeconds / 60
+	seconds := totalSeconds % 60
+	milliseconds := ms % 1000
+	return fmt.Sprintf("%02d:%02d.%03d", minutes, seconds, milliseconds)
+}
+
+// GetMonitoringData retrieves combined participant data for monitoring display
+func (s *LapService) GetMonitoringData(competitionID string) ([]MonitoringParticipantData, error) {
+	// Get all participants for the competition
+	participants, err := s.participantRepo.GetByCompetitionID(competitionID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get participants: %w", err)
+	}
+
+	var result []MonitoringParticipantData
+
+	for _, p := range participants {
+		// Get competitor model info
+		cm, err := s.competitorModelRepo.GetByID(p.CompetitorModelID)
+		if err != nil || cm == nil {
+			continue
+		}
+
+		// Get competitor info
+		competitor, err := s.competitorRepo.GetByID(cm.CompetitorID)
+		if err != nil || competitor == nil {
+			continue
+		}
+
+		// Get RC model info
+		rcModel, err := s.rcModelRepo.GetByID(cm.RCModelID)
+		if err != nil || rcModel == nil {
+			continue
+		}
+
+		// Get lap data from cache or database
+		laps := 0
+		bestLapTimeMs := 0
+		transponderActive := false
+
+		s.resultsMu.RLock()
+		if lapData, exists := s.participantResults[p.ID]; exists {
+			laps = lapData.LapCount
+			bestLapTimeMs = lapData.BestLapTimeMs
+			// Transponder is active if at least one lap has been recorded
+			transponderActive = laps > 0
+		}
+		s.resultsMu.RUnlock()
+
+		// If no cached data, try to get from database
+		if laps == 0 {
+			dbLaps, err := s.competitionLapsRepo.GetByParticipantID(p.ID)
+			if err == nil && dbLaps != nil {
+				laps = dbLaps.NumberOfLaps
+				bestLapTimeMs = dbLaps.BestLapTimeMs
+				transponderActive = laps > 0
+			}
+		}
+
+		data := MonitoringParticipantData{
+			CompetitorID:             competitor.ID,
+			CompetitorNumber:         competitor.CompetitorNumber,
+			FullName:                 competitor.FullName,
+			RCModelID:                rcModel.ID,
+			ModelScale:               rcModel.Scale,
+			ModelName:                rcModel.ModelName,
+			TransponderNumber:        cm.TransponderNumber,
+			TransponderActive:        transponderActive,
+			Laps:                     laps,
+			BestLapTimeMs:            bestLapTimeMs,
+			BestLapTimeFormatted:     formatLapTime(bestLapTimeMs),
+			CompetitionParticipantID: p.ID,
+		}
+
+		result = append(result, data)
+	}
+
+	return result, nil
 }

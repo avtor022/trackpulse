@@ -61,15 +61,16 @@ type Competition struct {
 
 // CompetitionParticipant links competition with competitor-model
 type CompetitionParticipant struct {
-	ID                string    `json:"id" db:"id"`
-	CompetitionID     string    `json:"competition_id" db:"competition_id"`
-	CompetitorModelID string    `json:"competitor_model_id" db:"competitor_model_id"`
-	GridPosition      *int      `json:"grid_position,omitempty" db:"grid_position"`
-	IsFinished        bool      `json:"is_finished" db:"is_finished"`
-	Disqualified      bool      `json:"disqualified" db:"disqualified"`
-	DNFReason         string    `json:"dnf_reason" db:"dnf_reason"`
-	CreatedAt         time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt         time.Time `json:"updated_at" db:"updated_at"`
+	ID                   string    `json:"id" db:"id"`
+	CompetitionID        string    `json:"competition_id" db:"competition_id"`
+	CompetitorModelID    string    `json:"competitor_model_id" db:"competitor_model_id"`
+	GridPosition         *int      `json:"grid_position,omitempty" db:"grid_position"`
+	IsFinished           bool      `json:"is_finished" db:"is_finished"`
+	Disqualified         bool      `json:"disqualified" db:"disqualified"`
+	DNFReason            string    `json:"dnf_reason" db:"dnf_reason"`
+	TransponderActive    bool      `json:"transponder_active" db:"transponder_active"`
+	CreatedAt            time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt            time.Time `json:"updated_at" db:"updated_at"`
 }
 
 // CompetitionLaps aggregated results for a participant in a competition
