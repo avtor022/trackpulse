@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -17,6 +18,7 @@ type MonitoringPanel struct {
 	content               *fyne.Container
 	mainWindow            fyne.Window
 	competitionService    *service.CompetitionService
+	monitoringService     *service.MonitoringService
 	selectedCompetition   string
 	selectedCompetitionID string
 	statusLabel           *widget.Label
@@ -27,13 +29,16 @@ type MonitoringPanel struct {
 	timerLabel            *widget.Label
 	timer                 *Timer
 	competitionFilter     *CompetitionFilter
+	participantsTable     *widget.Table
+	participantData       []service.MonitoringParticipantData
 }
 
 // NewMonitoringPanel creates a new monitoring panel
-func NewMonitoringPanel(competitionService *service.CompetitionService, mainWindow fyne.Window) *MonitoringPanel {
+func NewMonitoringPanel(competitionService *service.CompetitionService, monitoringService *service.MonitoringService, mainWindow fyne.Window) *MonitoringPanel {
 	p := &MonitoringPanel{
-		mainWindow:         mainWindow,
+		mainWindow:        mainWindow,
 		competitionService: competitionService,
+		monitoringService:  monitoringService,
 	}
 
 	p.content = p.createContent()
@@ -83,8 +88,87 @@ func (p *MonitoringPanel) createContent() *fyne.Container {
 		widget.NewSeparator(),
 	)
 
-	// Main content area (placeholder for future monitoring widgets)
-	monitoringContent := widget.NewLabel(locale.T("monitoring.placeholder"))
+	// Main content area with participants table
+	p.participantsTable = widget.NewTable(
+		func() (int, int) {
+			if len(p.participantData) == 0 {
+				return 0, 0
+			}
+			return len(p.participantData), 7
+		},
+		func() fyne.CanvasObject {
+			label := widget.NewLabel("Template")
+			label.Truncation = fyne.TextTruncateEllipsis
+			return label
+		},
+		func(i widget.TableCellID, o fyne.CanvasObject) {
+			if i.Row >= len(p.participantData) {
+				o.(*widget.Label).SetText("")
+				return
+			}
+			data := p.participantData[i.Row]
+
+			switch i.Col {
+			case 0: // Transponder Active
+				status := "❌"
+				if data.TransponderActive {
+					status = "✅"
+				}
+				o.(*widget.Label).SetText(status)
+			case 1: // Competitor Number
+				o.(*widget.Label).SetText(fmt.Sprintf("%d", data.CompetitorNumber))
+			case 2: // Full Name
+				o.(*widget.Label).SetText(data.FullName)
+			case 3: // Model
+				o.(*widget.Label).SetText(fmt.Sprintf("%s (%s)", data.ModelName, data.ModelScale))
+			case 4: // Lap Count
+				o.(*widget.Label).SetText(fmt.Sprintf("%d", data.LapCount))
+			case 5: // Best Lap Time
+				if data.BestLapTimeMs > 0 {
+					o.(*widget.Label).SetText(formatDuration(time.Duration(data.BestLapTimeMs) * time.Millisecond))
+				} else {
+					o.(*widget.Label).SetText("-")
+				}
+			case 6: // Total Time
+				if data.TotalCompetitionTimeMs > 0 {
+					o.(*widget.Label).SetText(formatDuration(time.Duration(data.TotalCompetitionTimeMs) * time.Millisecond))
+				} else {
+					o.(*widget.Label).SetText("-")
+				}
+			}
+			o.(*widget.Label).Truncation = fyne.TextTruncateEllipsis
+		},
+	)
+	p.participantsTable.ShowHeaderRow = true
+	p.participantsTable.CreateHeader = func() fyne.CanvasObject {
+		return widget.NewLabelWithStyle("Header", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	}
+	p.participantsTable.UpdateHeader = func(id widget.TableCellID, o fyne.CanvasObject) {
+		headers := []string{
+			"RFID",
+			locale.T("competitor.header.number"),
+			locale.T("competitor.header.name"),
+			locale.T("participants.table.model"),
+			locale.T("competition.header.laps"),
+			locale.T("monitoring.best_lap"),
+			locale.T("monitoring.total_time"),
+		}
+		if id.Col >= 0 && id.Col < len(headers) {
+			o.(*widget.Label).SetText(headers[id.Col])
+			o.(*widget.Label).TextStyle = fyne.TextStyle{Bold: true}
+		}
+	}
+
+	// Set column widths
+	p.participantsTable.SetColumnWidth(0, 60)  // RFID status
+	p.participantsTable.SetColumnWidth(1, 80)  // Number
+	p.participantsTable.SetColumnWidth(2, 200) // Name
+	p.participantsTable.SetColumnWidth(3, 200) // Model
+	p.participantsTable.SetColumnWidth(4, 80)  // Laps
+	p.participantsTable.SetColumnWidth(5, 120) // Best Lap
+	p.participantsTable.SetColumnWidth(6, 120) // Total Time
+
+	monitoringContent := container.NewScroll(p.participantsTable)
 	monitoringContent.Alignment = fyne.TextAlignCenter
 
 	// Layout
@@ -198,6 +282,7 @@ func (p *MonitoringPanel) onCompetitionSelected(selected string) {
 			p.timer.Reset()
 		}
 		p.selectedCompetitionID = ""
+		p.clearParticipantsTable()
 		return
 	}
 
@@ -232,9 +317,46 @@ func (p *MonitoringPanel) onCompetitionSelected(selected string) {
 					p.stopButton.Disable()
 				}
 			}
+			// Load participant data for monitoring display immediately after selection
+			p.loadParticipantData()
 			return
 		}
 	}
+}
+
+// loadParticipantData loads participant data for the selected competition
+func (p *MonitoringPanel) loadParticipantData() {
+	if p.selectedCompetitionID == "" || p.monitoringService == nil {
+		return
+	}
+
+	data, err := p.monitoringService.GetParticipantsForCompetition(p.selectedCompetitionID)
+	if err != nil {
+		fmt.Println("ERROR loading participant data:", err)
+		return
+	}
+
+	p.participantData = data
+	if p.participantsTable != nil {
+		p.participantsTable.Refresh()
+	}
+}
+
+// clearParticipantsTable clears the participants table
+func (p *MonitoringPanel) clearParticipantsTable() {
+	p.participantData = nil
+	if p.participantsTable != nil {
+		p.participantsTable.Refresh()
+	}
+}
+
+// formatDuration formats a duration into MM:SS.ms format
+func formatDuration(d time.Duration) string {
+	ms := d.Milliseconds()
+	minutes := ms / 60000
+	seconds := (ms % 60000) / 1000
+	millis := ms % 1000
+	return fmt.Sprintf("%02d:%02d.%03d", minutes, seconds, millis)
 }
 
 // Refresh updates the panel with new locale strings

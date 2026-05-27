@@ -134,7 +134,17 @@ func (a *App) createMainContent() *container.AppTabs {
 
 // createMonitoringTab creates the Live Monitoring tab
 func (a *App) createMonitoringTab() fyne.CanvasObject {
-	a.monitoringPanel = NewMonitoringPanel(a.competitionService, a.mainWindow)
+	// Initialize monitoring service with lap service for real-time data
+	monitoringService := service.NewMonitoringService(
+		repository.NewCompetitionParticipantRepository(nil),
+		repository.NewCompetitorModelRepository(nil),
+		repository.NewCompetitorRepository(nil),
+		repository.NewRCModelRepository(nil),
+		repository.NewCompetitionLapsRepository(nil),
+		a.lapService,
+	)
+
+	a.monitoringPanel = NewMonitoringPanel(a.competitionService, monitoringService, a.mainWindow)
 	return a.monitoringPanel.content
 }
 
