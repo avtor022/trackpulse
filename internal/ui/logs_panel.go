@@ -18,6 +18,8 @@ type LogsPanel struct {
 	logText    *widget.RichText
 	logScroll  *container.Scroll
 	mainWindow fyne.Window
+	header     *widget.Label
+	clearBtn   *widget.Button
 }
 
 // NewLogsPanel creates a new logs panel
@@ -37,15 +39,16 @@ func (p *LogsPanel) createContent() *fyne.Container {
 	p.logScroll = container.NewVScroll(p.logText)
 
 	// Кнопка очистки лога
-	clearBtn := widget.NewButtonWithIcon(locale.T("logs.clear"), theme.DeleteIcon(), func() {
+	p.clearBtn = widget.NewButtonWithIcon(locale.T("logs.clear"), theme.DeleteIcon(), func() {
 		p.clearLog()
 	})
 
 	// Заголовок лога
+	p.header = widget.NewLabel(locale.T("logs.device_log"))
 	logHeader := container.NewHBox(
-		widget.NewLabel(locale.T("logs.device_log")),
+		p.header,
 		layout.NewSpacer(),
-		clearBtn,
+		p.clearBtn,
 	)
 	logHeader.Objects[0].(*widget.Label).TextStyle = fyne.TextStyle{Bold: true}
 
@@ -93,5 +96,6 @@ func (p *LogsPanel) clearLog() {
 
 // Refresh updates the panel with new locale strings
 func (p *LogsPanel) Refresh() {
-	p.content = p.createContent()
+	p.header.SetText(locale.T("logs.device_log"))
+	p.clearBtn.SetText(locale.T("logs.clear"))
 }

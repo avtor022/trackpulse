@@ -1,12 +1,13 @@
 package locale
 
 import (
+	"embed"
 	"encoding/json"
 	"fmt"
-	"os"
-	"path/filepath"
-	"runtime"
 )
+
+//go:embed translations/*.json
+var translationsFS embed.FS
 
 // Locale represents a localization configuration
 type Locale struct {
@@ -23,18 +24,11 @@ var SupportedLocales = map[string]string{
 	"ru": "Русский",
 }
 
-// translationsDir returns the path to the translations directory
-func translationsDir() string {
-	_, filename, _, _ := runtime.Caller(0)
-	dir := filepath.Dir(filename)
-	return filepath.Join(dir, "translations")
-}
-
 // loadTranslations loads translations from a JSON file
 func loadTranslations(langCode string) (map[string]string, error) {
-	filePath := filepath.Join(translationsDir(), langCode+".json")
+	filePath := "translations/" + langCode + ".json"
 
-	data, err := os.ReadFile(filePath)
+	data, err := translationsFS.ReadFile(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read translation file %s: %w", filePath, err)
 	}
