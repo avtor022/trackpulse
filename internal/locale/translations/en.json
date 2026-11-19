@@ -280,7 +280,7 @@
     "monitoring.competitor_number": "Athlete number",
     "monitoring.competitor_name": "Full name",
     "monitoring.laps": "Laps",
-    "monitoring.best_lap": "Fastest lap (s)",
+    "monitoring.best_lap": "Fastest lap (mm:ss:ms)",
     "monitoring.save_error": "Error saving race data: %s",
     "button.start": "Start",
     "button.stop": "Stop",

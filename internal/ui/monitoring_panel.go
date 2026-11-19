@@ -141,7 +141,7 @@ func (p *MonitoringPanel) createStandingsTable() *widget.Table {
 			case 4:
 				text = "–"
 				if row.BestLapTimeMs > 0 {
-					text = fmt.Sprintf("%d.%03d", row.BestLapTimeMs/1000, row.BestLapTimeMs%1000)
+					text = fmt.Sprintf("%02d:%02d:%03d", row.BestLapTimeMs/60000, row.BestLapTimeMs/1000%60, row.BestLapTimeMs%1000)
 				}
 			}
 			obj.(*widget.Label).SetText(text)

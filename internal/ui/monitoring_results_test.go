@@ -25,7 +25,7 @@ func TestMonitoringTableShowsCompetitorAndLapResults(t *testing.T) {
 	if rows != 1 || columns != 5 {
 		t.Fatalf("table dimensions = %d x %d", rows, columns)
 	}
-	want := []string{"1", "7", "Иван Иванов", "3", "5.432"}
+	want := []string{"1", "7", "Иван Иванов", "3", "00:05:432"}
 	for col, expected := range want {
 		label := widget.NewLabel("")
 		p.standingsTable.UpdateCell(widget.TableCellID{Row: 0, Col: col}, label)
@@ -33,8 +33,14 @@ func TestMonitoringTableShowsCompetitorAndLapResults(t *testing.T) {
 			t.Errorf("column %d = %q, want %q", col, label.Text, expected)
 		}
 	}
-	p.standings[0].BestLapTimeMs = 0
+	p.standings[0].BestLapTimeMs = 65007
 	label := widget.NewLabel("")
+	p.standingsTable.UpdateCell(widget.TableCellID{Row: 0, Col: 4}, label)
+	if label.Text != "01:05:007" {
+		t.Errorf("lap time = %q, want 01:05:007", label.Text)
+	}
+	p.standings[0].BestLapTimeMs = 0
+	label = widget.NewLabel("")
 	p.standingsTable.UpdateCell(widget.TableCellID{Row: 0, Col: 4}, label)
 	if label.Text != "–" {
 		t.Errorf("no completed lap should display a dash, got %q", label.Text)

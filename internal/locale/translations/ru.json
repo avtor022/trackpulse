@@ -281,7 +281,7 @@
     "monitoring.competitor_number": "Номер спортсмена",
     "monitoring.competitor_name": "Полное имя спортсмена",
     "monitoring.laps": "Количество кругов",
-    "monitoring.best_lap": "Быстрейший круг (с)",
+    "monitoring.best_lap": "Быстрейший круг (мм:сс:мс)",
     "monitoring.save_error": "Ошибка сохранения данных заезда: %s",
     "button.start": "Старт",
     "button.stop": "Стоп",
