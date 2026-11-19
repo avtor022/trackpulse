@@ -50,6 +50,7 @@ type Competition struct {
 	TrackName        string     `json:"track_name" db:"track_name"`
 	LapCountTarget   *int       `json:"lap_count_target,omitempty" db:"lap_count_target"`
 	TimeLimitMinutes *int       `json:"time_limit_minutes,omitempty" db:"time_limit_minutes"`
+	MinLapTimeMs     int        `json:"min_lap_time_ms" db:"min_lap_time_ms"`
 	TimeStart        *time.Time `json:"time_start,omitempty" db:"time_start"`
 	TimeFinish       *time.Time `json:"time_finish,omitempty" db:"time_finish"`
 	Status           string     `json:"status" db:"status"`
@@ -86,6 +87,15 @@ type CompetitionLaps struct {
 	TotalCompetitionTimeMs   int        `json:"total_competition_time_ms" db:"total_competition_time_ms"`
 	CreatedAt                time.Time  `json:"created_at" db:"created_at"`
 	UpdatedAt                time.Time  `json:"updated_at" db:"updated_at"`
+}
+
+// CompetitionStanding is one participant's result on the monitoring screen.
+type CompetitionStanding struct {
+	ParticipantID    string
+	CompetitorNumber int
+	FullName         string
+	NumberOfLaps     int
+	BestLapTimeMs    int
 }
 
 // LapHistory detailed history of each lap

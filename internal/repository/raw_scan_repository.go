@@ -15,6 +15,7 @@ type RawScanRepository struct {
 	db            *sql.DB
 	insertStmt    *sql.Stmt // Cached prepared statement for bulk inserts
 	stmtCacheOnce sync.Once // Ensure one-time initialization
+	stmtErr       error
 }
 
 // NewRawScanRepository creates a new raw scan repository
@@ -46,7 +47,7 @@ func (r *RawScanRepository) Close() error {
 // Create inserts a single raw scan record
 func (r *RawScanRepository) Create(scan *models.RawScan) error {
 	now := time.Now().Format(time.RFC3339)
-	timestamp := scan.Timestamp.Format(time.RFC3339)
+	timestamp := scan.Timestamp.Format(time.RFC3339Nano)
 
 	var signalStrength sql.NullInt64
 	if scan.SignalStrength != nil {
@@ -96,12 +97,11 @@ func (r *RawScanRepository) CreateBulk(scans []*models.RawScan) error {
 	}
 
 	// Initialize prepared statement once using sync.Once
-	var initErr error
 	r.stmtCacheOnce.Do(func() {
-		initErr = r.initPreparedStmt()
+		r.stmtErr = r.initPreparedStmt()
 	})
-	if initErr != nil {
-		return initErr
+	if r.stmtErr != nil {
+		return r.stmtErr
 	}
 
 	// Start transaction for atomic bulk insert
@@ -124,7 +124,7 @@ func (r *RawScanRepository) CreateBulk(scans []*models.RawScan) error {
 			scan.Timestamp = time.Now()
 		}
 
-		timestamp := scan.Timestamp.Format(time.RFC3339)
+		timestamp := scan.Timestamp.Format(time.RFC3339Nano)
 
 		var signalStrength sql.NullInt64
 		if scan.SignalStrength != nil {

@@ -458,6 +458,14 @@ func TestCompetitionService_CreateCompetition_EmptyType(t *testing.T) {
 	}
 }
 
+func TestCompetitionServiceRejectsNegativeMinimumLapTime(t *testing.T) {
+	svc := service.NewCompetitionService(NewMockCompetitionRepository(), NewMockRCModelTypeRepositoryForCompetition(), NewMockRCModelScaleRepositoryForCompetition(), NewMockCompetitionTrackRepository(), NewMockCompetitionYearRepository(), NewMockCompetitionSeasonRepository())
+	competition := &models.Competition{CompetitionTitle: "Race", CompetitionType: "heat", MinLapTimeMs: -1}
+	if err := svc.CreateCompetition(competition); err == nil {
+		t.Fatal("negative minimum lap time must be rejected")
+	}
+}
+
 // TestCompetitionService_UpdateCompetition_Success tests successful update
 func TestCompetitionService_UpdateCompetition_Success(t *testing.T) {
 	mockCompRepo := NewMockCompetitionRepository()

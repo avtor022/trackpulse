@@ -179,7 +179,7 @@ func (p *PortScanner) connect() {
 	}
 
 	// Start reading from serial port in background
-	go p.readFromPort()
+	go p.readFromPort(port, p.readerType, portName)
 }
 
 // disconnect handles disconnection from the serial port
@@ -333,8 +333,8 @@ func (p *PortScanner) SetLapService(lapService *service.LapService) {
 }
 
 // readFromPort continuously reads data from the serial port and logs RFID tags
-func (p *PortScanner) readFromPort() {
-	if p.port == nil {
+func (p *PortScanner) readFromPort(port io.ReadCloser, readerType, comPort string) {
+	if port == nil {
 		return
 	}
 
@@ -345,11 +345,11 @@ func (p *PortScanner) readFromPort() {
 			return
 		default:
 			// Set read deadline to prevent blocking indefinitely
-			if rc, ok := p.port.(interface{ SetReadDeadline(time.Time) error }); ok {
+			if rc, ok := port.(interface{ SetReadDeadline(time.Time) error }); ok {
 				rc.SetReadDeadline(time.Now().Add(500 * time.Millisecond))
 			}
 
-			n, err := p.port.Read(buf)
+			n, err := port.Read(buf)
 			if err != nil {
 				if err == io.EOF {
 					return
@@ -366,7 +366,9 @@ func (p *PortScanner) readFromPort() {
 				if data != "" {
 					// Log to UI
 					if p.logsPanel != nil {
-						p.logsPanel.AddLog(fmt.Sprintf("RFID tag detected: %s", data))
+						fyne.Do(func() {
+							p.logsPanel.AddLog(fmt.Sprintf("RFID tag detected: %s", data))
+						})
 					}
 
 					// Queue scan for processing by LapService
@@ -375,8 +377,8 @@ func (p *PortScanner) readFromPort() {
 							ID:         uuid.New().String(),
 							TagValue:   data,
 							Timestamp:  time.Now(),
-							ReaderType: p.readerType,
-							COMPort:    p.comPort,
+							ReaderType: readerType,
+							COMPort:    comPort,
 						}
 						p.lapService.QueueScan(scan)
 					}

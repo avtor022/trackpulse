@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 
@@ -495,10 +496,10 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 
 	// Map display names to internal values
 	statusMap := map[string]string{
-		locale.T("competition.status.scheduled"):  "scheduled",
-		locale.T("competition.status.running"):    "in_progress",
-		locale.T("competition.status.finished"):   "finished",
-		locale.T("competition.status.cancelled"):  "cancelled",
+		locale.T("competition.status.scheduled"): "scheduled",
+		locale.T("competition.status.running"):   "in_progress",
+		locale.T("competition.status.finished"):  "finished",
+		locale.T("competition.status.cancelled"): "cancelled",
 	}
 
 	// Helper function to update status button text
@@ -1174,6 +1175,8 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 	// Time limit entry
 	timeLimitEntry := widget.NewEntry()
 	timeLimitEntry.SetPlaceHolder(locale.T("form.competition.time_limit_placeholder"))
+	minLapTimeEntry := widget.NewEntry()
+	minLapTimeEntry.SetText("5")
 
 	if competition != nil {
 		// Edit mode - populate fields
@@ -1223,6 +1226,7 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 		if competition.TimeLimitMinutes != nil {
 			timeLimitEntry.SetText(strconv.Itoa(*competition.TimeLimitMinutes))
 		}
+		minLapTimeEntry.SetText(strconv.FormatFloat(float64(competition.MinLapTimeMs)/1000, 'f', -1, 64))
 		// Map internal status to localized display
 		if localizedStatus, ok := reverseMap(statusMap, competition.Status); ok {
 			statusSelect.SetSelected(localizedStatus)
@@ -1243,6 +1247,7 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 		widget.NewFormItem(locale.T("form.competition.title"), titleEntry),
 		widget.NewFormItem(locale.T("form.competition.time_limit"), timeLimitEntry),
 		widget.NewFormItem(locale.T("form.competition.lap_count"), lapCountEntry),
+		widget.NewFormItem(locale.T("form.competition.min_lap_time"), minLapTimeEntry),
 	)
 
 	// Create dialog without buttons first so we can reference it in the callback
@@ -1269,6 +1274,13 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 		// Map localized display to internal value
 		if mappedType, ok := typeMap[compType]; ok {
 			compType = mappedType
+		}
+
+		// Parse minimum lap time
+		minLapTimeMs, err := parseMinimumLapTime(minLapTimeEntry.Text)
+		if err != nil {
+			dialog.ShowError(fmt.Errorf("%s", locale.T("error.invalid.min_lap_time")), p.window)
+			return
 		}
 
 		// Parse lap count
@@ -1375,6 +1387,7 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 			newC.TrackName = strings.TrimSpace(trackName)
 			newC.LapCountTarget = lapCountTarget
 			newC.TimeLimitMinutes = timeLimitMinutes
+			newC.MinLapTimeMs = minLapTimeMs
 			newC.Status = statusValue
 			newC.CompetitionYear = competitionYear
 			newC.Season = seasonValue
@@ -1401,6 +1414,7 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 				TrackName:        strings.TrimSpace(trackName),
 				LapCountTarget:   lapCountTarget,
 				TimeLimitMinutes: timeLimitMinutes,
+				MinLapTimeMs:     minLapTimeMs,
 				Status:           statusValue,
 				CompetitionYear:  competitionYear,
 				Season:           seasonValue,
@@ -1450,6 +1464,14 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 
 	// Resize the dialog window
 	d.Resize(fyne.NewSize(dialogWidth, dialogHeight))
+}
+
+func parseMinimumLapTime(input string) (int, error) {
+	seconds, err := strconv.ParseFloat(strings.ReplaceAll(strings.TrimSpace(input), ",", "."), 64)
+	if err != nil || math.IsNaN(seconds) || math.IsInf(seconds, 0) || seconds < 0 || seconds > float64(math.MaxInt32)/1000 {
+		return 0, fmt.Errorf("invalid minimum lap time")
+	}
+	return int(math.Round(seconds * 1000)), nil
 }
 
 // reverseMap finds the key by value in a map

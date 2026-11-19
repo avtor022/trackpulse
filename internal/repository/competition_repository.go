@@ -23,6 +23,7 @@ func scanCompetitionRow(rows *sql.Rows) (*models.Competition, error) {
 		&c.TrackName,
 		&lapCountTarget,
 		&timeLimitMinutes,
+		&c.MinLapTimeMs,
 		&timeStartStr,
 		&timeFinishStr,
 		&c.Status,
@@ -82,6 +83,7 @@ func scanCompetitionRowFromRow(row *sql.Row) (*models.Competition, error) {
 		&c.TrackName,
 		&lapCountTarget,
 		&timeLimitMinutes,
+		&c.MinLapTimeMs,
 		&timeStartStr,
 		&timeFinishStr,
 		&c.Status,
@@ -143,7 +145,7 @@ func NewCompetitionRepository(db *sql.DB) *CompetitionRepository {
 func (r *CompetitionRepository) GetAll() ([]models.Competition, error) {
 	rows, err := r.db.Query(`
 		SELECT id, competition_title, competition_type, model_type, model_scale, track_name, 
-		       lap_count_target, time_limit_minutes, time_start, time_finish, status, 
+		       lap_count_target, time_limit_minutes, min_lap_time_ms, time_start, time_finish, status,
 		       competition_year, season, created_at, updated_at
 		FROM competitions
 		ORDER BY time_start DESC
@@ -169,7 +171,7 @@ func (r *CompetitionRepository) GetAll() ([]models.Competition, error) {
 func (r *CompetitionRepository) GetByID(id string) (*models.Competition, error) {
 	row := r.db.QueryRow(`
 		SELECT id, competition_title, competition_type, model_type, model_scale, track_name, 
-		       lap_count_target, time_limit_minutes, time_start, time_finish, status, 
+		       lap_count_target, time_limit_minutes, min_lap_time_ms, time_start, time_finish, status,
 		       competition_year, season, created_at, updated_at
 		FROM competitions
 		WHERE id = ?
@@ -194,10 +196,10 @@ func (r *CompetitionRepository) Create(competition *models.Competition) error {
 
 	var timeStartStr, timeFinishStr sql.NullString
 	if competition.TimeStart != nil {
-		timeStartStr = sql.NullString{String: competition.TimeStart.Format(time.RFC3339), Valid: true}
+		timeStartStr = sql.NullString{String: competition.TimeStart.Format(time.RFC3339Nano), Valid: true}
 	}
 	if competition.TimeFinish != nil {
-		timeFinishStr = sql.NullString{String: competition.TimeFinish.Format(time.RFC3339), Valid: true}
+		timeFinishStr = sql.NullString{String: competition.TimeFinish.Format(time.RFC3339Nano), Valid: true}
 	}
 
 	var competitionYear sql.NullInt64
@@ -207,9 +209,9 @@ func (r *CompetitionRepository) Create(competition *models.Competition) error {
 
 	result, err := r.db.Exec(`
 		INSERT INTO competitions (id, competition_title, competition_type, model_type, model_scale, 
-		                          track_name, lap_count_target, time_limit_minutes, time_start, 
+		                          track_name, lap_count_target, time_limit_minutes, min_lap_time_ms, time_start,
 		                          time_finish, status, competition_year, season, created_at, updated_at)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`,
 		competition.ID,
 		competition.CompetitionTitle,
@@ -219,6 +221,7 @@ func (r *CompetitionRepository) Create(competition *models.Competition) error {
 		competition.TrackName,
 		lapCountTarget,
 		timeLimitMinutes,
+		competition.MinLapTimeMs,
 		timeStartStr,
 		timeFinishStr,
 		competition.Status,
@@ -259,10 +262,10 @@ func (r *CompetitionRepository) Update(competition *models.Competition) error {
 
 	var timeStartStr, timeFinishStr sql.NullString
 	if competition.TimeStart != nil {
-		timeStartStr = sql.NullString{String: competition.TimeStart.Format(time.RFC3339), Valid: true}
+		timeStartStr = sql.NullString{String: competition.TimeStart.Format(time.RFC3339Nano), Valid: true}
 	}
 	if competition.TimeFinish != nil {
-		timeFinishStr = sql.NullString{String: competition.TimeFinish.Format(time.RFC3339), Valid: true}
+		timeFinishStr = sql.NullString{String: competition.TimeFinish.Format(time.RFC3339Nano), Valid: true}
 	}
 
 	var competitionYear sql.NullInt64
@@ -273,7 +276,7 @@ func (r *CompetitionRepository) Update(competition *models.Competition) error {
 	result, err := r.db.Exec(`
 		UPDATE competitions
 		SET competition_title = ?, competition_type = ?, model_type = ?, model_scale = ?, 
-		    track_name = ?, lap_count_target = ?, time_limit_minutes = ?, time_start = ?, 
+		    track_name = ?, lap_count_target = ?, time_limit_minutes = ?, min_lap_time_ms = ?, time_start = ?,
 		    time_finish = ?, status = ?, competition_year = ?, season = ?, updated_at = ?
 		WHERE id = ?
 	`,
@@ -284,6 +287,7 @@ func (r *CompetitionRepository) Update(competition *models.Competition) error {
 		competition.TrackName,
 		lapCountTarget,
 		timeLimitMinutes,
+		competition.MinLapTimeMs,
 		timeStartStr,
 		timeFinishStr,
 		competition.Status,
@@ -340,7 +344,7 @@ func (r *CompetitionRepository) Count() (int, error) {
 func (r *CompetitionRepository) GetByStatus(status string) ([]models.Competition, error) {
 	rows, err := r.db.Query(`
 		SELECT id, competition_title, competition_type, model_type, model_scale, track_name, 
-		       lap_count_target, time_limit_minutes, time_start, time_finish, status, 
+		       lap_count_target, time_limit_minutes, min_lap_time_ms, time_start, time_finish, status,
 		       competition_year, season, created_at, updated_at
 		FROM competitions
 		WHERE status = ?

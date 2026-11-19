@@ -132,6 +132,7 @@ func (db *DB) Initialize() error {
 		track_name TEXT,
 		lap_count_target INTEGER,
 		time_limit_minutes INTEGER,
+		min_lap_time_ms INTEGER NOT NULL DEFAULT 5000,
 		time_start TEXT,
 		time_finish TEXT,
 		status TEXT DEFAULT 'scheduled',
@@ -262,6 +263,9 @@ func (db *DB) Initialize() error {
 	if err != nil {
 		return fmt.Errorf("failed to create schema: %w", err)
 	}
+	if err := db.migrateMinimumLapTime(); err != nil {
+		return err
+	}
 
 	// Insert default settings if not exists
 	defaultSettings := []struct {
@@ -296,6 +300,38 @@ func (db *DB) Initialize() error {
 		}
 	}
 
+	return nil
+}
+
+// migrateMinimumLapTime preserves competitions created before lap filtering.
+func (db *DB) migrateMinimumLapTime() error {
+	rows, err := db.Query(`PRAGMA table_info(competitions)`)
+	if err != nil {
+		return fmt.Errorf("failed to inspect competition schema: %w", err)
+	}
+	found := false
+	for rows.Next() {
+		var cid, notNull, primaryKey int
+		var name, columnType string
+		var defaultValue sql.NullString
+		if err := rows.Scan(&cid, &name, &columnType, &notNull, &defaultValue, &primaryKey); err != nil {
+			rows.Close()
+			return fmt.Errorf("failed to inspect competition column: %w", err)
+		}
+		if name == "min_lap_time_ms" {
+			found = true
+		}
+	}
+	err = rows.Err()
+	rows.Close()
+	if err != nil {
+		return fmt.Errorf("failed to inspect competition schema: %w", err)
+	}
+	if !found {
+		if _, err := db.Exec(`ALTER TABLE competitions ADD COLUMN min_lap_time_ms INTEGER NOT NULL DEFAULT 5000`); err != nil {
+			return fmt.Errorf("failed to add minimum lap time: %w", err)
+		}
+	}
 	return nil
 }
 

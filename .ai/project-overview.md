@@ -121,8 +121,9 @@ UI → Service → Repository → Database
 **Особенности**:
 - Фоновый worker с буферизацией (канал на 200 сканирований)
 - Кэширование транспондеров и участников для O(1) поиска
-- Пакетная запись в БД (50 сканирований или 100ms)
-- Методы: `Start()`, `Stop()`, `SetActiveCompetition()`, `ProcessScan()`, `QueueScan()`
+- Пакетная запись сырых сканирований в БД (50 сканирований или 100ms)
+- Результат участника сохраняется после каждой принятой отметки; первая отметка запускает круг, но не увеличивает счётчик
+- Методы: `Start()`, `Stop()`, `SetActiveCompetition()`, `ProcessScan()`, `QueueScan()`, `Flush()`, `GetStandings()`
 - Структуры: `LapScan`, `ParticipantLapData`
 
 #### CompetitionService
