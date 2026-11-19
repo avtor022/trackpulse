@@ -70,6 +70,7 @@ type Competition struct {
     TrackName        string     // Трасса
     LapCountTarget   *int       // Целевое количество кругов
     TimeLimitMinutes *int       // Лимит времени в минутах
+    MinLapTimeMs     int        // Минимальное время круга в миллисекундах
     TimeStart        *time.Time // Время старта
     TimeFinish       *time.Time // Время финиша
     Status           string     // scheduled|in_progress|finished|cancelled
@@ -82,6 +83,8 @@ type Competition struct {
 
 **Индексы**: по статусу, по времени старта, по году  
 **Уникальность**: пара (год, сезон)
+
+Минимальное время круга задаётся в интерфейсе в секундах. Для новых и существующих соревнований начальное значение составляет 5000 мс.
 
 ---
 

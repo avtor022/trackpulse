@@ -150,6 +150,9 @@ func (s *CompetitionService) DeleteCompetitionSeason(season string) error {
 // CreateCompetition creates a new competition with validation
 func (s *CompetitionService) CreateCompetition(competition *models.Competition) error {
 	// Validate required fields
+	if competition.MinLapTimeMs < 0 {
+		return fmt.Errorf("minimum lap time cannot be negative")
+	}
 	if competition.CompetitionTitle == "" {
 		return fmt.Errorf("competition title is required")
 	}
@@ -171,6 +174,9 @@ func (s *CompetitionService) CreateCompetition(competition *models.Competition) 
 // UpdateCompetition updates an existing competition with validation
 func (s *CompetitionService) UpdateCompetition(competition *models.Competition) error {
 	// Validate required fields
+	if competition.MinLapTimeMs < 0 {
+		return fmt.Errorf("minimum lap time cannot be negative")
+	}
 	if competition.ID == "" {
 		return fmt.Errorf("competition ID is required")
 	}

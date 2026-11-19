@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -16,6 +17,7 @@ type Timer struct {
 	ticker     *time.Ticker
 	stopChan   chan struct{}
 	mainWindow fyne.Window
+	mu         sync.Mutex
 }
 
 // NewTimer creates a new Timer instance
@@ -27,20 +29,20 @@ func NewTimer(mainWindow fyne.Window, label *widget.Label) *Timer {
 }
 
 // Start starts the timer for monitoring elapsed time
-func (t *Timer) Start(timeLimitMinutes *int, onStop func()) {
-	// Stop any existing timer first
-	t.Stop()
-
-	startTime := time.Now()
+func (t *Timer) Start(startTime time.Time, timeLimitMinutes *int, onStop func() bool) {
 	var limitReached bool
 
+	t.mu.Lock()
+	t.stopLocked()
 	t.stopChan = make(chan struct{})
 	t.ticker = time.NewTicker(10 * time.Millisecond)
+	ticker, stopChan := t.ticker, t.stopChan
+	t.mu.Unlock()
 
 	go func() {
 		for {
 			select {
-			case <-t.ticker.C:
+			case <-ticker.C:
 				elapsed := time.Since(startTime)
 
 				// Check if time limit is reached
@@ -50,11 +52,12 @@ func (t *Timer) Start(timeLimitMinutes *int, onStop func()) {
 						limitReached = true
 						// Timer reached limit, stop it and notify on main thread
 						fyne.Do(func() {
-							t.Stop()
-							if onStop != nil {
-								onStop()
+							if !t.stopIfCurrent(stopChan) {
+								return
 							}
-							dialog.ShowInformation(locale.T("dialog.info"), locale.T("dialog.time_limit_reached"), t.mainWindow)
+							if onStop == nil || onStop() {
+								dialog.ShowInformation(locale.T("dialog.info"), locale.T("dialog.time_limit_reached"), t.mainWindow)
+							}
 						})
 						return
 					}
@@ -63,11 +66,13 @@ func (t *Timer) Start(timeLimitMinutes *int, onStop func()) {
 				// Update timer label on main thread
 				finalElapsed := elapsed
 				fyne.Do(func() {
-					if t.label != nil {
+					t.mu.Lock()
+					defer t.mu.Unlock()
+					if t.stopChan == stopChan && t.label != nil {
 						t.label.SetText(t.formatDuration(finalElapsed))
 					}
 				})
-			case <-t.stopChan:
+			case <-stopChan:
 				return
 			}
 		}
@@ -76,6 +81,22 @@ func (t *Timer) Start(timeLimitMinutes *int, onStop func()) {
 
 // Stop stops the running timer
 func (t *Timer) Stop() {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.stopLocked()
+}
+
+func (t *Timer) stopIfCurrent(stopChan chan struct{}) bool {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	if t.stopChan != stopChan {
+		return false
+	}
+	t.stopLocked()
+	return true
+}
+
+func (t *Timer) stopLocked() {
 	if t.ticker != nil {
 		t.ticker.Stop()
 		t.ticker = nil
@@ -90,6 +111,8 @@ func (t *Timer) Stop() {
 
 // Reset clears the timer display
 func (t *Timer) Reset() {
+	t.mu.Lock()
+	defer t.mu.Unlock()
 	if t.label != nil {
 		t.label.SetText("")
 	}

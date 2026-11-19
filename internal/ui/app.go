@@ -5,6 +5,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
+	"log"
 	"trackpulse/internal/locale"
 	"trackpulse/internal/repository"
 	"trackpulse/internal/service"
@@ -59,6 +60,13 @@ func NewApp(competitorService *service.CompetitorService, modelService *service.
 
 	// Initialize lap service with buffered processing
 	lapService := service.NewLapService(rawScanRepo, competitorModelRepo, competitionRepo, participantRepo, competitionLapsRepo)
+	if running, err := competitionService.GetCompetitionsByStatus("in_progress"); err != nil {
+		log.Printf("failed to load running competitions: %v", err)
+	} else if len(running) == 1 {
+		if err := lapService.SetActiveCompetition(&running[0]); err != nil {
+			log.Printf("failed to restore running competition: %v", err)
+		}
+	}
 	lapService.Start()
 
 	appInstance := &App{
@@ -89,6 +97,12 @@ func (a *App) Run() {
 	a.mainWindow.SetContent(a.createMainContent())
 	a.mainWindow.Resize(fyne.NewSize(1200, 800))
 	a.mainWindow.ShowAndRun()
+	if a.monitoringPanel != nil {
+		a.monitoringPanel.Close()
+	}
+	a.lapService.Flush()
+	a.lapService.Stop()
+	a.rawScanRepo.Close()
 }
 
 // createMainContent builds the main tabbed interface
@@ -135,7 +149,7 @@ func (a *App) createMainContent() *container.AppTabs {
 
 // createMonitoringTab creates the Live Monitoring tab
 func (a *App) createMonitoringTab() fyne.CanvasObject {
-	a.monitoringPanel = NewMonitoringPanel(a.competitionService, a.mainWindow)
+	a.monitoringPanel = NewMonitoringPanel(a.competitionService, a.lapService, a.mainWindow)
 	return a.monitoringPanel.content
 }
 

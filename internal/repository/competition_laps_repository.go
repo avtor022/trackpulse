@@ -30,12 +30,13 @@ func (r *CompetitionLapsRepository) GetByParticipantID(participantID string) (*m
 	`
 
 	var laps models.CompetitionLaps
+	var timeStart, createdAt, updatedAt string
 	var timeFinish, lastPassTime sql.NullString
 
 	err := r.db.QueryRow(query, participantID).Scan(
 		&laps.ID,
 		&laps.CompetitionParticipantID,
-		&laps.TimeStart,
+		&timeStart,
 		&timeFinish,
 		&laps.NumberOfLaps,
 		&laps.BestLapTimeMs,
@@ -43,8 +44,8 @@ func (r *CompetitionLapsRepository) GetByParticipantID(participantID string) (*m
 		&laps.LastLapTimeMs,
 		&lastPassTime,
 		&laps.TotalCompetitionTimeMs,
-		&laps.CreatedAt,
-		&laps.UpdatedAt,
+		&createdAt,
+		&updatedAt,
 	)
 
 	if err == sql.ErrNoRows {
@@ -53,19 +54,30 @@ func (r *CompetitionLapsRepository) GetByParticipantID(participantID string) (*m
 	if err != nil {
 		return nil, fmt.Errorf("failed to get competition laps: %w", err)
 	}
+	if laps.TimeStart, err = time.Parse(time.RFC3339Nano, timeStart); err != nil {
+		return nil, fmt.Errorf("invalid lap start time: %w", err)
+	}
+	if laps.CreatedAt, err = time.Parse(time.RFC3339Nano, createdAt); err != nil {
+		return nil, fmt.Errorf("invalid lap creation time: %w", err)
+	}
+	if laps.UpdatedAt, err = time.Parse(time.RFC3339Nano, updatedAt); err != nil {
+		return nil, fmt.Errorf("invalid lap update time: %w", err)
+	}
 
 	if timeFinish.Valid {
-		t, err := time.Parse(time.RFC3339, timeFinish.String)
-		if err == nil {
-			laps.TimeFinish = &t
+		t, err := time.Parse(time.RFC3339Nano, timeFinish.String)
+		if err != nil {
+			return nil, fmt.Errorf("invalid lap finish time: %w", err)
 		}
+		laps.TimeFinish = &t
 	}
 
 	if lastPassTime.Valid {
-		t, err := time.Parse(time.RFC3339, lastPassTime.String)
-		if err == nil {
-			laps.LastPassTime = &t
+		t, err := time.Parse(time.RFC3339Nano, lastPassTime.String)
+		if err != nil {
+			return nil, fmt.Errorf("invalid last passage time: %w", err)
 		}
+		laps.LastPassTime = &t
 	}
 
 	return &laps, nil
@@ -84,16 +96,16 @@ func (r *CompetitionLapsRepository) Create(laps *models.CompetitionLaps) error {
 
 	var timeFinish, lastPassTime sql.NullString
 	if laps.TimeFinish != nil {
-		timeFinish = sql.NullString{String: laps.TimeFinish.Format(time.RFC3339), Valid: true}
+		timeFinish = sql.NullString{String: laps.TimeFinish.Format(time.RFC3339Nano), Valid: true}
 	}
 	if laps.LastPassTime != nil {
-		lastPassTime = sql.NullString{String: laps.LastPassTime.Format(time.RFC3339), Valid: true}
+		lastPassTime = sql.NullString{String: laps.LastPassTime.Format(time.RFC3339Nano), Valid: true}
 	}
 
 	_, err := r.db.Exec(query,
 		laps.ID,
 		laps.CompetitionParticipantID,
-		laps.TimeStart.Format(time.RFC3339),
+		laps.TimeStart.Format(time.RFC3339Nano),
 		timeFinish,
 		laps.NumberOfLaps,
 		laps.BestLapTimeMs,
@@ -101,8 +113,8 @@ func (r *CompetitionLapsRepository) Create(laps *models.CompetitionLaps) error {
 		laps.LastLapTimeMs,
 		lastPassTime,
 		laps.TotalCompetitionTimeMs,
-		laps.CreatedAt.Format(time.RFC3339),
-		laps.UpdatedAt.Format(time.RFC3339),
+		laps.CreatedAt.Format(time.RFC3339Nano),
+		laps.UpdatedAt.Format(time.RFC3339Nano),
 	)
 
 	if err != nil {
@@ -125,14 +137,14 @@ func (r *CompetitionLapsRepository) Update(laps *models.CompetitionLaps) error {
 
 	var timeFinish, lastPassTime sql.NullString
 	if laps.TimeFinish != nil {
-		timeFinish = sql.NullString{String: laps.TimeFinish.Format(time.RFC3339), Valid: true}
+		timeFinish = sql.NullString{String: laps.TimeFinish.Format(time.RFC3339Nano), Valid: true}
 	}
 	if laps.LastPassTime != nil {
-		lastPassTime = sql.NullString{String: laps.LastPassTime.Format(time.RFC3339), Valid: true}
+		lastPassTime = sql.NullString{String: laps.LastPassTime.Format(time.RFC3339Nano), Valid: true}
 	}
 
 	_, err := r.db.Exec(query,
-		laps.TimeStart.Format(time.RFC3339),
+		laps.TimeStart.Format(time.RFC3339Nano),
 		timeFinish,
 		laps.NumberOfLaps,
 		laps.BestLapTimeMs,
@@ -140,7 +152,7 @@ func (r *CompetitionLapsRepository) Update(laps *models.CompetitionLaps) error {
 		laps.LastLapTimeMs,
 		lastPassTime,
 		laps.TotalCompetitionTimeMs,
-		laps.UpdatedAt.Format(time.RFC3339),
+		laps.UpdatedAt.Format(time.RFC3339Nano),
 		laps.CompetitionParticipantID,
 	)
 
@@ -186,12 +198,13 @@ func (r *CompetitionLapsRepository) GetAllByCompetitionID(competitionID string) 
 	var lapsList []*models.CompetitionLaps
 	for rows.Next() {
 		var laps models.CompetitionLaps
+		var timeStart, createdAt, updatedAt string
 		var timeFinish, lastPassTime sql.NullString
 
 		err := rows.Scan(
 			&laps.ID,
 			&laps.CompetitionParticipantID,
-			&laps.TimeStart,
+			&timeStart,
 			&timeFinish,
 			&laps.NumberOfLaps,
 			&laps.BestLapTimeMs,
@@ -199,25 +212,36 @@ func (r *CompetitionLapsRepository) GetAllByCompetitionID(competitionID string) 
 			&laps.LastLapTimeMs,
 			&lastPassTime,
 			&laps.TotalCompetitionTimeMs,
-			&laps.CreatedAt,
-			&laps.UpdatedAt,
+			&createdAt,
+			&updatedAt,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan competition laps: %w", err)
 		}
+		if laps.TimeStart, err = time.Parse(time.RFC3339Nano, timeStart); err != nil {
+			return nil, fmt.Errorf("invalid lap start time: %w", err)
+		}
+		if laps.CreatedAt, err = time.Parse(time.RFC3339Nano, createdAt); err != nil {
+			return nil, fmt.Errorf("invalid lap creation time: %w", err)
+		}
+		if laps.UpdatedAt, err = time.Parse(time.RFC3339Nano, updatedAt); err != nil {
+			return nil, fmt.Errorf("invalid lap update time: %w", err)
+		}
 
 		if timeFinish.Valid {
-			t, err := time.Parse(time.RFC3339, timeFinish.String)
-			if err == nil {
-				laps.TimeFinish = &t
+			t, err := time.Parse(time.RFC3339Nano, timeFinish.String)
+			if err != nil {
+				return nil, fmt.Errorf("invalid lap finish time: %w", err)
 			}
+			laps.TimeFinish = &t
 		}
 
 		if lastPassTime.Valid {
-			t, err := time.Parse(time.RFC3339, lastPassTime.String)
-			if err == nil {
-				laps.LastPassTime = &t
+			t, err := time.Parse(time.RFC3339Nano, lastPassTime.String)
+			if err != nil {
+				return nil, fmt.Errorf("invalid last passage time: %w", err)
 			}
+			laps.LastPassTime = &t
 		}
 
 		lapsList = append(lapsList, &laps)
@@ -228,4 +252,32 @@ func (r *CompetitionLapsRepository) GetAllByCompetitionID(competitionID string) 
 	}
 
 	return lapsList, nil
+}
+
+// GetStandings returns registered competitors ordered by laps and fastest lap.
+func (r *CompetitionLapsRepository) GetStandings(competitionID string) ([]models.CompetitionStanding, error) {
+	rows, err := r.db.Query(`
+		SELECT cp.id, c.competitor_number, c.full_name,
+		       COALESCE(cl.number_of_laps, 0), COALESCE(cl.best_lap_time_ms, 0)
+		FROM competition_participants cp
+		JOIN competitor_models cm ON cm.id = cp.competitor_model_id
+		JOIN competitors c ON c.id = cm.competitor_id
+		LEFT JOIN competition_laps cl ON cl.competition_participant_id = cp.id
+		WHERE cp.competition_id = ?
+		ORDER BY COALESCE(cl.number_of_laps, 0) DESC,
+		         CASE WHEN COALESCE(cl.best_lap_time_ms, 0) > 0 THEN 0 ELSE 1 END,
+		         COALESCE(cl.best_lap_time_ms, 0) ASC, c.competitor_number ASC, cp.id ASC`, competitionID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query standings: %w", err)
+	}
+	defer rows.Close()
+	var standings []models.CompetitionStanding
+	for rows.Next() {
+		var standing models.CompetitionStanding
+		if err := rows.Scan(&standing.ParticipantID, &standing.CompetitorNumber, &standing.FullName, &standing.NumberOfLaps, &standing.BestLapTimeMs); err != nil {
+			return nil, fmt.Errorf("failed to scan standings: %w", err)
+		}
+		standings = append(standings, standing)
+	}
+	return standings, rows.Err()
 }

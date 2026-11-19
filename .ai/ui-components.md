@@ -233,34 +233,10 @@ validateCompetition(dto) error
 - `controlButtons` — старт/стоп гонки
 
 ### Таблица результатов
-Колонки:
-- Position (авторасчёт)
-- Competitor Name
-- Model
-- Laps Count
-- Best Lap Time
-- Last Lap Time
-- Total Time
-- Gap to Leader
+Колонки: место, номер спортсмена, полное имя, количество завершённых кругов и время быстрейшего круга в формате мм:сс:мс.
 
 ### Обновление в реальном времени
-```go
-type MonitoringPanel struct {
-    lapService *service.LapService
-    timer      *Timer
-    updateChan chan LapUpdate
-    ticker     *time.Ticker
-}
-
-func (p *MonitoringPanel) startRealTimeUpdates() {
-    p.ticker = time.NewTicker(500 * time.Millisecond)
-    go func() {
-        for range p.ticker.C {
-            p.refreshResults()
-        }
-    }()
-}
-```
+Панель раз в 500 мс запрашивает сохранённые результаты через `LapService.GetStandings()` и обновляет таблицу в главном потоке Fyne.
 
 ### Методы
 ```go
