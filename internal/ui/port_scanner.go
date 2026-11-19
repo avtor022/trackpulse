@@ -19,19 +19,20 @@ import (
 
 // PortScanner handles serial port scanning and connection UI
 type PortScanner struct {
-	port         io.ReadCloser
-	isConnected  bool
-	statusText   *widget.RichText
-	connectBtn   *widget.Button
-	portSelect   *widget.Select
-	baudEntry    *widget.Entry
-	refreshBtn   *widget.Button
-	settingsForm *widget.Form
-	logsPanel    *LogsPanel
-	stopReading  chan bool
-	lapService   *service.LapService
-	readerType   string
-	comPort      string
+	port          io.ReadCloser
+	isConnected   bool
+	statusText    *widget.RichText
+	connectBtn    *widget.Button
+	portSelect    *widget.Select
+	baudEntry     *widget.Entry
+	refreshBtn    *widget.Button
+	settingsForm  *widget.Form
+	logsPanel     *LogsPanel
+	stopReading   chan bool
+	lapService    *service.LapService
+	readerType    string
+	comPort       string
+	portAvailable bool
 }
 
 // scanPorts scans for available serial ports
@@ -39,7 +40,7 @@ func scanPorts() ([]string, string) {
 	ports, err := enumerator.GetDetailedPortsList()
 	if err != nil {
 		fmt.Println("Ошибка сканирования портов:", err)
-		return []string{"Ошибка сканирования"}, ""
+		return []string{locale.T("logs.error_scanning")}, ""
 	}
 
 	var portNames []string
@@ -74,7 +75,7 @@ func scanPorts() ([]string, string) {
 	}
 
 	if len(portNames) == 0 {
-		return []string{"Порты не найдены"}, ""
+		return []string{locale.T("logs.no_ports")}, ""
 	}
 
 	// Если Arduino не найден, используем первый порт
@@ -92,7 +93,7 @@ func extractPortName(selected string) string {
 		return selected[:idx]
 	}
 	// Если это сообщение об ошибке или пустой список
-	if selected == "Порты не найдены" || selected == "Ошибка сканирования" {
+	if selected == locale.T("logs.no_ports") || selected == locale.T("logs.error_scanning") {
 		return ""
 	}
 	return selected
@@ -116,10 +117,10 @@ func (p *PortScanner) connect() {
 	}
 
 	portName := extractPortName(p.portSelect.Selected)
-	if portName == "" {
+	if portName == "" || !p.portAvailable {
 		p.statusText.Segments = []widget.RichTextSegment{
 			&widget.TextSegment{
-				Text: "Выберите порт из списка",
+				Text: locale.T("logs.select_port"),
 				Style: widget.RichTextStyle{
 					ColorName: theme.ColorNameError,
 					Inline:    true,
@@ -147,7 +148,7 @@ func (p *PortScanner) connect() {
 	if err != nil {
 		p.statusText.Segments = []widget.RichTextSegment{
 			&widget.TextSegment{
-				Text: fmt.Sprintf("Ошибка подключения: %v", err),
+				Text: fmt.Sprintf(locale.T("logs.connect_error"), err),
 				Style: widget.RichTextStyle{
 					ColorName: theme.ColorNameError,
 					Inline:    true,
@@ -175,7 +176,7 @@ func (p *PortScanner) connect() {
 
 	// Log connection event
 	if p.logsPanel != nil {
-		p.logsPanel.AddLog(fmt.Sprintf("Connected to %s at %d baud", portName, baudRate))
+		p.logsPanel.AddLog(fmt.Sprintf(locale.T("logs.device_connected"), portName, baudRate))
 	}
 
 	// Start reading from serial port in background
@@ -211,7 +212,7 @@ func (p *PortScanner) disconnect() {
 
 	// Log disconnection event
 	if p.logsPanel != nil {
-		p.logsPanel.AddLog("Disconnected from device")
+		p.logsPanel.AddLog(locale.T("logs.device_disconnected"))
 	}
 }
 
@@ -219,6 +220,7 @@ func (p *PortScanner) disconnect() {
 func (p *PortScanner) BuildUI() fyne.CanvasObject {
 	// Сканирование доступных портов при запуске
 	portList, defaultPort := scanPorts()
+	p.portAvailable = defaultPort != ""
 
 	// Создание виджетов
 	p.statusText = widget.NewRichText(
@@ -250,18 +252,7 @@ func (p *PortScanner) BuildUI() fyne.CanvasObject {
 	p.connectBtn = widget.NewButton(locale.T("settings.connect"), p.connect)
 
 	p.refreshBtn = widget.NewButtonWithIcon("", theme.ViewRefreshIcon(), func() {
-		portList, defaultPort := scanPorts()
-		p.portSelect.Options = portList
-		if defaultPort != "" {
-			for _, port := range portList {
-				portName := extractPortName(port)
-				if portName == defaultPort {
-					p.portSelect.SetSelected(port)
-					break
-				}
-			}
-		}
-		p.portSelect.Refresh()
+		p.RefreshPorts()
 	})
 
 	// Панель настроек подключения с использованием Form layout как в диалоге транспондера
@@ -277,6 +268,7 @@ func (p *PortScanner) BuildUI() fyne.CanvasObject {
 // RefreshPorts refreshes the list of available ports
 func (p *PortScanner) RefreshPorts() {
 	portList, defaultPort := scanPorts()
+	p.portAvailable = defaultPort != ""
 	p.portSelect.Options = portList
 	if defaultPort != "" {
 		for _, port := range portList {
@@ -293,6 +285,9 @@ func (p *PortScanner) RefreshPorts() {
 // RefreshLabels updates the labels in the port scanner form for localization
 func (p *PortScanner) RefreshLabels() {
 	if p.settingsForm != nil && len(p.settingsForm.Items) >= 3 {
+		if !p.portAvailable && p.portSelect != nil {
+			p.RefreshPorts()
+		}
 		p.settingsForm.Items[0].Text = locale.T("settings.port")
 		p.settingsForm.Items[1].Text = locale.T("settings.baud_rate")
 
@@ -366,7 +361,9 @@ func (p *PortScanner) readFromPort() {
 				if data != "" {
 					// Log to UI
 					if p.logsPanel != nil {
-						p.logsPanel.AddLog(fmt.Sprintf("RFID tag detected: %s", data))
+						fyne.Do(func() {
+							p.logsPanel.AddLog(fmt.Sprintf(locale.T("logs.tag_detected"), data))
+						})
 					}
 
 					// Queue scan for processing by LapService

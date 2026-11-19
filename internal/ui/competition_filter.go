@@ -26,6 +26,7 @@ type CompetitionFilter struct {
 	seasonButton         *widget.Button
 	trackButton          *widget.Button
 	modelTypeButton      *widget.Button
+	labels               []*widget.Label
 	onFilterChanged      func()
 	allCompetitions      []models.Competition
 	filteredCompetitions []models.Competition
@@ -62,11 +63,14 @@ func (cf *CompetitionFilter) CreateContent() *fyne.Container {
 		cf.showModelTypeFilterPopup()
 	})
 
-	filterContainer := container.NewGridWithColumns(4,
+	cf.labels = []*widget.Label{
 		widget.NewLabel(locale.T("common.year")),
 		widget.NewLabel(locale.T("common.season")),
 		widget.NewLabel(locale.T("common.track")),
 		widget.NewLabel(locale.T("common.model_type")),
+	}
+	filterContainer := container.NewGridWithColumns(4,
+		cf.labels[0], cf.labels[1], cf.labels[2], cf.labels[3],
 		cf.yearButton,
 		cf.seasonButton,
 		cf.trackButton,
@@ -142,7 +146,7 @@ func (cf *CompetitionFilter) applyFilters() {
 // matchesFilters checks if a competition matches the current filter selections
 func (cf *CompetitionFilter) matchesFilters(comp models.Competition) bool {
 	// Check year filter
-	if cf.selectedYear != "" && cf.selectedYear != locale.T("filter.all_years") {
+	if cf.selectedYear != "" {
 		if comp.CompetitionYear == nil {
 			return false
 		}
@@ -153,21 +157,21 @@ func (cf *CompetitionFilter) matchesFilters(comp models.Competition) bool {
 	}
 
 	// Check season filter
-	if cf.selectedSeason != "" && cf.selectedSeason != locale.T("filter.all_seasons") {
+	if cf.selectedSeason != "" {
 		if comp.Season != cf.selectedSeason {
 			return false
 		}
 	}
 
 	// Check track filter
-	if cf.selectedTrack != "" && cf.selectedTrack != locale.T("filter.all_tracks") {
+	if cf.selectedTrack != "" {
 		if comp.TrackName != cf.selectedTrack {
 			return false
 		}
 	}
 
 	// Check model type filter
-	if cf.selectedModelType != "" && cf.selectedModelType != locale.T("filter.all_model_types") {
+	if cf.selectedModelType != "" {
 		if comp.ModelType != cf.selectedModelType {
 			return false
 		}
@@ -193,17 +197,40 @@ func (cf *CompetitionFilter) GetFilteredCompetitionTitles() []string {
 // RefreshButtons updates button text to reflect current filter selections
 func (cf *CompetitionFilter) RefreshButtons() {
 	if cf.yearButton != nil {
-		cf.yearButton.SetText(cf.selectedYear)
+		cf.yearButton.SetText(filterLabel(cf.selectedYear, "filter.all_years"))
 	}
 	if cf.seasonButton != nil {
-		cf.seasonButton.SetText(cf.selectedSeason)
+		cf.seasonButton.SetText(filterLabel(cf.selectedSeason, "filter.all_seasons"))
 	}
 	if cf.trackButton != nil {
-		cf.trackButton.SetText(cf.selectedTrack)
+		cf.trackButton.SetText(filterLabel(cf.selectedTrack, "filter.all_tracks"))
 	}
 	if cf.modelTypeButton != nil {
-		cf.modelTypeButton.SetText(cf.selectedModelType)
+		cf.modelTypeButton.SetText(filterLabel(cf.selectedModelType, "filter.all_model_types"))
 	}
+}
+
+func filterLabel(value, allKey string) string {
+	if value == "" {
+		return locale.T(allKey)
+	}
+	return value
+}
+
+func filterValue(value, allKey string) string {
+	if value == locale.T(allKey) {
+		return ""
+	}
+	return value
+}
+
+// RefreshLocale updates the filter labels without changing its selection.
+func (cf *CompetitionFilter) RefreshLocale() {
+	keys := []string{"common.year", "common.season", "common.track", "common.model_type"}
+	for i, label := range cf.labels {
+		label.SetText(locale.T(keys[i]))
+	}
+	cf.RefreshButtons()
 }
 
 // showYearFilterPopup shows the year filter popup
@@ -236,7 +263,7 @@ func (cf *CompetitionFilter) showYearFilterPopup() {
 			AddFunc:    func(name string) error { return nil },
 			DeleteFunc: func(name string) error { return nil },
 			OnItemSelected: func(selected string) {
-				cf.selectedYear = selected
+				cf.selectedYear = filterValue(selected, "filter.all_years")
 				cf.RefreshButtons()
 				cf.applyFilters()
 			},
@@ -245,7 +272,7 @@ func (cf *CompetitionFilter) showYearFilterPopup() {
 		items,
 		"",
 		func(selected string) {
-			cf.selectedYear = selected
+			cf.selectedYear = filterValue(selected, "filter.all_years")
 			cf.RefreshButtons()
 			cf.applyFilters()
 		},
@@ -286,7 +313,7 @@ func (cf *CompetitionFilter) showSeasonFilterPopup() {
 			AddFunc:    func(name string) error { return nil },
 			DeleteFunc: func(name string) error { return nil },
 			OnItemSelected: func(selected string) {
-				cf.selectedSeason = selected
+				cf.selectedSeason = filterValue(selected, "filter.all_seasons")
 				cf.RefreshButtons()
 				cf.applyFilters()
 			},
@@ -295,7 +322,7 @@ func (cf *CompetitionFilter) showSeasonFilterPopup() {
 		items,
 		"",
 		func(selected string) {
-			cf.selectedSeason = selected
+			cf.selectedSeason = filterValue(selected, "filter.all_seasons")
 			cf.RefreshButtons()
 			cf.applyFilters()
 		},
@@ -336,7 +363,7 @@ func (cf *CompetitionFilter) showTrackFilterPopup() {
 			AddFunc:    func(name string) error { return nil },
 			DeleteFunc: func(name string) error { return nil },
 			OnItemSelected: func(selected string) {
-				cf.selectedTrack = selected
+				cf.selectedTrack = filterValue(selected, "filter.all_tracks")
 				cf.RefreshButtons()
 				cf.applyFilters()
 			},
@@ -345,7 +372,7 @@ func (cf *CompetitionFilter) showTrackFilterPopup() {
 		items,
 		"",
 		func(selected string) {
-			cf.selectedTrack = selected
+			cf.selectedTrack = filterValue(selected, "filter.all_tracks")
 			cf.RefreshButtons()
 			cf.applyFilters()
 		},
@@ -386,7 +413,7 @@ func (cf *CompetitionFilter) showModelTypeFilterPopup() {
 			AddFunc:    func(name string) error { return nil },
 			DeleteFunc: func(name string) error { return nil },
 			OnItemSelected: func(selected string) {
-				cf.selectedModelType = selected
+				cf.selectedModelType = filterValue(selected, "filter.all_model_types")
 				cf.RefreshButtons()
 				cf.applyFilters()
 			},
@@ -395,7 +422,7 @@ func (cf *CompetitionFilter) showModelTypeFilterPopup() {
 		items,
 		"",
 		func(selected string) {
-			cf.selectedModelType = selected
+			cf.selectedModelType = filterValue(selected, "filter.all_model_types")
 			cf.RefreshButtons()
 			cf.applyFilters()
 		},

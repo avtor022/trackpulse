@@ -27,6 +27,7 @@ type MonitoringPanel struct {
 	timerLabel            *widget.Label
 	timer                 *Timer
 	competitionFilter     *CompetitionFilter
+	placeholder           *widget.Label
 }
 
 // NewMonitoringPanel creates a new monitoring panel
@@ -84,8 +85,8 @@ func (p *MonitoringPanel) createContent() *fyne.Container {
 	)
 
 	// Main content area (placeholder for future monitoring widgets)
-	monitoringContent := widget.NewLabel(locale.T("monitoring.placeholder"))
-	monitoringContent.Alignment = fyne.TextAlignCenter
+	p.placeholder = widget.NewLabel(locale.T("monitoring.placeholder"))
+	p.placeholder.Alignment = fyne.TextAlignCenter
 
 	// Layout
 	content := container.NewBorder(
@@ -93,7 +94,7 @@ func (p *MonitoringPanel) createContent() *fyne.Container {
 		nil,
 		nil,
 		nil,
-		monitoringContent,
+		p.placeholder,
 	)
 
 	// Load competitions
@@ -208,7 +209,7 @@ func (p *MonitoringPanel) onCompetitionSelected(selected string) {
 	for _, comp := range p.allCompetitions {
 		if comp.CompetitionTitle == selected {
 			p.selectedCompetitionID = comp.ID
-			p.statusLabel.SetText(fmt.Sprintf("%s: %s (%s)", locale.T("common.selected"), comp.CompetitionTitle, comp.Status))
+			p.statusLabel.SetText(fmt.Sprintf("%s: %s (%s)", locale.T("common.selected"), comp.CompetitionTitle, competitionStatusLabel(comp.Status)))
 			if p.competitionButton != nil {
 				p.competitionButton.SetText(comp.CompetitionTitle)
 			}
@@ -239,7 +240,21 @@ func (p *MonitoringPanel) onCompetitionSelected(selected string) {
 
 // Refresh updates the panel with new locale strings
 func (p *MonitoringPanel) Refresh() {
-	p.content = p.createContent()
+	p.startButton.SetText(locale.T("button.start"))
+	p.stopButton.SetText(locale.T("button.stop"))
+	p.placeholder.SetText(locale.T("monitoring.placeholder"))
+	if p.selectedCompetitionID == "" {
+		p.competitionButton.SetText(locale.T("form.competition.select"))
+		p.statusLabel.SetText(locale.T("status.ready"))
+	} else {
+		for _, comp := range p.allCompetitions {
+			if comp.ID == p.selectedCompetitionID {
+				p.statusLabel.SetText(fmt.Sprintf("%s: %s (%s)", locale.T("common.selected"), comp.CompetitionTitle, competitionStatusLabel(comp.Status)))
+				break
+			}
+		}
+	}
+	p.competitionFilter.RefreshLocale()
 }
 
 // UpdateData reloads competition data and refreshes filter options
@@ -260,7 +275,7 @@ func (p *MonitoringPanel) startMonitoring() {
 
 	err := p.competitionService.StartCompetition(p.selectedCompetitionID)
 	if err != nil {
-		dialog.ShowError(err, p.mainWindow)
+		dialog.ShowError(localizedError(err), p.mainWindow)
 		return
 	}
 
@@ -283,7 +298,7 @@ func (p *MonitoringPanel) stopMonitoring() {
 
 	err := p.competitionService.StopCompetition(p.selectedCompetitionID)
 	if err != nil {
-		dialog.ShowError(err, p.mainWindow)
+		dialog.ShowError(localizedError(err), p.mainWindow)
 		return
 	}
 
