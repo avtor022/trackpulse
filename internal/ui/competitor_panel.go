@@ -224,7 +224,7 @@ func (p *CompetitorPanel) refreshData() {
 		p.allCompetitors, err = p.competitorService.GetAllCompetitors()
 		if err != nil {
 			fmt.Println("ERROR refreshing data:", err)
-			p.statusLabel.SetText("Error refreshing data")
+			p.statusLabel.SetText(locale.T("status.refresh_error"))
 			return
 		}
 		// Force table to recalculate rows count and update cell contents
@@ -293,8 +293,9 @@ func (p *CompetitorPanel) deleteSelected() {
 		func(confirmed bool) {
 			if confirmed {
 				if err := p.competitorService.DeleteCompetitor(racerToDelete.ID); err != nil {
-					dialog.ShowError(err, p.window)
-					p.statusLabel.SetText(locale.T("status.delete_failed") + ": " + err.Error())
+					userErr := localizedError(err)
+					dialog.ShowError(userErr, p.window)
+					p.statusLabel.SetText(fmt.Sprintf(locale.T("status.delete_failed"), userErr))
 				} else {
 					p.refreshData()
 					p.selectedCompetitorID = ""
@@ -384,9 +385,7 @@ func (p *CompetitorPanel) showRacerDialog(title string, competitor *models.Compe
 		// Parse values
 		number, err := strconv.Atoi(strings.TrimSpace(numberEntry.Text))
 		if err != nil {
-			errMsg := fmt.Sprintf("invalid competitor number: %v (got: '%s')", err, numberEntry.Text)
-			fmt.Println("ERROR:", errMsg)
-			dialog.ShowError(fmt.Errorf(errMsg), p.window)
+			dialog.ShowError(fmt.Errorf("%s", locale.T("error.invalid.number")), p.window)
 			return
 		}
 
@@ -413,9 +412,7 @@ func (p *CompetitorPanel) showRacerDialog(title string, competitor *models.Compe
 				if err == nil {
 					r.Birthday = &birthday
 				} else {
-					errMsg := fmt.Sprintf("invalid date format (use DD.MM.YYYY): %v (got: '%s')", err, birthdayStr)
-					fmt.Println("ERROR:", errMsg)
-					dialog.ShowError(fmt.Errorf(errMsg), p.window)
+					dialog.ShowError(fmt.Errorf("%s", locale.T("error.invalid.date")), p.window)
 					return
 				}
 			} else {
@@ -424,10 +421,10 @@ func (p *CompetitorPanel) showRacerDialog(title string, competitor *models.Compe
 			r.Rating = rating
 			if err := p.competitorService.UpdateCompetitor(r); err != nil {
 				fmt.Println("ERROR updating competitor:", err)
-				dialog.ShowError(err, p.window)
+				dialog.ShowError(localizedError(err), p.window)
 				return
 			}
-			p.statusLabel.SetText("Competitor updated successfully")
+			p.statusLabel.SetText(locale.T("status.updated_success"))
 
 			// Close dialog and refresh data in main thread
 			d.Hide()
@@ -449,18 +446,16 @@ func (p *CompetitorPanel) showRacerDialog(title string, competitor *models.Compe
 				if err == nil {
 					r.Birthday = &birthday
 				} else {
-					errMsg := fmt.Sprintf("invalid date format (use DD.MM.YYYY): %v (got: '%s')", err, birthdayStr)
-					fmt.Println("ERROR:", errMsg)
-					dialog.ShowError(fmt.Errorf(errMsg), p.window)
+					dialog.ShowError(fmt.Errorf("%s", locale.T("error.invalid.date")), p.window)
 					return
 				}
 			}
 			if err := p.competitorService.CreateCompetitor(r); err != nil {
 				fmt.Println("ERROR creating competitor:", err)
-				dialog.ShowError(err, p.window)
+				dialog.ShowError(localizedError(err), p.window)
 				return
 			}
-			p.statusLabel.SetText("Competitor created successfully")
+			p.statusLabel.SetText(locale.T("status.created_success"))
 
 			// Close dialog and refresh data in main thread
 			d.Hide()

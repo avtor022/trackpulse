@@ -27,7 +27,11 @@ type ParticipantPanel struct {
 	availableTransponders  []models.CompetitorModel
 	boundParticipants      []models.CompetitionParticipant
 	competitionSelect      *widget.Button
+	clearSelectionButton   *widget.Button
 	competitionDisplay     *widget.Label
+	competitionLabel       *widget.Label
+	transpondersHeader     *widget.Label
+	boundHeader            *widget.Label
 	transponderList        *fyne.Container
 	transponderCheckboxes  map[string]*widget.Check
 	boundTable             *widget.Table
@@ -63,6 +67,27 @@ func (p *ParticipantPanel) Refresh() {
 
 // updateLocale updates all localized text in the panel
 func (p *ParticipantPanel) updateLocale() {
+	if p.competitionSelect != nil {
+		p.competitionSelect.SetText(locale.T("participants.select.competition.button"))
+	}
+	if p.clearSelectionButton != nil {
+		p.clearSelectionButton.SetText(locale.T("participants.clear_selection"))
+	}
+	if p.competitionLabel != nil {
+		p.competitionLabel.SetText(locale.T("participants.select.competition"))
+	}
+	if p.transpondersHeader != nil {
+		p.transpondersHeader.SetText(locale.T("participants.transponders_list"))
+	}
+	if p.boundHeader != nil {
+		p.boundHeader.SetText(locale.T("participants.already_bound"))
+	}
+	if p.competitionFilter != nil {
+		p.competitionFilter.RefreshLocale()
+	}
+	if p.transponderList != nil && p.selectedCompetitionID != "" && len(p.availableTransponders) == 0 {
+		p.renderTransponderList()
+	}
 	if p.statusLabel != nil {
 		p.statusLabel.SetText(locale.T("status.ready"))
 	}
@@ -98,13 +123,13 @@ func (p *ParticipantPanel) buildUI() *fyne.Container {
 	})
 
 	// Clear selection button
-	clearBtn := widget.NewButton(locale.T("participants.clear_selection"), func() {
+	p.clearSelectionButton = widget.NewButton(locale.T("participants.clear_selection"), func() {
 		p.selectedCompetitionID = ""
 		p.competitionDisplay.SetText(locale.T("participants.select.competition.placeholder"))
 		p.clearTransponderList()
 		p.clearBoundTable()
 	})
-	clearBtn.Importance = widget.DangerImportance
+	p.clearSelectionButton.Importance = widget.DangerImportance
 
 	// Toolbar with refresh and save buttons
 	toolbar := widget.NewToolbar(
@@ -122,12 +147,13 @@ func (p *ParticipantPanel) buildUI() *fyne.Container {
 	})
 
 	// Competition selection area (without toolbar - moved to main content)
+	p.competitionLabel = widget.NewLabel(locale.T("participants.select.competition"))
 	competitionArea := container.NewVBox(
 		container.NewHBox(
-			widget.NewLabel(locale.T("participants.select.competition")),
+			p.competitionLabel,
 			p.competitionDisplay,
 			p.competitionSelect,
-			clearBtn,
+			p.clearSelectionButton,
 		),
 	)
 
@@ -135,9 +161,9 @@ func (p *ParticipantPanel) buildUI() *fyne.Container {
 	p.transponderList = container.NewVBox()
 
 	// Left panel with transponder list and header
-	leftHeader := widget.NewLabelWithStyle(locale.T("participants.transponders_list"), fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	p.transpondersHeader = widget.NewLabelWithStyle(locale.T("participants.transponders_list"), fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
 	leftPanel := container.NewBorder(
-		leftHeader,
+		p.transpondersHeader,
 		nil,
 		nil,
 		nil,
@@ -213,8 +239,9 @@ func (p *ParticipantPanel) buildUI() *fyne.Container {
 	p.boundTable.SetColumnWidth(5, 80)  // Grid
 
 	// Right panel with bound participants table
+	p.boundHeader = widget.NewLabelWithStyle(locale.T("participants.already_bound"), fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
 	rightPanel := container.NewBorder(
-		widget.NewLabelWithStyle(locale.T("participants.already_bound"), fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+		p.boundHeader,
 		nil,
 		nil,
 		nil,
@@ -469,7 +496,7 @@ func (p *ParticipantPanel) bindSelectedTransponders() {
 	if errorCount > 0 {
 		message += fmt.Sprintf("\n"+locale.T("participants.bind.errors"), errorCount)
 		for _, err := range errors {
-			message += fmt.Sprintf("\n- %v", err)
+			message += fmt.Sprintf("\n- %v", localizedError(err))
 		}
 	}
 

@@ -242,7 +242,7 @@ func (p *ModelPanel) refreshData() {
 		p.allModels, err = p.modelService.GetAllModels()
 		if err != nil {
 			fmt.Println("ERROR refreshing data:", err)
-			p.statusLabel.SetText("Error refreshing data")
+			p.statusLabel.SetText(locale.T("status.refresh_error"))
 			return
 		}
 		// Force table to recalculate rows count and update cell contents
@@ -311,8 +311,9 @@ func (p *ModelPanel) deleteSelected() {
 		func(confirmed bool) {
 			if confirmed {
 				if err := p.modelService.DeleteModel(modelToDelete.ID); err != nil {
-					dialog.ShowError(err, p.window)
-					p.statusLabel.SetText(locale.T("status.delete_failed") + ": " + err.Error())
+					userErr := localizedError(err)
+					dialog.ShowError(userErr, p.window)
+					p.statusLabel.SetText(fmt.Sprintf(locale.T("status.delete_failed"), userErr))
 				} else {
 					p.refreshData()
 					p.selectedModelID = ""
@@ -816,7 +817,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			return
 		}
 		if modelTypeButton.Text == "" || modelTypeButton.Text == locale.T("common.select_one") {
-			dialog.ShowError(fmt.Errorf(locale.T("error.required.type")), p.window)
+			dialog.ShowError(fmt.Errorf("%s", locale.T("error.required.model_type")), p.window)
 			return
 		}
 
@@ -832,7 +833,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			m.DriveType = driveTypeEntry.Text
 			if err := p.modelService.UpdateModel(m); err != nil {
 				fmt.Println("ERROR updating model:", err)
-				dialog.ShowError(err, p.window)
+				dialog.ShowError(localizedError(err), p.window)
 				return
 			}
 			p.statusLabel.SetText(locale.T("status.updated_success"))
@@ -854,7 +855,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			}
 			if err := p.modelService.CreateModel(m); err != nil {
 				fmt.Println("ERROR creating model:", err)
-				dialog.ShowError(err, p.window)
+				dialog.ShowError(localizedError(err), p.window)
 				return
 			}
 			p.statusLabel.SetText(locale.T("status.created_success"))

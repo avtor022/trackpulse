@@ -75,3 +75,7 @@ go tool cover -html=coverage.out
 ```bash
 go test ./tests/service/ -v -run TestCompetitorService_CreateCompetitor_Success
 ```
+
+## Язык интерфейса
+
+На вкладке «Настройки» можно выбрать русский или английский язык. Выбор сохраняется в базе данных и применяется при следующем запуске. Переводы находятся в `internal/locale/translations/` и включаются в исполняемый файл при сборке. При изменении строк обновляйте оба файла переводов.

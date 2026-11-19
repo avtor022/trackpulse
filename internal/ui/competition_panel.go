@@ -154,11 +154,19 @@ func (p *CompetitionPanel) createCompetitionTable() *widget.Table {
 			case 1:
 				o.(*widget.Label).SetText(c.CompetitionTitle)
 			case 2:
-				o.(*widget.Label).SetText(c.CompetitionType)
+				o.(*widget.Label).SetText(competitionTypeLabel(c.CompetitionType))
 			case 3:
-				o.(*widget.Label).SetText(c.ModelType)
+				if c.ModelType == "*" {
+					o.(*widget.Label).SetText(locale.T("competition.model_type.all"))
+				} else {
+					o.(*widget.Label).SetText(c.ModelType)
+				}
 			case 4:
-				o.(*widget.Label).SetText(c.ModelScale)
+				if c.ModelScale == "*" {
+					o.(*widget.Label).SetText(locale.T("competition.model_scale.all"))
+				} else {
+					o.(*widget.Label).SetText(c.ModelScale)
+				}
 			case 5:
 				o.(*widget.Label).SetText(c.TrackName)
 			case 6:
@@ -186,7 +194,7 @@ func (p *CompetitionPanel) createCompetitionTable() *widget.Table {
 					o.(*widget.Label).SetText("-")
 				}
 			case 10:
-				o.(*widget.Label).SetText(c.Status)
+				o.(*widget.Label).SetText(competitionStatusLabel(c.Status))
 			case 11:
 				if !c.CreatedAt.IsZero() {
 					o.(*widget.Label).SetText(c.CreatedAt.Format("2006-01-02 15:04:05"))
@@ -259,7 +267,7 @@ func (p *CompetitionPanel) refreshData() {
 		p.allCompetitions, err = p.competitionService.GetAllCompetitions()
 		if err != nil {
 			fmt.Println("ERROR refreshing competitions:", err)
-			p.statusLabel.SetText("Error refreshing data")
+			p.statusLabel.SetText(locale.T("status.refresh_error"))
 			return
 		}
 
@@ -360,8 +368,9 @@ func (p *CompetitionPanel) deleteSelected() {
 		func(confirmed bool) {
 			if confirmed {
 				if err := p.competitionService.DeleteCompetition(cToDelete.ID); err != nil {
-					dialog.ShowError(err, p.window)
-					p.statusLabel.SetText(locale.T("status.delete_failed") + ": " + err.Error())
+					userErr := localizedError(err)
+					dialog.ShowError(userErr, p.window)
+					p.statusLabel.SetText(fmt.Sprintf(locale.T("status.delete_failed"), userErr))
 				} else {
 					p.refreshData()
 					p.selectedID = ""
@@ -991,7 +1000,7 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 					AddFunc: func(name string) error {
 						yearVal, err := strconv.Atoi(name)
 						if err != nil {
-							return fmt.Errorf("invalid year: %v", err)
+							return fmt.Errorf("invalid year")
 						}
 						return p.competitionService.AddCompetitionYear(yearVal)
 					},
@@ -1288,7 +1297,7 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 		if lapCountEntry.Text != "" {
 			lct, err := strconv.Atoi(strings.TrimSpace(lapCountEntry.Text))
 			if err != nil {
-				dialog.ShowError(fmt.Errorf("invalid lap count: %v", err), p.window)
+				dialog.ShowError(fmt.Errorf("%s", locale.T("error.invalid.lap_count")), p.window)
 				return
 			}
 			lapCountTarget = &lct
@@ -1299,7 +1308,7 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 		if timeLimitEntry.Text != "" {
 			tlm, err := strconv.Atoi(strings.TrimSpace(timeLimitEntry.Text))
 			if err != nil {
-				dialog.ShowError(fmt.Errorf("invalid time limit: %v", err), p.window)
+				dialog.ShowError(fmt.Errorf("%s", locale.T("error.invalid.time_limit")), p.window)
 				return
 			}
 			timeLimitMinutes = &tlm
@@ -1394,7 +1403,7 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 
 			if err := p.competitionService.UpdateCompetition(newC); err != nil {
 				fmt.Println("ERROR updating competition:", err)
-				dialog.ShowError(err, p.window)
+				dialog.ShowError(localizedError(err), p.window)
 				return
 			}
 			p.statusLabel.SetText(locale.T("status.updated_success"))
@@ -1422,7 +1431,7 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 
 			if err := p.competitionService.CreateCompetition(newC); err != nil {
 				fmt.Println("ERROR creating competition:", err)
-				dialog.ShowError(err, p.window)
+				dialog.ShowError(localizedError(err), p.window)
 				return
 			}
 			p.statusLabel.SetText(locale.T("status.created_success"))

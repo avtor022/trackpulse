@@ -47,6 +47,7 @@ type Config struct {
 
 // NewApp creates a new TrackPulse application
 func NewApp(competitorService *service.CompetitorService, modelService *service.RCModelService, settingsService *service.SettingsService, competitorModelService *service.CompetitorModelService, competitionService *service.CompetitionService, participantService *service.CompetitionParticipantService, language string, db *sql.DB) *App {
+	initializeFyneLocale()
 	fyneApp := app.New()
 	mainWindow := fyneApp.NewWindow("TrackPulse")
 
@@ -255,6 +256,9 @@ func (a *App) refreshUI() {
 	}
 	if a.logsPanel != nil {
 		a.logsPanel.Refresh()
+	}
+	if a.portScanner != nil {
+		a.portScanner.RefreshLabels()
 	}
 	// Also update settings tab content
 	a.tabs.Refresh()

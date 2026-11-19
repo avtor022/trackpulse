@@ -279,7 +279,7 @@ func (p *MonitoringPanel) onCompetitionSelected(selectedID string) {
 	for _, comp := range p.allCompetitions {
 		if comp.ID == selectedID {
 			p.selectedCompetitionID = comp.ID
-			p.statusLabel.SetText(fmt.Sprintf("%s: %s (%s)", locale.T("common.selected"), comp.CompetitionTitle, comp.Status))
+			p.statusLabel.SetText(fmt.Sprintf("%s: %s (%s)", locale.T("common.selected"), comp.CompetitionTitle, competitionStatusLabel(comp.Status)))
 			if p.competitionButton != nil {
 				p.competitionButton.SetText(comp.CompetitionTitle)
 			}
@@ -360,7 +360,7 @@ func (p *MonitoringPanel) startMonitoring() {
 
 	err := p.competitionService.StartCompetition(p.selectedCompetitionID)
 	if err != nil {
-		dialog.ShowError(err, p.mainWindow)
+		dialog.ShowError(localizedError(err), p.mainWindow)
 		return
 	}
 	comp, err := p.competitionService.GetCompetitionByID(p.selectedCompetitionID)
