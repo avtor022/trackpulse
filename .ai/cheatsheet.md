@@ -297,10 +297,9 @@ go build -ldflags="-s -w -H windowsgui" -o app.exe  # Windows GUI
 ### Тесты
 ```bash
 go test ./...                    # Все тесты
-go test ./pkg/... -v             # Тесты пакета с выводом
+go test ./tests/service/... -v   # Тесты сервисов с выводом
 go test -run TestName ./...      # Конкретный тест
-go test -cover ./...             # Покрытие кода
-go test -coverprofile=coverage.out
+go test ./tests/... -coverpkg=./internal/... -coverprofile=coverage.out
 go tool cover -html=coverage.out # HTML отчёт
 ```
 

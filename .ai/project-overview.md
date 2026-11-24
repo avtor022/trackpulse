@@ -252,7 +252,7 @@ go test ./... -v
 go test ./tests/service/ -v -run TestCompetitorService
 
 # Покрытие
-go test ./... -coverprofile=coverage.out
+go test ./tests/... -coverpkg=./internal/... -coverprofile=coverage.out
 go tool cover -html=coverage.out
 ```
 

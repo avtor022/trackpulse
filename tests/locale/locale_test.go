@@ -1,20 +1,30 @@
-package locale
+package locale_test
 
 import (
+	"encoding/json"
+	"os"
+	"path/filepath"
 	"reflect"
 	"regexp"
 	"testing"
 )
 
+func loadTranslations(t *testing.T, language string) map[string]string {
+	t.Helper()
+	data, err := os.ReadFile(filepath.Join("..", "..", "internal", "locale", "translations", language+".json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var translations map[string]string
+	if err := json.Unmarshal(data, &translations); err != nil {
+		t.Fatal(err)
+	}
+	return translations
+}
+
 func TestTranslationsHaveMatchingKeysAndFormats(t *testing.T) {
-	en, err := loadTranslations("en")
-	if err != nil {
-		t.Fatal(err)
-	}
-	ru, err := loadTranslations("ru")
-	if err != nil {
-		t.Fatal(err)
-	}
+	en := loadTranslations(t, "en")
+	ru := loadTranslations(t, "ru")
 	formats := regexp.MustCompile(`%[+#0 -]*[0-9]*(?:\.[0-9]+)?[a-zA-Z]`)
 	for key, value := range en {
 		translated, ok := ru[key]

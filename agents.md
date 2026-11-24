@@ -33,6 +33,9 @@ trackpulse/
 │   ├── logger/           # Логирование
 │   └── utils/            # Утилиты
 ├── tests/                # Тесты
+│   ├── database/         # Тесты базы данных
+│   ├── locale/           # Тесты переводов
+│   ├── repository/       # Тесты репозиториев
 │   ├── service/          # Тесты сервисов
 │   └── ui/               # Тесты UI
 ├── config.json           # Конфигурационный файл
@@ -77,7 +80,7 @@ go build -ldflags="-s -w" -o trackpulse cmd/main.go
 
 #### Запуск всех тестов
 ```bash
-go test ./... -v
+go test ./tests/... -v
 ```
 
 #### Запуск тестов сервиса
@@ -92,7 +95,7 @@ go test ./tests/service/ -v -run TestCompetitorService_CreateCompetitor_Success
 
 #### Отчёт о покрытии кода
 ```bash
-go test ./tests/service/ -coverprofile=coverage.out
+go test ./tests/service/ -coverpkg=./internal/service/... -coverprofile=coverage.out
 go tool cover -html=coverage.out
 ```
 

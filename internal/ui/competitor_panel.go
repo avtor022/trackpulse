@@ -293,7 +293,7 @@ func (p *CompetitorPanel) deleteSelected() {
 		func(confirmed bool) {
 			if confirmed {
 				if err := p.competitorService.DeleteCompetitor(racerToDelete.ID); err != nil {
-					userErr := localizedError(err)
+					userErr := LocalizedError(err)
 					dialog.ShowError(userErr, p.window)
 					p.statusLabel.SetText(fmt.Sprintf(locale.T("status.delete_failed"), userErr))
 				} else {
@@ -421,7 +421,7 @@ func (p *CompetitorPanel) showRacerDialog(title string, competitor *models.Compe
 			r.Rating = rating
 			if err := p.competitorService.UpdateCompetitor(r); err != nil {
 				fmt.Println("ERROR updating competitor:", err)
-				dialog.ShowError(localizedError(err), p.window)
+				dialog.ShowError(LocalizedError(err), p.window)
 				return
 			}
 			p.statusLabel.SetText(locale.T("status.updated_success"))
@@ -452,7 +452,7 @@ func (p *CompetitorPanel) showRacerDialog(title string, competitor *models.Compe
 			}
 			if err := p.competitorService.CreateCompetitor(r); err != nil {
 				fmt.Println("ERROR creating competitor:", err)
-				dialog.ShowError(localizedError(err), p.window)
+				dialog.ShowError(LocalizedError(err), p.window)
 				return
 			}
 			p.statusLabel.SetText(locale.T("status.created_success"))

@@ -39,7 +39,7 @@ jobs:
             pkg-config
 
       - name: Run all tests in tests/ directory
-        run: go test ./tests/... -v -race -coverprofile=coverage.out
+        run: go test ./tests/... -v -race -coverpkg=./internal/... -coverprofile=coverage.out
 
       - name: Build application
         run: go build -v -o trackpulse ./cmd/...

@@ -47,8 +47,12 @@ type Config struct {
 
 // NewApp creates a new TrackPulse application
 func NewApp(competitorService *service.CompetitorService, modelService *service.RCModelService, settingsService *service.SettingsService, competitorModelService *service.CompetitorModelService, competitionService *service.CompetitionService, participantService *service.CompetitionParticipantService, language string, db *sql.DB) *App {
+	return NewAppWithFyne(app.New(), competitorService, modelService, settingsService, competitorModelService, competitionService, participantService, language, db)
+}
+
+// NewAppWithFyne creates the UI using an existing Fyne application.
+func NewAppWithFyne(fyneApp fyne.App, competitorService *service.CompetitorService, modelService *service.RCModelService, settingsService *service.SettingsService, competitorModelService *service.CompetitorModelService, competitionService *service.CompetitionService, participantService *service.CompetitionParticipantService, language string, db *sql.DB) *App {
 	initializeFyneLocale()
-	fyneApp := app.New()
 	mainWindow := fyneApp.NewWindow("TrackPulse")
 
 	// Initialize repositories for lap service
@@ -94,9 +98,14 @@ func NewApp(competitorService *service.CompetitorService, modelService *service.
 
 // Run starts the application UI
 func (a *App) Run() {
-	a.mainWindow.SetContent(a.createMainContent())
+	a.mainWindow.SetContent(a.CreateMainContent())
 	a.mainWindow.Resize(fyne.NewSize(1200, 800))
 	a.mainWindow.ShowAndRun()
+	a.Close()
+}
+
+// Close releases the monitoring and scan-processing resources.
+func (a *App) Close() {
 	if a.monitoringPanel != nil {
 		a.monitoringPanel.Close()
 	}
@@ -105,8 +114,8 @@ func (a *App) Run() {
 	a.rawScanRepo.Close()
 }
 
-// createMainContent builds the main tabbed interface
-func (a *App) createMainContent() *container.AppTabs {
+// CreateMainContent builds the main tabbed interface.
+func (a *App) CreateMainContent() *container.AppTabs {
 	a.tabs = container.NewAppTabs(
 		container.NewTabItem(locale.T("tab.monitoring"), a.createMonitoringTab()),
 		container.NewTabItem(locale.T("tab.competitors"), a.createCompetitorsTab()),
@@ -134,6 +143,10 @@ func (a *App) createMainContent() *container.AppTabs {
 			// Refresh model panel data when switching to models tab
 			a.modelPanel.RefreshData()
 		}
+		if ti == a.tabs.Items[3] && a.competitorModelPanel != nil {
+			// Refresh transponders and their related competitors and models
+			a.competitorModelPanel.refreshData()
+		}
 		if ti == a.tabs.Items[4] && a.competitionPanel != nil {
 			// Refresh competition panel data when switching to competitions tab
 			a.competitionPanel.Refresh()
@@ -141,6 +154,7 @@ func (a *App) createMainContent() *container.AppTabs {
 		if ti == a.tabs.Items[5] && a.participantPanel != nil {
 			// Refresh participant panel data when switching to participants tab
 			a.participantPanel.Refresh()
+			a.participantPanel.refreshData()
 		}
 	}
 

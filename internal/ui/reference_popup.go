@@ -63,7 +63,7 @@ func (m *ReferencePopupManager) ShowPopup(mainDialog dialog.Dialog, currentDialo
 	if m.config.LoadDataFunc != nil {
 		items, err := m.config.LoadDataFunc()
 		if err != nil {
-			dialog.ShowError(localizedError(err), m.window)
+			dialog.ShowError(LocalizedError(err), m.window)
 			return
 		}
 		m.items = items
@@ -91,7 +91,7 @@ func (m *ReferencePopupManager) ShowPopup(mainDialog dialog.Dialog, currentDialo
 					if confirmed {
 						// Delete item from database
 						if err := m.config.DeleteFunc(itemName); err != nil {
-							dialog.ShowError(localizedError(err), m.window)
+							dialog.ShowError(LocalizedError(err), m.window)
 							return
 						}
 
@@ -188,7 +188,7 @@ func (m *ReferencePopupManager) ShowPopup(mainDialog dialog.Dialog, currentDialo
 
 			// Add new item to reference table
 			if err := m.config.AddFunc(newItemName); err != nil {
-				dialog.ShowError(localizedError(err), m.window)
+				dialog.ShowError(LocalizedError(err), m.window)
 				return
 			}
 
@@ -283,7 +283,7 @@ func (m *ReferencePopupManager) ShowPopupWithoutAddDelete(mainDialog dialog.Dial
 	if m.config.LoadDataFunc != nil {
 		items, err := m.config.LoadDataFunc()
 		if err != nil {
-			dialog.ShowError(localizedError(err), m.window)
+			dialog.ShowError(LocalizedError(err), m.window)
 			return
 		}
 		m.items = items

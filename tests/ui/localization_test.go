@@ -1,4 +1,4 @@
-package ui
+package ui_test
 
 import (
 	"errors"
@@ -11,28 +11,26 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"trackpulse/internal/locale"
 	"trackpulse/internal/models"
+	"trackpulse/internal/ui"
 )
 
 func TestMonitoringRefreshKeepsVisibleContentAndUpdatesButtons(t *testing.T) {
 	app := test.NewApp()
 	defer app.Quit()
 	locale.SetLocale("en")
-	p := NewMonitoringPanel(nil, app.NewWindow("test"))
-	content := p.content
-
+	p := ui.NewMonitoringPanel(nil, nil, app.NewWindow("test"))
+	defer p.Close()
+	content := p.Content()
 	locale.SetLocale("ru")
 	p.Refresh()
-
-	if p.content != content {
+	if p.Content() != content {
 		t.Fatal("refresh replaced the container already attached to the tab")
 	}
-	if got := p.startButton.Text; got != "Старт" {
-		t.Errorf("start button = %q, want Старт", got)
-	}
+	buttonByText(t, content, "Старт")
 }
 
 func TestFyneDialogButtonsFollowApplicationLanguage(t *testing.T) {
-	initializeFyneLocale()
+	refreshTestApp(t)
 	locale.SetLocale("ru")
 	if got := lang.L("Yes"); got != "Да" {
 		t.Errorf("confirmation button = %q, want Да", got)
@@ -47,14 +45,29 @@ func TestFyneDialogButtonsFollowApplicationLanguage(t *testing.T) {
 }
 
 func TestCompetitionTableLocalizesTypeAndStatus(t *testing.T) {
-	app := test.NewApp()
-	defer app.Quit()
+	f := refreshTestApp(t)
+	if _, err := f.db.Exec(`UPDATE competitions SET competition_type='qualifying', status='in_progress' WHERE id='race-one'`); err != nil {
+		t.Fatal(err)
+	}
 	locale.SetLocale("ru")
-	p := &CompetitionPanel{allCompetitions: []models.Competition{{CompetitionType: "qualifying", Status: "in_progress", ModelType: "*", ModelScale: "*"}}}
-	table := p.createCompetitionTable()
+	f.tabs.SelectIndex(4)
+	table := tableIn(t, f.tabs.Items[4].Content)
+	rows, _ := table.Length()
+	row := -1
+	for i := 0; i < rows; i++ {
+		label := widget.NewLabel("")
+		table.UpdateCell(widget.TableCellID{Row: i, Col: 1}, label)
+		if label.Text == "Race one" {
+			row = i
+			break
+		}
+	}
+	if row == -1 {
+		t.Fatal("competition not found in table")
+	}
 	for col, want := range map[int]string{2: "Квалификация", 3: "Все типы (Массовый заезд)", 4: "Все масштабы", 10: "Идёт"} {
 		label := widget.NewLabel("")
-		table.UpdateCell(widget.TableCellID{Row: 0, Col: col}, label)
+		table.UpdateCell(widget.TableCellID{Row: row, Col: col}, label)
 		if label.Text != want {
 			t.Errorf("column %d = %q, want %q", col, label.Text, want)
 		}
@@ -62,11 +75,11 @@ func TestCompetitionTableLocalizesTypeAndStatus(t *testing.T) {
 }
 
 func TestYearDeleteMessageAcceptsStringInBothLanguages(t *testing.T) {
-	for _, lang := range []string{"en", "ru"} {
-		locale.SetLocale(lang)
+	for _, language := range []string{"en", "ru"} {
+		locale.SetLocale(language)
 		message := fmt.Sprintf(locale.T("dialog.delete_year.message"), "2025")
 		if strings.Contains(message, "%!") || !strings.Contains(message, "2025") {
-			t.Errorf("%s: invalid message %q", lang, message)
+			t.Errorf("%s: invalid message %q", language, message)
 		}
 	}
 }
@@ -80,17 +93,26 @@ func TestLocalizedServiceErrors(t *testing.T) {
 		{"cannot delete brand 'XRAY': it is used by model 'X4'", "Нельзя удалить бренд «XRAY»: он используется моделью «X4»"},
 		{"database is locked", "Не удалось выполнить операцию: database is locked"},
 	} {
-		if got := localizedError(errors.New(tc.message)).Error(); got != tc.want {
-			t.Errorf("localizedError(%q) = %q, want %q", tc.message, got, tc.want)
+		if got := ui.LocalizedError(errors.New(tc.message)).Error(); got != tc.want {
+			t.Errorf("LocalizedError(%q) = %q, want %q", tc.message, got, tc.want)
 		}
 	}
 }
 
 func TestAllFilterSelectionSurvivesLanguageChange(t *testing.T) {
+	app := test.NewApp()
+	defer app.Quit()
 	locale.SetLocale("en")
-	filter := &CompetitionFilter{selectedYear: filterValue(locale.T("filter.all_years"), "filter.all_years")}
+	window := app.NewWindow("test")
+	filter := ui.NewCompetitionFilter(window, nil)
+	content := filter.CreateContent()
+	window.SetContent(content)
+	filter.SetCompetitions([]models.Competition{{CompetitionTitle: "Race"}})
+	test.Tap(buttonByText(t, content, locale.T("filter.all_years")))
+	test.Tap(buttonByText(t, window.Canvas().Overlays().Top(), locale.T("filter.all_years")))
 	locale.SetLocale("ru")
-	if !filter.matchesFilters(models.Competition{}) {
+	filter.RefreshLocale()
+	if len(filter.GetFilteredCompetitions()) != 1 {
 		t.Error("selecting all years should not filter competitions after language change")
 	}
 }
@@ -99,46 +121,46 @@ func TestLogsRefreshKeepsVisibleContentAndLog(t *testing.T) {
 	app := test.NewApp()
 	defer app.Quit()
 	locale.SetLocale("en")
-	p := NewLogsPanel(app.NewWindow("test"))
+	p := ui.NewLogsPanel(app.NewWindow("test"))
 	p.AddLog("scan")
-	content, log := p.content, p.logText
-
+	content := p.Content()
 	locale.SetLocale("ru")
 	p.Refresh()
-
-	if p.content != content || p.logText != log {
+	if p.Content() != content {
 		t.Fatal("refresh replaced the visible log and its content")
 	}
-	if len(p.logText.Segments) != 1 {
-		t.Error("refresh discarded the existing log")
+	for _, object := range test.LaidOutObjects(content) {
+		if log, ok := object.(*widget.RichText); ok && len(log.Segments) == 1 {
+			return
+		}
 	}
+	t.Fatal("refresh discarded the existing log")
 }
 
 func TestParticipantRefreshUpdatesSelectionButton(t *testing.T) {
-	app := test.NewApp()
-	defer app.Quit()
-	locale.SetLocale("en")
-	p := &ParticipantPanel{competitionSelect: widget.NewButton(locale.T("participants.select.competition.button"), nil)}
-
-	locale.SetLocale("ru")
-	p.Refresh()
-
-	if got := p.competitionSelect.Text; got != "Выбрать..." {
-		t.Errorf("selection button = %q, want Выбрать...", got)
+	f := refreshTestApp(t)
+	f.tabs.SelectIndex(7)
+	for _, object := range test.LaidOutObjects(f.tabs.Items[7].Content) {
+		if selectLanguage, ok := object.(*widget.Select); ok {
+			for _, option := range selectLanguage.Options {
+				if option == "Русский" {
+					selectLanguage.SetSelected(option)
+					buttonByText(t, f.tabs.Items[5].Content, "Выбрать...")
+					return
+				}
+			}
+		}
 	}
+	t.Fatal("language selector not found")
 }
 
 func TestFilterRefreshShowsTranslatedAllOptions(t *testing.T) {
 	app := test.NewApp()
 	defer app.Quit()
 	locale.SetLocale("en")
-	filter := NewCompetitionFilter(app.NewWindow("test"), nil)
-	filter.CreateContent()
-
+	filter := ui.NewCompetitionFilter(app.NewWindow("test"), nil)
+	content := filter.CreateContent()
 	locale.SetLocale("ru")
 	filter.RefreshButtons()
-
-	if got := filter.yearButton.Text; got != "Все годы" {
-		t.Errorf("year filter = %q, want Все годы", got)
-	}
+	buttonByText(t, content, "Все годы")
 }

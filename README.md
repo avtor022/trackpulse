@@ -51,6 +51,12 @@ trackpulse.exe    # Windows
 
 ## Тестирование
 
+Все тесты находятся в `tests/`: отдельно для базы данных, локализации, репозиториев, сервисов и интерфейса.
+
+```bash
+go test ./tests/...
+```
+
 ### Запуск тестов для сервиса участников
 
 ```bash
@@ -66,7 +72,7 @@ go test ./... -v
 ### Отчёт о покрытии кода
 
 ```bash
-go test ./tests/service/ -coverprofile=coverage.out
+go test ./tests/service/ -coverpkg=./internal/service/... -coverprofile=coverage.out
 go tool cover -html=coverage.out
 ```
 

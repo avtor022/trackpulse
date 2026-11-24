@@ -368,7 +368,7 @@ func (p *CompetitionPanel) deleteSelected() {
 		func(confirmed bool) {
 			if confirmed {
 				if err := p.competitionService.DeleteCompetition(cToDelete.ID); err != nil {
-					userErr := localizedError(err)
+					userErr := LocalizedError(err)
 					dialog.ShowError(userErr, p.window)
 					p.statusLabel.SetText(fmt.Sprintf(locale.T("status.delete_failed"), userErr))
 				} else {
@@ -1286,7 +1286,7 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 		}
 
 		// Parse minimum lap time
-		minLapTimeMs, err := parseMinimumLapTime(minLapTimeEntry.Text)
+		minLapTimeMs, err := ParseMinimumLapTime(minLapTimeEntry.Text)
 		if err != nil {
 			dialog.ShowError(fmt.Errorf("%s", locale.T("error.invalid.min_lap_time")), p.window)
 			return
@@ -1403,7 +1403,7 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 
 			if err := p.competitionService.UpdateCompetition(newC); err != nil {
 				fmt.Println("ERROR updating competition:", err)
-				dialog.ShowError(localizedError(err), p.window)
+				dialog.ShowError(LocalizedError(err), p.window)
 				return
 			}
 			p.statusLabel.SetText(locale.T("status.updated_success"))
@@ -1431,7 +1431,7 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 
 			if err := p.competitionService.CreateCompetition(newC); err != nil {
 				fmt.Println("ERROR creating competition:", err)
-				dialog.ShowError(localizedError(err), p.window)
+				dialog.ShowError(LocalizedError(err), p.window)
 				return
 			}
 			p.statusLabel.SetText(locale.T("status.created_success"))
@@ -1475,7 +1475,8 @@ func (p *CompetitionPanel) showCompetitionDialog(title string, competition *mode
 	d.Resize(fyne.NewSize(dialogWidth, dialogHeight))
 }
 
-func parseMinimumLapTime(input string) (int, error) {
+// ParseMinimumLapTime converts seconds entered in the UI to milliseconds.
+func ParseMinimumLapTime(input string) (int, error) {
 	seconds, err := strconv.ParseFloat(strings.ReplaceAll(strings.TrimSpace(input), ",", "."), 64)
 	if err != nil || math.IsNaN(seconds) || math.IsInf(seconds, 0) || seconds < 0 || seconds > float64(math.MaxInt32)/1000 {
 		return 0, fmt.Errorf("invalid minimum lap time")

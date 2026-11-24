@@ -32,6 +32,11 @@ func NewLogsPanel(mainWindow fyne.Window) *LogsPanel {
 	return p
 }
 
+// Content returns the log panel's UI.
+func (p *LogsPanel) Content() fyne.CanvasObject {
+	return p.content
+}
+
 // createContent builds the logs panel content
 func (p *LogsPanel) createContent() *fyne.Container {
 	// Создание виджета лога
