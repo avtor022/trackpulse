@@ -315,7 +315,7 @@ func (p *CompetitorModelPanel) deleteSelected() {
 		func(confirmed bool) {
 			if confirmed {
 				if err := p.competitorModelService.DeleteCompetitorModel(rmToDelete.ID); err != nil {
-					userErr := localizedError(err)
+					userErr := LocalizedError(err)
 					dialog.ShowError(userErr, p.window)
 					p.statusLabel.SetText(fmt.Sprintf(locale.T("status.delete_failed"), userErr))
 				} else {
@@ -627,7 +627,7 @@ func (p *CompetitorModelPanel) showCompetitorModelDialog(title string, rm *model
 
 			if err := p.competitorModelService.UpdateCompetitorModel(newRM); err != nil {
 				fmt.Println("ERROR updating transponder:", err)
-				dialog.ShowError(localizedError(err), p.window)
+				dialog.ShowError(LocalizedError(err), p.window)
 				return
 			}
 			p.statusLabel.SetText(locale.T("status.updated_success"))
@@ -649,7 +649,7 @@ func (p *CompetitorModelPanel) showCompetitorModelDialog(title string, rm *model
 
 			if err := p.competitorModelService.CreateCompetitorModel(newRM); err != nil {
 				fmt.Println("ERROR creating transponder:", err)
-				dialog.ShowError(localizedError(err), p.window)
+				dialog.ShowError(LocalizedError(err), p.window)
 				return
 			}
 			p.statusLabel.SetText(locale.T("status.created_success"))

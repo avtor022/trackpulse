@@ -8,9 +8,9 @@ import (
 	"trackpulse/internal/locale"
 )
 
-// localizedError converts expected service errors to messages for the user.
+// LocalizedError converts expected service errors to messages for the user.
 // Unexpected technical details remain available after a localized explanation.
-func localizedError(err error) error {
+func LocalizedError(err error) error {
 	if err == nil {
 		return nil
 	}

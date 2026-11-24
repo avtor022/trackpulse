@@ -269,11 +269,11 @@ func (p *ParticipantPanel) buildUI() *fyne.Container {
 }
 
 // loadCompetitions loads all competitions into the selector
-func (p *ParticipantPanel) loadCompetitions() {
+func (p *ParticipantPanel) loadCompetitions() bool {
 	competitions, err := p.competitionService.GetAllCompetitions()
 	if err != nil {
 		p.showError(locale.T("status.error_loading"))
-		return
+		return false
 	}
 	p.allCompetitions = competitions
 
@@ -281,6 +281,7 @@ func (p *ParticipantPanel) loadCompetitions() {
 	if p.competitionFilter != nil {
 		p.competitionFilter.SetCompetitions(p.allCompetitions)
 	}
+	return true
 }
 
 // showCompetitionPopup displays a popup to select a competition using reference_popup pattern
@@ -299,6 +300,10 @@ func (p *ParticipantPanel) showCompetitionPopup() {
 		compItem := comp
 		selectBtn := widget.NewButton(comp.CompetitionTitle, func() {
 			// Select this competition
+			if p.selectedCompetitionID != compItem.ID {
+				p.clearTransponderList()
+				p.clearBoundTable()
+			}
 			p.selectedCompetitionID = compItem.ID
 			p.competitionDisplay.SetText(compItem.CompetitionTitle)
 
@@ -309,8 +314,9 @@ func (p *ParticipantPanel) showCompetitionPopup() {
 			}
 
 			// Load transponders and bound participants
-			p.loadAvailableTransponders()
-			p.loadBoundParticipants()
+			if p.loadBoundParticipants() {
+				p.loadAvailableTransponders()
+			}
 		})
 		selectBtn.Alignment = widget.ButtonAlignLeading
 		selectBtn.Importance = widget.MediumImportance
@@ -408,6 +414,7 @@ func (p *ParticipantPanel) loadAvailableTransponders() {
 // renderTransponderList renders the list of available transponders with checkboxes
 func (p *ParticipantPanel) renderTransponderList() {
 	p.transponderList.Objects = nil
+	previousCheckboxes := p.transponderCheckboxes
 	p.transponderCheckboxes = make(map[string]*widget.Check)
 
 	if len(p.availableTransponders) == 0 {
@@ -422,6 +429,9 @@ func (p *ParticipantPanel) renderTransponderList() {
 		labelText := fmt.Sprintf("%s - %s (%s)", t.TransponderNumber, competitorName, modelName)
 
 		check := widget.NewCheck(labelText, nil)
+		if previous := previousCheckboxes[t.ID]; previous != nil {
+			check.SetChecked(previous.Checked)
+		}
 		p.transponderCheckboxes[t.ID] = check
 		p.transponderList.Add(check)
 	}
@@ -437,18 +447,19 @@ func (p *ParticipantPanel) clearTransponderList() {
 }
 
 // loadBoundParticipants loads participants already bound to the selected competition
-func (p *ParticipantPanel) loadBoundParticipants() {
+func (p *ParticipantPanel) loadBoundParticipants() bool {
 	if p.selectedCompetitionID == "" {
-		return
+		return false
 	}
 
 	participants, err := p.participantService.GetParticipantsByCompetitionID(p.selectedCompetitionID)
 	if err != nil {
 		p.showError(locale.T("status.error_loading"))
-		return
+		return false
 	}
 	p.boundParticipants = participants
 	p.boundTable.Refresh()
+	return true
 }
 
 // clearBoundTable clears the bound participants table
@@ -496,7 +507,7 @@ func (p *ParticipantPanel) bindSelectedTransponders() {
 	if errorCount > 0 {
 		message += fmt.Sprintf("\n"+locale.T("participants.bind.errors"), errorCount)
 		for _, err := range errors {
-			message += fmt.Sprintf("\n- %v", localizedError(err))
+			message += fmt.Sprintf("\n- %v", LocalizedError(err))
 		}
 	}
 
@@ -508,10 +519,23 @@ func (p *ParticipantPanel) bindSelectedTransponders() {
 
 // refreshData reloads all data
 func (p *ParticipantPanel) refreshData() {
-	p.loadCompetitions()
+	if !p.loadCompetitions() {
+		return
+	}
 	if p.selectedCompetitionID != "" {
-		p.loadAvailableTransponders()
-		p.loadBoundParticipants()
+		for _, competition := range p.allCompetitions {
+			if competition.ID == p.selectedCompetitionID {
+				p.competitionDisplay.SetText(competition.CompetitionTitle)
+				if p.loadBoundParticipants() {
+					p.loadAvailableTransponders()
+				}
+				return
+			}
+		}
+		p.selectedCompetitionID = ""
+		p.competitionDisplay.SetText(locale.T("participants.select.competition.placeholder"))
+		p.clearTransponderList()
+		p.clearBoundTable()
 	}
 }
 

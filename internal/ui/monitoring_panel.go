@@ -58,6 +58,11 @@ func NewMonitoringPanel(competitionService *service.CompetitionService, lapServi
 	return p
 }
 
+// Content returns the monitoring panel's UI.
+func (p *MonitoringPanel) Content() fyne.CanvasObject {
+	return p.content
+}
+
 // createContent builds the monitoring panel content
 func (p *MonitoringPanel) createContent() *fyne.Container {
 	// Status label
@@ -203,18 +208,18 @@ func (p *MonitoringPanel) Close() {
 }
 
 // refreshCompetitions loads all competitions from the service
-func (p *MonitoringPanel) refreshCompetitions() {
+func (p *MonitoringPanel) refreshCompetitions() bool {
 	if p.competitionService == nil {
-		return
+		return false
 	}
 
-	var err error
-	p.allCompetitions, err = p.competitionService.GetAllCompetitions()
+	competitions, err := p.competitionService.GetAllCompetitions()
 	if err != nil {
 		fmt.Println("ERROR loading competitions:", err)
 		p.statusLabel.SetText(locale.T("status.error_loading"))
-		return
+		return false
 	}
+	p.allCompetitions = competitions
 
 	if len(p.allCompetitions) == 0 {
 		p.statusLabel.SetText(locale.T("status.no_competitions"))
@@ -226,6 +231,7 @@ func (p *MonitoringPanel) refreshCompetitions() {
 	if p.competitionFilter != nil {
 		p.competitionFilter.SetCompetitions(p.allCompetitions)
 	}
+	return true
 }
 
 // showCompetitionPopup shows the competition selection popup without add/delete buttons
@@ -340,10 +346,27 @@ func (p *MonitoringPanel) Refresh() {
 
 // UpdateData reloads competition data and refreshes filter options
 func (p *MonitoringPanel) UpdateData() {
-	p.refreshCompetitions()
+	if !p.refreshCompetitions() {
+		return
+	}
 	// Refresh the selected competition state from DB
 	if p.selectedCompetitionID != "" {
-		p.onCompetitionSelected(p.selectedCompetitionID)
+		for _, competition := range p.allCompetitions {
+			if competition.ID == p.selectedCompetitionID {
+				p.onCompetitionSelected(p.selectedCompetitionID)
+				return
+			}
+		}
+		if p.lapService != nil {
+			if active := p.lapService.GetActiveCompetition(); active != nil && active.ID == p.selectedCompetitionID {
+				p.lapService.SetActiveCompetition(nil)
+			}
+		}
+		if p.timerCompetitionID == p.selectedCompetitionID {
+			p.timer.Stop()
+			p.timerCompetitionID = ""
+		}
+		p.onCompetitionSelected("")
 	}
 }
 
@@ -360,7 +383,7 @@ func (p *MonitoringPanel) startMonitoring() {
 
 	err := p.competitionService.StartCompetition(p.selectedCompetitionID)
 	if err != nil {
-		dialog.ShowError(localizedError(err), p.mainWindow)
+		dialog.ShowError(LocalizedError(err), p.mainWindow)
 		return
 	}
 	comp, err := p.competitionService.GetCompetitionByID(p.selectedCompetitionID)

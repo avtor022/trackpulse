@@ -311,7 +311,7 @@ func (p *ModelPanel) deleteSelected() {
 		func(confirmed bool) {
 			if confirmed {
 				if err := p.modelService.DeleteModel(modelToDelete.ID); err != nil {
-					userErr := localizedError(err)
+					userErr := LocalizedError(err)
 					dialog.ShowError(userErr, p.window)
 					p.statusLabel.SetText(fmt.Sprintf(locale.T("status.delete_failed"), userErr))
 				} else {
@@ -833,7 +833,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			m.DriveType = driveTypeEntry.Text
 			if err := p.modelService.UpdateModel(m); err != nil {
 				fmt.Println("ERROR updating model:", err)
-				dialog.ShowError(localizedError(err), p.window)
+				dialog.ShowError(LocalizedError(err), p.window)
 				return
 			}
 			p.statusLabel.SetText(locale.T("status.updated_success"))
@@ -855,7 +855,7 @@ func (p *ModelPanel) showModelDialog(title string, model *models.RCModel) {
 			}
 			if err := p.modelService.CreateModel(m); err != nil {
 				fmt.Println("ERROR creating model:", err)
-				dialog.ShowError(localizedError(err), p.window)
+				dialog.ShowError(LocalizedError(err), p.window)
 				return
 			}
 			p.statusLabel.SetText(locale.T("status.created_success"))
